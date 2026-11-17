@@ -9,6 +9,9 @@ https://ginotoretti114-ops.github.io/giochi/
   (chi crea la partita manda il link all'altro) oppure passandosi lo stesso telefono.
 - **Sottozero** (`sottozero/`): da 2 a 8 giocatori, ognuno con una griglia di carte coperte da
   scambiare e scoprire; vince chi, dopo i round scelti (3, 5 o 9), ha meno punti. Online o sullo stesso telefono.
+- **Piccante** (`piccante/`): gioco a prese da 2 a 8 giocatori con scommessa. Ogni presa sbagliata è un
+  peperoncino; ogni round una delle 40 missioni cambia le regole. Online (ognuno vede solo le sue carte) o sullo
+  stesso telefono, che dice a chi passarlo prima di mostrare le carte.
 
 ## Com'è fatto
 
@@ -24,8 +27,9 @@ Non c'è niente da compilare: quello che finisce sul ramo `main` va online da so
 1. Crea una cartella, per esempio `nuovo-gioco/`, con dentro `index.html` e `copertina.svg`.
 2. Aggiungi una voce all'array `GIOCHI` in `index.html`.
 3. Tutti i giochi stanno sullo stesso sito, quindi condividono la memoria del browser:
-   - usa un prefisso tuo per `localStorage` (Gran Bazar usa `gb-…`, Sottozero `sz-…`);
-   - per l'online usa argomenti MQTT tuoi (Gran Bazar usa `granbazar/v1/<partita>/state`, Sottozero `sottozero/v1/…`).
+   - usa un prefisso tuo per `localStorage` (Gran Bazar usa `gb-…`, Sottozero `sz-…`, Piccante `pc-…`);
+   - per l'online usa argomenti MQTT tuoi (Gran Bazar usa `granbazar/v1/<partita>/state`, Sottozero `sottozero/v1/…`,
+     Piccante `piccante/v1/…`).
 4. Per un gioco online a turni conviene partire da `lib/stanze.js`, come fa Sottozero.
 
 ## Come funziona l'online di Gran Bazar
@@ -40,14 +44,21 @@ rimanda le versioni più recenti che conosce, così i due server si riallineano 
 I server sono pubblici: chi conosce il codice della partita può leggerla. Per questo nelle
 partite ci sono solo i nomi scelti dai giocatori e le carte.
 
-Le regole stanno in `gran-bazar/motore.js` e `sottozero/motore.js` (codice puro, senza interfaccia).
-Sottozero usa lo stesso schema tramite `lib/stanze.js`. Nota: i punti delle carte azione di Sottozero
+Le regole stanno in `gran-bazar/motore.js`, `sottozero/motore.js` e `piccante/motore.js` (codice puro, senza interfaccia).
+Sottozero e Piccante usano lo stesso schema tramite `lib/stanze.js`. Nota: i punti delle carte azione di Sottozero
 (oggi 10 ciascuna) sono in `ACTION_VALUE` dentro `sottozero/motore.js`.
+
+In Piccante alcune mosse si fanno tutti insieme (passare carte, scegliere il compagno, giocare in contemporanea):
+se due giocatori pubblicano nello stesso istante una delle due versioni si perde, e chi non ritrova la sua scelta
+nello stato arrivato la riapplica e ripubblica da solo. Le 40 missioni sono in `MISSIONS` dentro `piccante/motore.js`:
+il regolamento ne descrive gli effetti ma non il contenuto carta per carta (carte da distribuire, carte da passare,
+numero vietato, numeri piccanti), quindi quei valori sono ricostruiti e si possono correggere lì.
 
 ## Collaudo
 
 ```
 node gran-bazar/test/motore.test.js            # scenari di regole + 500 partite simulate
 node sottozero/test/motore.test.js             # scenari di regole + 300 partite da 2 a 8 giocatori
+node piccante/test/motore.test.js              # scenari di regole e missioni + 300 partite da 2 a 8 giocatori
 PARTITE=3000 node gran-bazar/test/motore.test.js
 ```
