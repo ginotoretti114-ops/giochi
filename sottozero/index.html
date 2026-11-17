@@ -201,6 +201,7 @@ button.zc:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .mine .sc { margin-left: auto; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .mine .sc b { color: var(--text); }
 .grid { display: grid; grid-auto-flow: column; grid-template-rows: auto auto auto; gap: 8px; justify-content: center; overflow-x: auto; padding: 4px 2px 2px; }
+.grid > .zc { --w: inherit; } /* la larghezza calcolata sta sulla griglia: ogni .zc altrimenti la ridefinisce a 64px */
 .clr { font-size: 12px; font-weight: 700; padding: 5px 4px; min-height: 30px; border-radius: 9px; background: var(--saffron); color: var(--on-saffron); border: 0; cursor: pointer; width: var(--w); }
 .clr-gap { height: 30px; }
 .actions { position: sticky; bottom: 0; z-index: 2; margin: 14px -16px 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(19, 24, 51, .95); border-top: 1px solid var(--line); display: grid; gap: 8px; margin-top: auto; }
@@ -451,7 +452,7 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   function myWidth(n) {
     var avail = Math.min(560, window.innerWidth || 390) - 32 - 26;
     var w = Math.floor((avail - (n - 1) * 8) / Math.max(n, 1));
-    return Math.max(44, Math.min(78, w));
+    return Math.max(44, Math.min(64, w));
   }
   function mineHTML(s, P, anim) {
     var me = P.me, g = Z.gridOf(s, me);
