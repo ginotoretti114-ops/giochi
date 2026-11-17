@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="600" height="360" role="img" aria-label="Sottozero: ventaglio di carte con lo zero al centro">
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1.6" fill="#f5aa3e" fill-opacity=".12"/>
+      <circle cx="0" cy="0" r="1" fill="#ffffff" fill-opacity=".05"/>
+    </pattern>
+    <radialGradient id="glow" cx="50%" cy="45%" r="60%">
+      <stop offset="0" stop-color="#2a3570" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#131833" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#000" flood-opacity=".38"/>
+    </filter>
+    <linearGradient id="g-M" x1=".3" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#59acc4"/><stop offset=".48" stop-color="#1f8fb0"/><stop offset="1" stop-color="#16647b"/></linearGradient>
+    <linearGradient id="g-S" x1=".3" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#eac66e"/><stop offset=".48" stop-color="#e3b23c"/><stop offset="1" stop-color="#9f7d2a"/></linearGradient>
+    <linearGradient id="g-R" x1=".3" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#d2719c"/><stop offset=".48" stop-color="#c23f79"/><stop offset="1" stop-color="#882c55"/></linearGradient>
+    <linearGradient id="g-B" x1=".3" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#70b485"/><stop offset=".48" stop-color="#3e9a5b"/><stop offset="1" stop-color="#2b6c40"/></linearGradient>
+    <linearGradient id="g-MS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f8fb0"/><stop offset=".495" stop-color="#1f8fb0"/><stop offset=".505" stop-color="#e3b23c"/><stop offset="1" stop-color="#e3b23c"/></linearGradient>
+    <symbol id="m-M" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="currentColor"/></symbol>
+    <symbol id="m-S" viewBox="0 0 20 20"><path d="M10 2.5L18 16.5H2Z" fill="currentColor"/></symbol>
+    <symbol id="m-R" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2.5" fill="currentColor"/></symbol>
+    <symbol id="m-B" viewBox="0 0 20 20"><path d="M10 1.5L18.5 10L10 18.5L1.5 10Z" fill="currentColor"/></symbol>
+    <symbol id="a-x" viewBox="0 0 48 48"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="5"/><path d="M13.5 34.5L34.5 13.5" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></symbol>
+    <g id="frame"><rect x="-62" y="-87" width="124" height="174" rx="16" fill="none" stroke="#ffe0a0" stroke-opacity=".55" stroke-width="2.6"/></g>
+  </defs>
+  <rect width="600" height="360" fill="#131833"/>
+  <rect width="600" height="360" fill="url(#glow)"/>
+  <rect width="600" height="360" fill="url(#dots)"/>
+  <g filter="url(#shadow)" font-family="'Rozha One', Georgia, 'Times New Roman', serif">
+    <g transform="rotate(-16 132 330) translate(132 200)">
+      <rect x="-62" y="-87" width="124" height="174" rx="16" fill="url(#g-S)"/>
+      <rect x="-55" y="-80" width="110" height="160" rx="11" fill="none" stroke="#3a2700" stroke-opacity=".3"/>
+      <text x="0" y="34" text-anchor="middle" font-size="96" fill="#3a2700">6</text>
+      <use href="#m-S" x="-50" y="-75" width="22" height="22" color="#3a2700"/>
+      <use href="#m-S" x="28" y="53" width="22" height="22" color="#3a2700" transform="rotate(180 39 64)"/>
+      <use href="#frame"/>
+    </g>
+    <g transform="rotate(16 468 330) translate(468 200)">
+      <rect x="-62" y="-87" width="124" height="174" rx="16" fill="url(#g-B)"/>
+      <rect x="-55" y="-80" width="110" height="160" rx="11" fill="none" stroke="#fffaf0" stroke-opacity=".3"/>
+      <text x="0" y="34" text-anchor="middle" font-size="96" fill="#fffaf0">3</text>
+      <use href="#m-B" x="-50" y="-75" width="22" height="22" color="#fffaf0"/>
+      <use href="#m-B" x="28" y="53" width="22" height="22" color="#fffaf0" transform="rotate(180 39 64)"/>
+      <use href="#frame"/>
+    </g>
+    <g transform="rotate(-8 216 330) translate(216 186)">
+      <rect x="-62" y="-87" width="124" height="174" rx="16" fill="url(#g-R)"/>
+      <rect x="-55" y="-80" width="110" height="160" rx="11" fill="none" stroke="#fffaf0" stroke-opacity=".3"/>
+      <use href="#a-x" x="-34" y="-44" width="68" height="68" color="#fffaf0"/>
+      <text x="0" y="62" text-anchor="middle" font-family="'Atkinson Hyperlegible', Arial, sans-serif" font-weight="700" font-size="17" letter-spacing="1" fill="#fffaf0">SALTA</text>
+      <use href="#m-R" x="-50" y="-75" width="22" height="22" color="#fffaf0"/>
+      <use href="#frame"/>
+    </g>
+    <g transform="rotate(8 384 330) translate(384 186)">
+      <rect x="-62" y="-87" width="124" height="174" rx="16" fill="url(#g-MS)"/>
+      <rect x="-55" y="-80" width="110" height="160" rx="11" fill="none" stroke="#fffaf0" stroke-opacity=".3"/>
+      <text x="0" y="-2" text-anchor="middle" font-size="50" fill="#fffaf0">+2</text>
+      <text x="0" y="48" text-anchor="middle" font-size="50" fill="#fffaf0">+2</text>
+      <use href="#m-M" x="-50" y="-75" width="22" height="22" color="#fffaf0"/>
+      <use href="#m-S" x="28" y="53" width="22" height="22" color="#fffaf0" transform="rotate(180 39 64)"/>
+      <use href="#frame"/>
+    </g>
+    <g transform="translate(300 180)">
+      <rect x="-62" y="-87" width="124" height="174" rx="16" fill="url(#g-M)"/>
+      <rect x="-55" y="-80" width="110" height="160" rx="11" fill="none" stroke="#fffaf0" stroke-opacity=".3"/>
+      <text x="0" y="36" text-anchor="middle" font-size="104" fill="#fffaf0">0</text>
+      <use href="#m-M" x="-50" y="-75" width="22" height="22" color="#fffaf0"/>
+      <use href="#m-M" x="28" y="53" width="22" height="22" color="#fffaf0" transform="rotate(180 39 64)"/>
+      <use href="#frame"/>
+    </g>
+  </g>
+</svg>
