@@ -13,8 +13,9 @@ https://ginotoretti114-ops.github.io/giochi/
   peperoncino; ogni round una delle 40 missioni cambia le regole. Online (ognuno vede solo le sue carte) o sullo
   stesso telefono, che dice a chi passarlo prima di mostrare le carte.
 - **Diavolerie** (`diavolerie/`): da 2 a 5 giocatori, carte e dadi. Si raccolgono anime, si comprano bambini
-  e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online o sullo
-  stesso telefono (l'unica cosa segreta sono i demoni in mano).
+  e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online, sullo
+  stesso telefono (l'unica cosa segreta sono i demoni in mano) o contro il computer: da 1 a 4 bot, livello
+  facile, medio o difficile.
 
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
 effetti, solo effetti o niente (la scelta vale per tutti i giochi).
@@ -68,10 +69,18 @@ il regolamento ne descrive gli effetti ma non il contenuto carta per carta (cart
 numero vietato, numeri piccanti), quindi quei valori sono ricostruiti e si possono correggere lì.
 
 In Diavolerie le carte sono in `BLOCK`, `DEMONS` e `CANDLES` dentro `diavolerie/motore.js` (numero da tirare, copie,
-effetto); i testi delle carte li scrive `text()`. Il regolamento originale mostra solo una parte delle carte: quelle
-viste hanno nomi nuovi ed effetti uguali, le altre sono ricostruite rispettando la composizione del mazzo
-(32 animali, 34 bambine e 34 bambini, 12 dolci, 12 pesti e 10 né l'uno né l'altro). Quando un tiro attiva più carte
-dello stesso giocatore, il gioco le attiva nell'ordine più utile invece di farlo scegliere.
+effetto); i testi delle carte li scrive `text()`. L'elenco completo delle carte originali non è pubblico: gli effetti
+vengono dal regolamento, dalle recensioni e dalle domande dei giocatori, con nomi e disegni nuovi. Il campo `o` dice
+quanto è fedele ogni carta: `2` numero ed effetto come nell'originale, `1` effetto originale ma numero o dettaglio
+ricostruiti, assente carta ricostruita nello stesso spirito. Il mazzo rispetta la composizione originale
+(32 animali, tutti col 7; 34 bambine e 34 bambini, ognuno con 12 dolci, 12 pesti e 10 né l'uno né l'altro).
+Quando un tiro attiva più carte dello stesso giocatore, il gioco le attiva nell'ordine più utile invece di farlo scegliere.
+
+I giocatori del computer di Diavolerie sono in `diavolerie/bot.js`: `DiavolerieBot.mossa(stato, posto, livello)`
+restituisce una mossa per il motore. Il facile sceglie quasi a caso; il medio dà un valore in anime a ogni carta
+(effetto per probabilità del numero) e spegne quelle che valgono meno; il difficile in più tiene da parte le anime
+per vincere, colpisce chi è in testa e ritira i dadi quando conviene. Le partite contro il computer restano nel
+browser (`dv-bot`) e non passano dai server.
 
 ## Collaudo
 
@@ -80,5 +89,6 @@ node gran-bazar/test/motore.test.js            # scenari di regole + 500 partite
 node sottozero/test/motore.test.js             # scenari di regole + 300 partite da 2 a 8 giocatori
 node piccante/test/motore.test.js              # scenari di regole e missioni + 300 partite da 2 a 8 giocatori
 node diavolerie/test/motore.test.js            # scenari di carte e demoni + 300 partite da 2 a 5 giocatori
+node diavolerie/test/bot.test.js               # sfide tra i livelli dei bot: il più forte deve vincere più spesso
 PARTITE=3000 node gran-bazar/test/motore.test.js
 ```

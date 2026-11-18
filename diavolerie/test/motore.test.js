@@ -51,6 +51,7 @@ test('mazzi e preparazione', () => {
   const kinds = { A: 0, G: 0, B: 0 }, traits = {};
   K.BLOCK.forEach((t) => { kinds[t.k] += t.x; if (t.k !== 'A') traits[t.k + (t.t || '-')] = (traits[t.k + (t.t || '-')] || 0) + t.x; });
   assert.deepStrictEqual(kinds, { A: 32, G: 34, B: 34 });
+  assert.ok(K.BLOCK.every((t) => (t.k === 'A') === (t.n === 7)), 'gli animali, e solo loro, col 7');
   assert.deepStrictEqual(traits, { GS: 12, GR: 12, 'G-': 10, BS: 12, BR: 12, 'B-': 10 });
   assert.strictEqual(K.DEMONS.length, 20);
   for (let n = 2; n <= 5; n++) {
@@ -66,7 +67,7 @@ test('mazzi e preparazione', () => {
 
 /* ---------- turno ---------- */
 test('si tira, si compra, si evoca una volta; poi si passa', () => {
-  let s = mk({ cards: { 0: ['paolo.1', 'paolo.2', 'paolo.3'] }, block: ['fido.1', 'fido.2', 'gianna.1', 'gianna.2', 'rospo.1'], hand: { 0: ['mammona'] }, deck: ['micio.1', 'micio.2'] });
+  let s = mk({ cards: { 0: ['paolo.1', 'paolo.2', 'paolo.3'] }, block: ['fido.1', 'fido.2', 'gianna.1', 'gianna.2', 'pipistrello.1'], hand: { 0: ['mammona'] }, deck: ['micio.1', 'micio.2'] });
   assert.ok(!K.act(s, 0, { type: 'end' }).ok, 'prima bisogna tirare');
   s = run(s, [[0, { type: 'buy', i: 0 }]]);
   assert.strictEqual(s.souls[0], 2);
@@ -118,9 +119,9 @@ test('requisiti: Fido, Coniglietto, Pappagallo', () => {
   assert.strictEqual(s.souls[0], 5 + 2 + 3 + 2);
 });
 test('Micio prende l\'animale scoperto prima che conti il Coniglietto', () => {
-  let s = mk({ cards: { 0: ['coniglio.1', 'micio.1'] }, deck: ['gianna.2', 'rospo.1'] });
+  let s = mk({ cards: { 0: ['coniglio.1', 'micio.1'] }, deck: ['gianna.2', 'pipistrello.1'] });
   s = roll(s, 0, 3, 4);
-  assert.deepStrictEqual(s.cards[0].slice().sort(), ['coniglio.1', 'micio.1', 'rospo.1']);
+  assert.deepStrictEqual(s.cards[0].slice().sort(), ['coniglio.1', 'micio.1', 'pipistrello.1']);
   assert.strictEqual(s.souls[0], 8);
   s = mk({ cards: { 1: ['micio.1'] }, deck: ['gianna.2'] });
   s = roll(s, 0, 3, 4);
@@ -138,33 +139,40 @@ test('Lalla e Tonio pescano dal mazzo', () => {
   assert.deepStrictEqual(s.cards[0], ['tonio.1']);
 });
 test('Puzzola: tutti scartano tutto, tranne chi ha lo Spettro Custode', () => {
-  let s = mk({ cards: { 0: ['puzzola.1', 'paolo.1'], 1: ['fido.1'], 2: ['rospo.1'] }, demons: { 2: ['custode'] } });
+  let s = mk({ cards: { 0: ['puzzola.1', 'paolo.1'], 1: ['fido.1'], 2: ['pipistrello.1'] }, demons: { 2: ['custode'] } });
   s = roll(s, 0, 3, 4);
-  assert.deepStrictEqual([s.cards[0], s.cards[1], s.cards[2]], [[], [], ['rospo.1']]);
-  assert.strictEqual(K.blockCount(s), K.blockCount(mk({ cards: { 0: ['puzzola.1', 'paolo.1'], 1: ['fido.1'], 2: ['rospo.1'] } })));
+  assert.deepStrictEqual([s.cards[0], s.cards[1], s.cards[2]], [[], [], ['pipistrello.1']]);
+  assert.strictEqual(K.blockCount(s), K.blockCount(mk({ cards: { 0: ['puzzola.1', 'paolo.1'], 1: ['fido.1'], 2: ['pipistrello.1'] } })));
 });
 test('Ernesto attiva gli animali; Fortuna e Leo attivano i dolci', () => {
-  let s = mk({ cards: { 0: ['ernesto.1', 'fido.1', 'rospo.1'] }, candle: ['malvagia', 'malvagia', 'malvagia'] });
+  let s = mk({ cards: { 0: ['ernesto.1', 'fido.1', 'pipistrello.1'] }, candle: ['malvagia', 'malvagia', 'malvagia'] });
   s = roll(s, 0, 4, 4);
-  assert.strictEqual(s.souls[0], 5 + 2 + 2);
-  s = mk({ cards: { 0: ['fortuna.1', 'rosina.1', 'mimi.1', 'fortuna.2'] } });
+  assert.strictEqual(s.souls[0], 5 + 2 + 1);
+  s = mk({ cards: { 0: ['fortuna.1', 'rosina.1', 'pietro.1', 'fortuna.2'] } });
   s = roll(s, 0, 1, 4);
   assert.strictEqual(s.prompt.s, 0);
-  assert.deepStrictEqual(s.prompt.opts.slice().sort(), ['mimi.1', 'rosina.1'], 'mai un\'altra Fortuna');
+  assert.deepStrictEqual(s.prompt.opts.slice().sort(), ['pietro.1', 'rosina.1'], 'mai un\'altra Fortuna');
   // tutte e due le Fortune scattano: si sceglie due volte
   s = run(s, [[0, ans(['rosina.1'])], [0, ans(['rosina.1'])]]);
   assert.strictEqual(s.souls[0], 5 + 5 + 5);
-  s = mk({ cards: { 0: ['leo.1', 'leo.2', 'rosina.1', 'mimi.1', 'paolo.1'] } });
+  s = mk({ cards: { 0: ['leo.1', 'leo.2', 'rosina.1', 'ciccio.1', 'paolo.1'] } });
   s = roll(s, 0, 5, 5);
-  assert.strictEqual(s.souls[0], 5 + 2 * (5 + 1), 'due Leo, ognuno attiva Rosina e Mimì');
+  assert.strictEqual(s.souls[0], 5 + 2 * (5 + 2), 'due Leo, ognuno attiva Rosina e Ciccio');
 });
 test('Dario prende dal Quartiere; Nina scarta se stessa per rubare un bambino', () => {
-  let s = mk({ cards: { 0: ['dario.1'] }, block: ['fido.1', null, 'rospo.1', null, null] });
+  let s = mk({ cards: { 0: ['dario.1'] }, block: ['fido.1', null, 'pipistrello.1', null, null] });
   s = roll(s, 0, 1, 2);
-  assert.deepStrictEqual(s.prompt.opts, ['fido.1', 'rospo.1']);
-  s = run(s, [[0, ans(['rospo.1'])]]);
-  assert.deepStrictEqual(s.cards[0], ['dario.1', 'rospo.1']);
+  assert.deepStrictEqual(s.prompt.opts, ['fido.1', 'pipistrello.1']);
+  s = run(s, [[0, ans(['pipistrello.1'])]]);
+  assert.deepStrictEqual(s.cards[0], ['dario.1', 'pipistrello.1']);
   assert.strictEqual(s.block[2], null);
+  // Mimì prende solo bambini (con la Gorgobambola anche le bambine contano come bambini)
+  s = mk({ cards: { 0: ['mimi.1'] }, block: ['gianna.1', 'fido.1', 'paolo.1', null, 'olga.1'] });
+  s = roll(s, 0, 2, 4);
+  assert.deepStrictEqual([s.cards[0], s.block], [['mimi.1', 'paolo.1'], ['gianna.1', 'fido.1', null, null, 'olga.1']]);
+  s = mk({ cards: { 0: ['mimi.1'] }, demons: { 0: ['gorgobambola'] }, block: ['gianna.1', 'fido.1', 'paolo.1', null, null] });
+  s = roll(s, 0, 2, 4);
+  assert.deepStrictEqual(s.prompt.opts, ['gianna.1', 'paolo.1']);
   s = mk({ cards: { 0: ['nina.1'], 1: ['olga.1'], 2: ['franco.1'] }, demons: { 2: ['custode'] } });
   s = roll(s, 0, 4, 5);
   assert.ok(s.prompt.opts.includes('olga.1') && !s.prompt.opts.includes('franco.1'));
@@ -182,42 +190,58 @@ test('rubare anime: un solo bersaglio in automatico, altrimenti si sceglie; il r
   assert.strictEqual(s.prompt.kind, 'steal');
   s = run(s, [[0, { type: 'answer', target: 2 }]]);
   assert.deepStrictEqual(s.souls, [2, 4, 4]);
-  s = mk({ cards: { 2: ['rina.1'] }, souls: [3, 0, 0] });
+});
+test('Dora: tutti scartano i dolci, anche lei; lo Spettro Custode protegge', () => {
+  let s = mk({ cards: { 0: ['dora.1', 'rosina.1', 'paolo.1', 'tito.1'], 1: ['ciccio.1', 'tito.2', 'nina.1'], 2: ['lalla.1'] }, demons: { 2: ['custode'] } });
   s = roll(s, 0, 5, 6);
-  assert.deepStrictEqual(s.souls, [2, 0, 1]);
+  assert.deepStrictEqual([s.cards[0], s.cards[1], s.cards[2]], [['dora.1', 'paolo.1'], ['nina.1'], ['lalla.1']]);
+  assert.deepStrictEqual([s.souls[0], s.souls[1]], [5 + 4, 5], 'il Tito di chi tira scatta prima di Dora, quello dopo non fa in tempo');
+  s = mk({ cards: { 0: ['dora.1', 'nina.1'] }, demons: { 0: ['gemelle'] } });
+  s = roll(s, 0, 5, 6);
+  assert.deepStrictEqual(s.cards[0], [], 'con le Gemelle anche le pesti sono dolci: se ne va anche Dora');
+});
+test('Cane Rabbioso: 2 anime solo senza bambini', () => {
+  let s = mk({ cards: { 0: ['rabbioso.1', 'fido.1'] } });
+  s = roll(s, 0, 3, 4);
+  assert.strictEqual(s.souls[0], 5 + 2);
+  s = mk({ cards: { 0: ['rabbioso.1', 'fido.1', 'olga.1'] } });
+  s = roll(s, 0, 3, 4);
+  assert.strictEqual(s.souls[0], 5 + 2, 'con una bambina paga Fido e non il Cane Rabbioso');
 });
 test('Sandro, Caprone, Coccodrillo, Falco, Gufo', () => {
-  let s = mk({ cards: { 0: ['sandro.1', 'rospo.1'] } });
+  let s = mk({ cards: { 0: ['sandro.1', 'pipistrello.1'] } });
   s = roll(s, 0, 5, 5);
-  s = run(s, [[0, ans(['rospo.1'])]]);
+  s = run(s, [[0, ans(['pipistrello.1'])]]);
   assert.deepStrictEqual([s.cards[0], s.souls[0]], [['sandro.1'], 11]);
   s = mk({ cards: { 0: ['caprone.1', 'paolo.1', 'gianna.1', 'franco.1'] }, ddeck: ['legione', 'cerbero'] });
   s = roll(s, 0, 3, 4);
   assert.ok(!K.act(s, 0, ans(['paolo.1', 'franco.1'])).ok, 'servono un bambino e una bambina');
   s = run(s, [[0, ans(['paolo.1', 'gianna.1'])]]);
   assert.deepStrictEqual(s.demons[0], ['cerbero']);
-  s = mk({ cards: { 0: ['coccodrillo.1'], 1: ['paolo.1', 'rospo.1'], 2: ['gianna.1'] } });
+  s = mk({ cards: { 0: ['coccodrillo.1'], 1: ['paolo.1', 'pipistrello.1'], 2: ['gianna.1'] } });
   s = roll(s, 0, 3, 4);
   s = run(s, [[0, ans(['paolo.1', 'gianna.1'])]]);
-  assert.deepStrictEqual([s.cards[0], s.cards[1], s.cards[2]], [[], ['rospo.1'], []]);
-  s = mk({ cards: { 0: ['falco.1'] }, deck: ['coniglio.1', 'paolo.2', 'paolo.3', 'gianna.3', 'paolo.4', 'rospo.1', 'gianna.2', 'fido.1'] });
-  s = roll(s, 0, 5, 6);
+  assert.deepStrictEqual([s.cards[0], s.cards[1], s.cards[2]], [[], ['pipistrello.1'], []]);
+  s = mk({ cards: { 0: ['falco.1'] }, deck: ['coniglio.1', 'paolo.2', 'paolo.3', 'gianna.3', 'paolo.4', 'pipistrello.1', 'gianna.2', 'fido.1'] });
+  s = roll(s, 0, 3, 4);
   s = run(s, [[0, { type: 'answer', yes: true }]]);
-  assert.deepStrictEqual(s.cards[0].slice().sort(), ['fido.1', 'rospo.1']);
-  s = mk({ cards: { 0: ['gufo.1'] }, block: ['paolo.1', 'paolo.2', 'paolo.3', 'paolo.4', 'gianna.1'], deck: ['fido.1', 'rospo.1'] });
-  s = roll(s, 0, 2, 3);
+  assert.deepStrictEqual(s.cards[0].slice().sort(), ['fido.1', 'pipistrello.1']);
+  s = mk({ cards: { 0: ['gufo.1'] }, block: ['paolo.1', 'paolo.2', 'paolo.3', 'paolo.4', 'gianna.1'], deck: ['fido.1', 'pipistrello.1'] });
+  s = roll(s, 0, 3, 4);
   s = run(s, [[0, ans(['paolo.1', 'paolo.3'])]]);
-  assert.deepStrictEqual(s.block, ['rospo.1', 'paolo.2', 'fido.1', 'paolo.4', 'gianna.1']);
-  assert.strictEqual(s.souls[0], 6);
+  assert.deepStrictEqual(s.block, ['pipistrello.1', 'paolo.2', 'fido.1', 'paolo.4', 'gianna.1']);
+  assert.strictEqual(s.souls[0], 5);
 });
-test('Damiano e l\'Uovo evocano dalla mano', () => {
+test('Damiano evoca dalla mano, l\'Uovo si schiude', () => {
   let s = mk({ cards: { 0: ['damiano.1'] }, hand: { 0: ['cerbero', 'legione'] } });
   s = roll(s, 0, 6, 6);
   s = run(s, [[0, ans(['legione'])]]);
   assert.deepStrictEqual([s.demons[0], s.hand[0], s.cards[0]], [['legione'], ['cerbero'], []]);
-  s = mk({ demons: { 0: ['uovo'] }, hand: { 0: ['cerbero'] } });
+  s = mk({ demons: { 0: ['uovo'] }, hand: { 0: ['cerbero'] }, ddeck: ['mammona', 'legione', 'gemelle'] });
   s = roll(s, 0, 3, 3);
-  assert.deepStrictEqual(s.demons[0], ['uovo', 'cerbero']);
+  assert.deepStrictEqual(s.prompt.opts.slice().sort(), ['gemelle', 'legione', 'mammona'], 'si sceglie dal mazzo dei demoni');
+  s = run(s, [[0, ans(['legione'])]]);
+  assert.deepStrictEqual([s.demons[0], s.hand[0], s.ddeck.length, s.ddeck[0]], [['legione'], ['cerbero'], 3, 'uovo'], 'l\'Uovo lascia il posto al demone scelto');
 });
 
 /* ---------- demoni ---------- */
@@ -261,7 +285,7 @@ test('Candelora, Sabba, Burlone, Asinodeo, Metallaro', () => {
   let s = mk({ demons: { 0: ['candelora'] }, candle: ['principiante', 'malvagia', 'buona'] });
   s = roll(s, 0, 4, 4);
   assert.strictEqual(s.souls[0], 7);
-  s = mk({ demons: { 0: ['sabba', 'asinodeo'] }, block: ['rospo.1', 'paolo.1', 'paolo.2', 'paolo.3', 'paolo.4'] });
+  s = mk({ demons: { 0: ['sabba', 'asinodeo'] }, block: ['pipistrello.1', 'paolo.1', 'paolo.2', 'paolo.3', 'paolo.4'] });
   s = run(s, [[0, { type: 'buy', i: 0 }]]);
   assert.strictEqual(s.souls[0], 5 - 2 + 1);
   s = mk({ demons: { 1: ['burlone', 'metallaro'] }, hand: { 0: ['cerbero'] }, cards: { 0: ['paolo.1', 'paolo.2', 'paolo.3', 'paolo.4'] } });
@@ -270,14 +294,38 @@ test('Candelora, Sabba, Burlone, Asinodeo, Metallaro', () => {
   s = run(s, [[0, { type: 'summon', d: 'cerbero', cards: ['paolo.1', 'paolo.2', 'paolo.3', 'paolo.4'] }]]);
   assert.strictEqual(s.souls[1], 7);
 });
-test('Tentazione e Bruno rubano carte, Tina le scarta', () => {
-  let s = mk({ demons: { 0: ['tentazione'] }, cards: { 1: ['olga.1', 'rospo.1'] } });
-  s = roll(s, 0, 2, 2);
-  assert.deepStrictEqual([s.cards[0], s.cards[1]], [['olga.1'], ['rospo.1']]);
-  s = mk({ cards: { 0: ['bruno.1'], 1: ['rospo.1'], 2: ['fido.1'] } });
+test('Pesce Rosso, Serpente, Re delle Bestie, Carlo', () => {
+  let s = mk({ cards: { 0: ['pescerosso.1', 'rabbioso.1'] } });
+  s = roll(s, 0, 3, 4);
+  assert.strictEqual(s.souls[0], 5 + 2, 'prima il Cane Rabbioso raccoglie le sue 2 anime');
+  s = run(s, [[0, { type: 'answer', yes: true }]]);
+  assert.deepStrictEqual([s.cards[0], s.souls[0]], [['rabbioso.1'], 12]);
+  s = mk({ demons: { 1: ['serpente'] } });
+  s = roll(s, 0, 1, 1);
+  assert.strictEqual(s.status, 'playing', 'il Serpente vince solo quando tira chi lo ha');
+  s = run(s, [[0, { type: 'end' }]]);
+  s = roll(s, 1, 1, 1);
+  assert.deepStrictEqual([s.status, s.result.winner, s.result.why], ['gameOver', 1, 'serpent']);
+  s = mk({ demons: { 0: ['bestie'] }, cards: { 0: ['fido.1', 'micio.1', 'gianna.1'] }, souls: [0, 1, 0] });
+  s = roll(s, 0, 2, 3);
+  assert.deepStrictEqual(s.souls, [2, 0, 0], '2 animali = 2 anime rubate (una dalla riserva)');
+  s = mk({ cards: { 0: ['carlo.1', 'gigi.1'] }, souls: [0, 5, 0] });
   s = roll(s, 0, 5, 6);
-  s = run(s, [[0, ans(['fido.1'])]]);
-  assert.deepStrictEqual(s.cards[0], ['bruno.1', 'fido.1']);
+  assert.deepStrictEqual(s.souls, [0, 5, 0], 'servono 3 pesti');
+  s = mk({ cards: { 0: ['carlo.1', 'gigi.1', 'nina.1'] }, souls: [0, 5, 0] });
+  s = roll(s, 0, 5, 6);
+  assert.deepStrictEqual(s.souls, [3, 2, 0]);
+});
+test('Tentazione e Mefistolesto rubano carte, Tina le scarta', () => {
+  let s = mk({ demons: { 0: ['tentazione'] }, cards: { 1: ['olga.1', 'pipistrello.1'] } });
+  s = roll(s, 0, 2, 2);
+  assert.deepStrictEqual([s.cards[0], s.cards[1]], [['olga.1'], ['pipistrello.1']]);
+  s = mk({ demons: { 0: ['mefisto'], 1: ['cerbero'] }, cards: { 1: ['pipistrello.1'] }, ddeck: ['legione'] });
+  s = roll(s, 0, 5, 5);
+  assert.deepStrictEqual(s.prompt.opts, ['pipistrello.1', 'cerbero'], 'si ruba anche un demone');
+  s = run(s, [[0, ans(['cerbero'])]]);
+  assert.deepStrictEqual([s.demons[0], s.demons[1], s.hand[1]], [['mefisto', 'cerbero'], [], ['legione']], 'chi perde un demone ne pesca un altro');
+  assert.strictEqual(K.demonCount(s), K.demonCount(mk({ demons: { 0: ['mefisto'], 1: ['cerbero'] }, ddeck: ['legione'] })));
   s = mk({ cards: { 1: ['tina.1'], 0: ['olga.1'] } });
   s = roll(s, 0, 1, 2);
   assert.deepStrictEqual(s.cards[0], []);

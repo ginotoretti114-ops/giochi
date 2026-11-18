@@ -13,3 +13,4 @@ Non c'è nessuna build: i file si modificano e si pubblicano così come sono.
 - Le copie di giochi esistenti hanno nome e grafica originali (niente marchi o illustrazioni dell'editore), regole fedeli.
 - Stile comune: notte indaco `#131833`, pannelli `#1b2246`, testo `#f6eedd`, accento zafferano `#f5aa3e`; caratteri Rozha One per i titoli e Atkinson Hyperlegible per il testo.
 - Le regole stanno in `gran-bazar/motore.js`, `sottozero/motore.js`, `piccante/motore.js` e `diavolerie/motore.js`: dopo ogni modifica lanciare il test del gioco (`node <gioco>/test/motore.test.js`).
+- I bot di Diavolerie stanno in `diavolerie/bot.js` (livelli `facile`, `medio`, `difficile`): se cambiano le carte o i bot, lanciare anche `node diavolerie/test/bot.test.js`. Nelle carte di Diavolerie il campo `o` dice se sono fedeli all'originale (2), con numero o dettaglio ricostruiti (1) o ricostruite (assente).

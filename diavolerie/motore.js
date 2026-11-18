@@ -8,21 +8,23 @@
   var MIN_PLAYERS = 2, MAX_PLAYERS = 5, LOG_MAX = 140;
 
   /* k: B bambino, G bambina, A animale · t: S dolce, R peste · n: numero da tirare · x: copie nel mazzo.
-     Le carte con nome e numero noti dal regolamento hanno qui un nome nuovo; le altre sono ricostruite. */
+     o: 2 = numero ed effetto come nell'originale, 1 = effetto noto ma numero o dettaglio ricostruiti,
+     assente = carta ricostruita nello stesso spirito (l'elenco completo delle carte non è pubblico).
+     Come nell'originale gli animali si attivano tutti col 7, bambine e bambini con gli altri numeri. */
   var BLOCK = [
-    { id: 'rosina', name: 'Dolce Rosina', k: 'G', t: 'S', n: 2, x: 2, fx: 'collect', v: 5, art: '👧🏼', prop: '🍰' },
-    { id: 'fortuna', name: 'Dolce Fortuna', k: 'G', t: 'S', n: 5, x: 2, fx: 'destiny', art: '👧🏾', prop: '📣' },
-    { id: 'lalla', name: 'Dolce Lalla', k: 'G', t: 'S', n: 4, x: 2, fx: 'alice', art: '👧🏻', prop: '🎀' },
-    { id: 'pina', name: 'Dolce Pina', k: 'G', t: 'S', n: 4, x: 2, fx: 'perAnimal', v: 1, art: '👧', prop: '🐾' },
-    { id: 'lia', name: 'Dolce Lia', k: 'G', t: 'S', n: 9, x: 2, fx: 'perSweet', art: '👧🏽', prop: '🍭' },
-    { id: 'mimi', name: 'Dolce Mimì', k: 'G', t: 'S', n: 6, x: 2, fx: 'collect', v: 1, art: '👧🏿', prop: '🧁' },
-    { id: 'nina', name: 'Nina la Peste', k: 'G', t: 'R', n: 9, x: 2, fx: 'annie', art: '👧🏻', prop: '🧨' },
+    { id: 'rosina', name: 'Dolce Rosina', k: 'G', t: 'S', n: 2, x: 2, fx: 'collect', v: 5, art: '👧🏼', prop: '🍰', o: 2 },
+    { id: 'fortuna', name: 'Dolce Fortuna', k: 'G', t: 'S', n: 5, x: 2, fx: 'destiny', art: '👧🏾', prop: '📣', o: 2 },
+    { id: 'lalla', name: 'Dolce Lalla', k: 'G', t: 'S', n: 4, x: 2, fx: 'alice', art: '👧🏻', prop: '🎀', o: 2 },
+    { id: 'pina', name: 'Dolce Pina', k: 'G', t: 'S', n: 4, x: 2, fx: 'perAnimal', v: 1, art: '👧', prop: '🐾', o: 2 },
+    { id: 'lia', name: 'Dolce Lia', k: 'G', t: 'S', n: 9, x: 2, fx: 'perSweet', art: '👧🏽', prop: '🍭', o: 1 },
+    { id: 'mimi', name: 'Dolce Mimì', k: 'G', t: 'S', n: 6, x: 2, fx: 'gainBoy', art: '👧🏿', prop: '💌', o: 1 },
+    { id: 'nina', name: 'Nina la Peste', k: 'G', t: 'R', n: 9, x: 2, fx: 'annie', art: '👧🏻', prop: '🧨', o: 2 },
     { id: 'carla', name: 'Carla la Peste', k: 'G', t: 'R', n: 10, x: 2, fx: 'steal', v: 2, art: '👧🏿', prop: '🕷️' },
-    { id: 'rina', name: 'Rina la Peste', k: 'G', t: 'R', n: 11, x: 2, fx: 'stealEach', v: 1, art: '👧🏼', prop: '🧪' },
+    { id: 'dora', name: 'Dora la Peste', k: 'G', t: 'R', n: 11, x: 2, fx: 'purgeSweet', art: '👧🏼', prop: '🧪', o: 1 },
     { id: 'tina', name: 'Tina la Peste', k: 'G', t: 'R', n: 3, x: 2, fx: 'discardKid', art: '👧🏽', prop: '✂️' },
     { id: 'gilda', name: 'Gilda la Peste', k: 'G', t: 'R', n: 6, x: 2, fx: 'perRotten', art: '👧', prop: '💀' },
     { id: 'lucia', name: 'Lucia la Peste', k: 'G', t: 'R', n: 5, x: 2, fx: 'steal', v: 1, art: '👧🏾', prop: '🐍' },
-    { id: 'gianna', name: 'Gianna', k: 'G', t: null, n: 8, x: 4, fx: 'collect', v: 1, art: '👧🏼', prop: '🪁' },
+    { id: 'gianna', name: 'Gianna', k: 'G', t: null, n: 8, x: 4, fx: 'collect', v: 1, art: '👧🏼', prop: '🪁', o: 1 },
     { id: 'marta', name: 'Marta', k: 'G', t: null, n: 3, x: 2, fx: 'collect', v: 3, art: '👧🏻', prop: '📚' },
     { id: 'olga', name: 'Olga', k: 'G', t: null, n: 12, x: 2, fx: 'collect', v: 5, art: '👧🏿', prop: '🔮' },
     { id: 'viola', name: 'Viola', k: 'G', t: null, n: 10, x: 2, fx: 'collect', v: 2, art: '👧🏽', prop: '🎻' },
@@ -32,61 +34,61 @@
     { id: 'dario', name: 'Dolce Dario', k: 'B', t: 'S', n: 3, x: 2, fx: 'gainBlock', art: '👦🏾', prop: '🎁' },
     { id: 'tito', name: 'Dolce Tito', k: 'B', t: 'S', n: 11, x: 2, fx: 'collect', v: 4, art: '👦', prop: '🍦' },
     { id: 'leo', name: 'Dolce Leo', k: 'B', t: 'S', n: 10, x: 2, fx: 'leo', art: '👦🏿', prop: '📯' },
-    { id: 'sandro', name: 'Sandro la Peste', k: 'B', t: 'R', n: 10, x: 2, fx: 'sam', art: '👦🏼', prop: '🪤' },
-    { id: 'tonio', name: 'Tonio la Peste', k: 'B', t: 'R', n: 9, x: 2, fx: 'tommy', art: '👦🏻', prop: '🔦' },
+    { id: 'sandro', name: 'Sandro la Peste', k: 'B', t: 'R', n: 10, x: 2, fx: 'sam', art: '👦🏼', prop: '🪤', o: 2 },
+    { id: 'tonio', name: 'Tonio la Peste', k: 'B', t: 'R', n: 9, x: 2, fx: 'tommy', art: '👦🏻', prop: '🔦', o: 2 },
     { id: 'dino', name: 'Dino la Peste', k: 'B', t: 'R', n: 4, x: 2, fx: 'steal', v: 2, art: '👦🏽', prop: '💣' },
     { id: 'gigi', name: 'Gigi la Peste', k: 'B', t: 'R', n: 6, x: 2, fx: 'steal', v: 1, art: '👦🏿', prop: '🪀' },
-    { id: 'bruno', name: 'Bruno la Peste', k: 'B', t: 'R', n: 11, x: 2, fx: 'stealAnimal', art: '👦🏾', prop: '🪝' },
+    { id: 'carlo', name: 'Carlo la Peste', k: 'B', t: 'R', n: 11, x: 2, fx: 'steal', v: 3, req: 'rotten3', art: '👦🏾', prop: '🐯', o: 1 },
     { id: 'ettore', name: 'Ettore la Peste', k: 'B', t: 'R', n: 8, x: 2, fx: 'perRotten', art: '👦', prop: '🎃' },
-    { id: 'ernesto', name: 'Ernesto', k: 'B', t: null, n: 8, x: 2, fx: 'irwin', art: '👦🏼', prop: '🧭' },
-    { id: 'damiano', name: 'Damiano', k: 'B', t: null, n: 12, x: 2, fx: 'damian', art: '👦🏻', prop: '🔥' },
+    { id: 'ernesto', name: 'Ernesto', k: 'B', t: null, n: 8, x: 2, fx: 'irwin', art: '👦🏼', prop: '🧭', o: 2 },
+    { id: 'damiano', name: 'Damiano', k: 'B', t: null, n: 12, x: 2, fx: 'damian', art: '👦🏻', prop: '🔥', o: 1 },
     { id: 'paolo', name: 'Paolo', k: 'B', t: null, n: 6, x: 4, fx: 'collect', v: 1, art: '👦🏽', prop: '⚽' },
     { id: 'franco', name: 'Franco', k: 'B', t: null, n: 2, x: 2, fx: 'collect', v: 5, art: '👦🏿', prop: '🛹' },
-    { id: 'fido', name: 'Fido', k: 'A', n: 7, x: 4, fx: 'collect', v: 2, req: 'kid', art: '🐕' },
-    { id: 'coniglio', name: 'Coniglietto', k: 'A', n: 7, x: 4, fx: 'collect', v: 3, req: 'animals3', art: '🐇' },
-    { id: 'micio', name: 'Micio Nero', k: 'A', n: 7, x: 4, fx: 'cat', art: '🐈' },
-    { id: 'puzzola', name: 'Puzzola', k: 'A', n: 7, x: 1, fx: 'skunk', art: '🦨' },
-    { id: 'pappagallo', name: 'Pappagallo Arcobaleno', k: 'A', n: 7, x: 2, fx: 'collect', v: 2, req: 'pair', art: '🦜' },
-    { id: 'caprone', name: 'Caprone', k: 'A', n: 7, x: 2, fx: 'goat', art: '🐐' },
-    { id: 'coccodrillo', name: 'Coccodrillo', k: 'A', n: 7, x: 2, fx: 'alligator', art: '🐊' },
-    { id: 'falco', name: 'Falco', k: 'A', n: 11, x: 1, fx: 'hawk', art: '🦅' },
-    { id: 'gufo', name: 'Gufo', k: 'A', n: 5, x: 2, fx: 'owl', art: '🦉' },
-    { id: 'rospo', name: 'Rospo', k: 'A', n: 4, x: 2, fx: 'collect', v: 2, art: '🐸' },
-    { id: 'pipistrello', name: 'Pipistrello', k: 'A', n: 10, x: 2, fx: 'bat', art: '🦇' },
-    { id: 'maialino', name: 'Maialino', k: 'A', n: 3, x: 2, fx: 'perAnimal', v: 1, art: '🐷' },
-    { id: 'serpente', name: 'Serpente', k: 'A', n: 11, x: 2, fx: 'steal', v: 3, art: '🐍' },
-    { id: 'corvo', name: 'Corvo', k: 'A', n: 9, x: 2, fx: 'corvo', art: '🐦' }
+    { id: 'fido', name: 'Fido', k: 'A', n: 7, x: 6, fx: 'collect', v: 2, req: 'kid', art: '🐕', o: 1 },
+    { id: 'coniglio', name: 'Coniglietto', k: 'A', n: 7, x: 4, fx: 'collect', v: 3, req: 'animals3', art: '🐇', o: 1 },
+    { id: 'micio', name: 'Micio Nero', k: 'A', n: 7, x: 4, fx: 'cat', art: '🐈', o: 2 },
+    { id: 'pescerosso', name: 'Pesce Rosso', k: 'A', n: 7, x: 4, fx: 'goldfish', art: '🐠', o: 2 },
+    { id: 'pappagallo', name: 'Pappagallo Arcobaleno', k: 'A', n: 7, x: 2, fx: 'collect', v: 2, req: 'pair', art: '🦜', o: 2 },
+    { id: 'randagio', name: 'Gatto Randagio', k: 'A', n: 7, x: 2, fx: 'steal', v: 1, art: '🐈', prop: '🎸' },
+    { id: 'gufo', name: 'Gufo', k: 'A', n: 7, x: 2, fx: 'owl', art: '🦉', o: 2 },
+    { id: 'coccodrillo', name: 'Coccodrillo', k: 'A', n: 7, x: 2, fx: 'alligator', art: '🐊', o: 2 },
+    { id: 'caprone', name: 'Caprone', k: 'A', n: 7, x: 1, fx: 'goat', art: '🐐', o: 2 },
+    { id: 'falco', name: 'Falco', k: 'A', n: 7, x: 1, fx: 'hawk', art: '🦅', o: 2 },
+    { id: 'puzzola', name: 'Puzzola', k: 'A', n: 7, x: 1, fx: 'skunk', art: '🦨', o: 2 },
+    { id: 'rabbioso', name: 'Cane Rabbioso', k: 'A', n: 7, x: 2, fx: 'collect', v: 2, req: 'noKid', art: '🐶', prop: '💢', o: 1 },
+    { id: 'pipistrello', name: 'Pipistrello', k: 'A', n: 7, x: 1, fx: 'bat', art: '🦇' }
   ];
   /* Demoni: con n si attivano solo quando tira chi li ha evocati; con p hanno un potere sempre attivo. */
   var DEMONS = [
-    { id: 'cucu', name: 'Satana a Cucù', n: 9, fx: 'clock', art: '😈', prop: '🕰️' },
-    { id: 'gemelle', name: 'Diavolesse Gemelle', p: 'twins', art: '👿', prop: '👯' },
-    { id: 'orco', name: 'Orco Doppio', p: 'double', art: '👹', prop: '✌️' },
-    { id: 'belzedado', name: 'Belzedado', p: 'doubles', art: '😈', prop: '🎲' },
-    { id: 'ritiracifero', name: 'Ritiracifero', p: 'reroll', art: '🧛', prop: '🔁' },
-    { id: 'asinodeo', name: 'Asinodeo', p: 'animalGain', art: '🐴', prop: '🔥' },
-    { id: 'custode', name: 'Spettro Custode', p: 'shield', art: '👻', prop: '🔒' },
-    { id: 'metallaro', name: 'Capro Metallaro', p: 'tax4', art: '🐐', prop: '🎸' },
-    { id: 'gorgobambola', name: 'Gorgobambola', p: 'both', art: '🪆', prop: '👁️' },
+    { id: 'cucu', name: 'Satana a Cucù', n: 9, fx: 'clock', art: '😈', prop: '🕰️', o: 2 },
+    { id: 'gemelle', name: 'Diavolesse Gemelle', p: 'twins', art: '👿', prop: '👯', o: 2 },
+    { id: 'orco', name: 'Orco Doppio', p: 'double', art: '👹', prop: '✌️', o: 2 },
+    { id: 'belzedado', name: 'Belzedado', p: 'doubles', art: '😈', prop: '🎲', o: 2 },
+    { id: 'ritiracifero', name: 'Ritiracifero', p: 'reroll', art: '🧛', prop: '🔁', o: 2 },
+    { id: 'asinodeo', name: 'Asinodeo', p: 'animalGain', art: '🐴', prop: '🔥', o: 2 },
+    { id: 'custode', name: 'Spettro Custode', p: 'shield', art: '👻', prop: '🔒', o: 2 },
+    { id: 'metallaro', name: 'Capro Metallaro', p: 'tax4', art: '🐐', prop: '🎸', o: 2 },
+    { id: 'gorgobambola', name: 'Gorgobambola', p: 'both', art: '🪆', prop: '👁️', o: 1 },
+    { id: 'legione', name: 'Legione dei Piccoli', n: 8, fx: 'perCard', art: '👾', prop: '👾', o: 1 },
+    { id: 'uovo', name: 'Uovo del Diavolo', n: 6, fx: 'egg', art: '🥚', prop: '😈', o: 1 },
+    { id: 'mefisto', name: 'Mefistolesto', n: 10, fx: 'stealAny', art: '👺', prop: '✋', o: 1 },
+    { id: 'serpente', name: 'Il Serpente', n: 2, fx: 'serpent', art: '🐍', prop: '👑', o: 2 },
+    { id: 'bestie', name: 'Re delle Bestie', n: 5, fx: 'beasts', art: '🦁', prop: '🔥', o: 1 },
+    { id: 'mammona', name: 'Mammona', n: 7, fx: 'collect', v: 3, art: '🤑', prop: '💰' },
+    { id: 'cerbero', name: 'Cerbero', n: 11, fx: 'collect', v: 6, art: '🐺', prop: '🐺' },
+    { id: 'tentazione', name: 'Lady Tentazione', n: 4, fx: 'stealKid', art: '💃', prop: '💋' },
     { id: 'candelora', name: 'Strega Candelora', p: 'candle2', art: '🧙‍♀️', prop: '🕯️' },
     { id: 'sabba', name: 'Barone Sabba', p: 'cheap', art: '🎩', prop: '💸' },
-    { id: 'burlone', name: 'Diavolo Burlone', p: 'jester', art: '🤡', prop: '🃏' },
-    { id: 'legione', name: 'Legione dei Piccoli', n: 8, fx: 'perCard', art: '👾', prop: '👾' },
-    { id: 'uovo', name: 'Uovo del Diavolo', n: 6, fx: 'egg', art: '🥚', prop: '😈' },
-    { id: 'mammona', name: 'Mammona', n: 7, fx: 'collect', v: 3, art: '🤑', prop: '💰' },
-    { id: 'furfantasma', name: 'Furfantasma', n: 10, fx: 'stealEach', v: 2, art: '👺', prop: '🎒' },
-    { id: 'pigrone', name: 'Pigrone Infernale', n: 5, fx: 'gainBlock', art: '👹', prop: '💤' },
-    { id: 'tentazione', name: 'Lady Tentazione', n: 4, fx: 'stealKid', art: '💃', prop: '💋' },
-    { id: 'ingordo', name: 'Ingordo', n: 3, fx: 'perAnimal', v: 2, art: '👅', prop: '🍖' },
-    { id: 'cerbero', name: 'Cerbero', n: 11, fx: 'collect', v: 6, art: '🐺', prop: '🐺' }
+    { id: 'burlone', name: 'Diavolo Burlone', p: 'jester', art: '🤡', prop: '🃏' }
   ];
-  /* Candele: raccolgono 1 anima quando esce uno dei loro numeri, con chiunque tiri. Non si perdono mai. */
+  /* Candele: raccolgono 1 anima quando esce uno dei loro numeri, con chiunque tiri. Non si perdono mai.
+     Come nell'originale: quella del principiante col 6 e l'8 (28%), le altre al 25%. */
   var CANDLES = [
-    { id: 'principiante', name: 'Candela del Principiante', nums: [6, 8], fx: 'candle' },
-    { id: 'malvagia', name: 'Candela Malvagia', nums: [9, 10, 11], fx: 'candle' },
-    { id: 'buona', name: 'Candela Buona', nums: [3, 4, 5], fx: 'candle' },
-    { id: 'gentile', name: 'Candela Gentile', nums: [4, 7], fx: 'candle' },
-    { id: 'marcia', name: 'Candela Marcia', nums: [7, 10], fx: 'candle' }
+    { id: 'principiante', name: 'Candela del Principiante', nums: [6, 8], fx: 'candle', o: 2 },
+    { id: 'malvagia', name: 'Candela Malvagia', nums: [9, 10, 11], fx: 'candle', o: 2 },
+    { id: 'buona', name: 'Candela Buona', nums: [3, 4, 5], fx: 'candle', o: 1 },
+    { id: 'gentile', name: 'Candela Gentile', nums: [4, 7], fx: 'candle', o: 1 },
+    { id: 'marcia', name: 'Candela Marcia', nums: [7, 10], fx: 'candle', o: 1 }
   ];
   var BY = {};
   BLOCK.forEach(function (x) { x.cat = 'block'; BY[x.id] = x; });
@@ -98,7 +100,7 @@
   /* ---------- testi delle carte ---------- */
   function soulsTxt(v) { return v === 1 ? '1 anima' : v + ' anime'; }
   function orList(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' o ' + a[a.length - 1] : String(a[0]); }
-  var REQ_TXT = { kid: 'Se hai almeno un bambino o una bambina', animals3: 'Se hai almeno 3 animali', pair: 'Se hai almeno 2 bambini oppure almeno 2 bambine' };
+  var REQ_TXT = { kid: 'Se hai almeno un bambino o una bambina', noKid: 'Se non hai nessun bambino e nessuna bambina', animals3: 'Se hai almeno 3 animali', pair: 'Se hai almeno 2 bambini oppure almeno 2 bambine', rotten3: 'Se hai almeno 3 bambini o bambine pesti' };
   function text(I) {
     switch (I.fx) {
       case 'candle': return 'Raccogli 1 anima quando esce il ' + orList(I.nums) + ', chiunque tiri. Non si perde mai e non si può spegnere.';
@@ -111,8 +113,7 @@
       case 'pietro': return 'Raccogli 1 anima, o 3 se hai almeno 3 bambini o bambine dolci.';
       case 'corvo': return 'Raccogli 1 anima, o 2 se hai almeno 2 animali.';
       case 'share': return 'Raccogli 2 anime; ogni altro giocatore ne raccoglie 1.';
-      case 'steal': return 'Ruba ' + soulsTxt(I.v) + ' a un giocatore (o prendile dalla riserva).';
-      case 'stealEach': return 'Ruba ' + soulsTxt(I.v) + ' a ogni altro giocatore.';
+      case 'steal': return (I.req ? REQ_TXT[I.req] + ': r' : 'R') + 'uba ' + soulsTxt(I.v) + ' a un giocatore (o prendile dalla riserva).';
       case 'cat': return 'Scarta la prima carta del mazzo del Quartiere: se è un animale, prendilo.';
       case 'alice': return 'Scarta le prime 2 carte del mazzo del Quartiere: prendi ogni bambino o bambina dolce scartato.';
       case 'tommy': return 'Guarda la prima carta del mazzo del Quartiere: se è una bambina prendila, altrimenti scartala.';
@@ -121,6 +122,8 @@
       case 'leo': return 'Attiva tutti i tuoi altri bambini e bambine dolci (non gli altri Leo).';
       case 'destiny': return 'Attiva un tuo altro bambino o bambina dolce (non una Fortuna né un Leo).';
       case 'gainBlock': return 'Prendi gratis una carta del Quartiere.';
+      case 'gainBoy': return 'Prendi gratis un bambino del Quartiere.';
+      case 'purgeSweet': return 'Ogni giocatore, tu compreso, scarta tutti i suoi bambini e bambine dolci.';
       case 'annie': return 'Puoi scartare questa carta: se lo fai, ruba un bambino o una bambina a un altro giocatore, oppure prendine uno dal Quartiere.';
       case 'stealKid': return 'Ruba un bambino o una bambina a un altro giocatore.';
       case 'stealAnimal': return 'Ruba un animale a un altro giocatore.';
@@ -129,9 +132,13 @@
       case 'goat': return 'Puoi scartare esattamente un tuo bambino e una tua bambina: se lo fai, evoca gratis il primo demone del mazzo dei demoni.';
       case 'alligator': return 'Puoi scartare questa carta: se lo fai, scarta fino a 2 bambini o bambine in tutto tra gli altri giocatori.';
       case 'hawk': return 'Puoi scartare questa carta: se lo fai, scopri le prime 7 carte del mazzo del Quartiere, prendi ogni animale e scarta il resto.';
-      case 'owl': return 'Raccogli 1 anima e sostituisci quante carte vuoi del Quartiere.';
+      case 'owl': return 'Sostituisci quante carte vuoi del Quartiere con altre del mazzo.';
+      case 'goldfish': return 'Puoi scartare questa carta: se lo fai, raccogli 5 anime.';
+      case 'stealAny': return 'Ruba una carta a un altro giocatore, anche un demone (chi lo perde ne pesca uno nuovo in mano).';
+      case 'serpent': return 'Vinci subito la partita.';
+      case 'beasts': return 'Ruba 1 anima per ogni tuo animale.';
       case 'damian': return 'Puoi scartare questa carta: se lo fai, evoca gratis un demone della tua mano.';
-      case 'egg': return 'Evoca gratis un altro demone della tua mano.';
+      case 'egg': return 'Si schiude: scarta l\'Uovo, cerca nel mazzo dei demoni quello che vuoi ed evocalo subito al suo posto, gratis.';
       case 'clock': return 'Raccogli 1 anima e fai un altro turno dopo questo: in quel turno si attivano solo le tue carte.';
     }
     switch (I.p) {
@@ -200,8 +207,10 @@
   function summonCost(s, p) { return others(s, p).some(function (q) { return hasP(s, q, 'tax4'); }) ? 4 : 3; }
   function reqOk(s, p, req) {
     if (req === 'kid') return count(s, p, kidsF) >= 1;
+    if (req === 'noKid') return count(s, p, kidsF) === 0;
     if (req === 'animals3') return count(s, p, animalsF) >= 3;
     if (req === 'pair') return count(s, p, asBoy) >= 2 || count(s, p, asGirl) >= 2;
+    if (req === 'rotten3') return count(s, p, asRotten) >= 3;
     return true;
   }
 
@@ -233,10 +242,23 @@
   function takeCard(s, p, uid, src) { // dal Quartiere o rubata a un altro giocatore
     var slot = s.block.indexOf(uid);
     if (slot >= 0) { s.block[slot] = null; gain(s, p, uid, 'block', src); return; }
+    if (info(uid).cat === 'demon') {
+      var dq = demonOwner(s, uid);
+      if (dq < 0) return;
+      s.demons[dq].splice(s.demons[dq].indexOf(uid), 1);
+      s.demons[p].push(uid);
+      pushLog(s, { t: 'gain', s: p, g: uid, how: 'steal', c: src || null, from: dq });
+      if (s.ddeck.length) { s.hand[dq].push(s.ddeck.pop()); pushLog(s, { t: 'redraw', s: dq }); } // chi perde un demone ne pesca un altro
+      return;
+    }
     var from = ownerOf(s, uid);
     if (from < 0) return;
     s.cards[from].splice(s.cards[from].indexOf(uid), 1);
     gain(s, p, uid, 'steal', src, from);
+  }
+  function demonOwner(s, id) {
+    for (var p = 0; p < s.seats.length; p++) if ((s.demons[p] || []).indexOf(id) >= 0) return p;
+    return -1;
   }
   function takeSouls(s, p, from, n, src) {
     var got = from >= 0 ? Math.min(n, s.souls[from]) : 0;
@@ -258,13 +280,13 @@
   // poi quelle che ne attivano altre, poi quelle che contano, poi le altre e per ultime quelle che fanno scartare.
   function prio(I) {
     switch (I.fx) {
-      case 'cat': case 'alice': case 'tommy': case 'hawk': case 'gainBlock': case 'annie':
-      case 'stealKid': case 'stealAnimal': case 'egg': case 'damian': return 1;
+      case 'cat': case 'alice': case 'tommy': case 'hawk': case 'gainBlock': case 'gainBoy': case 'annie':
+      case 'stealKid': case 'stealAnimal': case 'egg': case 'damian': case 'stealAny': case 'serpent': return 1;
       case 'irwin': case 'leo': case 'destiny': return 2;
-      case 'perAnimal': case 'perSweet': case 'perRotten': case 'perCard': case 'pietro': case 'corvo': case 'bat': return 3;
-      case 'collect': return I.req ? 3 : 4;
-      case 'sam': case 'goat': case 'alligator': case 'discardKid': return 5;
-      case 'skunk': return 9;
+      case 'perAnimal': case 'perSweet': case 'perRotten': case 'perCard': case 'pietro': case 'corvo': case 'bat': case 'beasts': return 3;
+      case 'collect': case 'steal': return I.req ? 3 : 4;
+      case 'sam': case 'goat': case 'alligator': case 'discardKid': case 'goldfish': return 5;
+      case 'skunk': case 'purgeSweet': return 9;
     }
     return 4;
   }
@@ -316,18 +338,26 @@
         addSouls(s, p, 2 * dbl, c);
         others(s, p).forEach(function (q) { addSouls(s, q, 1, c); });
         break;
-      case 'steal':
+      case 'steal': case 'beasts':
+        n = I.fx === 'beasts' ? count(s, p, animalsF) : I.v;
+        if (!n) { idle(s, p, c); break; }
         list = others(s, p).filter(function (q) { return !shielded(s, q, p) && s.souls[q] > 0; });
-        if (list.length === 0) takeSouls(s, p, -1, I.v, c);
-        else if (list.length === 1) takeSouls(s, p, list[0], I.v, c);
-        else ask(s, p, 'steal', c, { fx: 'steal', v: I.v, opts: list });
+        if (list.length === 0) takeSouls(s, p, -1, n, c);
+        else if (list.length === 1) takeSouls(s, p, list[0], n, c);
+        else ask(s, p, 'steal', c, { fx: 'steal', v: n, opts: list });
         break;
-      case 'stealEach':
-        others(s, p).forEach(function (q) {
-          if (shielded(s, q, p)) return;
-          var k = Math.min(I.v, s.souls[q]);
-          if (k) { s.souls[q] -= k; s.souls[p] += k; pushLog(s, { t: 'steal', s: p, from: q, n: k, got: k, c: c }); }
-        });
+      case 'goldfish': ask(s, p, 'yesno', c, { fx: 'goldfish' }); break;
+      case 'serpent':
+        s.status = 'gameOver'; s.prompt = null; s.queue = []; s.phase = 'over';
+        s.result = { winner: p, turns: s.turnNo, why: 'serpent' };
+        pushLog(s, { t: 'win', s: p, c: c });
+        break;
+      case 'stealAny':
+        list = [];
+        others(s, p).forEach(function (q) { if (!shielded(s, q, p)) list = list.concat(s.cards[q], s.demons[q]); });
+        if (!list.length) idle(s, p, c);
+        else if (list.length === 1) takeCard(s, p, list[0], c);
+        else ask(s, p, 'pick', c, { fx: 'stealAny', opts: list, may: false });
         break;
       case 'cat': {
         var top = draw(s);
@@ -379,12 +409,21 @@
         else if (list.length === 1) s.queue.unshift({ s: p, c: list[0], via: c });
         else ask(s, p, 'pick', c, { fx: 'destiny', opts: list, may: false });
         break;
-      case 'gainBlock':
-        list = s.block.filter(Boolean);
+      case 'gainBlock': case 'gainBoy':
+        list = s.block.filter(function (x) { return x && (I.fx === 'gainBlock' || asBoy(s, p, x)); });
         if (!list.length) idle(s, p, c);
         else if (list.length === 1) takeCard(s, p, list[0], c);
-        else ask(s, p, 'pick', c, { fx: 'gainBlock', opts: list, may: false });
+        else ask(s, p, 'pick', c, { fx: I.fx, opts: list, may: false });
         break;
+      case 'purgeSweet': {
+        var gone = 0;
+        order(s, p).forEach(function (q) {
+          if (shielded(s, q, p)) return;
+          s.cards[q].filter(function (x) { return asSweet(s, q, x); }).forEach(function (x) { if (drop(s, q, x, p, c, true)) gone++; });
+        });
+        pushLog(s, { t: 'purge', s: p, n: gone, c: c });
+        break;
+      }
       case 'annie':
         list = kidTargets(s, p).concat(s.block.filter(function (x) { return x && isKid(x); }));
         if (!list.length) idle(s, p, c);
@@ -413,7 +452,6 @@
         break;
       case 'hawk': ask(s, p, 'yesno', c, { fx: 'hawk' }); break;
       case 'owl':
-        addSouls(s, p, 1, c);
         list = s.block.filter(Boolean);
         if (list.length) ask(s, p, 'multi', c, { fx: 'owl', opts: list, min: 0, max: list.length, may: true });
         break;
@@ -421,10 +459,10 @@
         if (!s.hand[p].length) idle(s, p, c);
         else ask(s, p, 'pick', c, { fx: 'damian', opts: s.hand[p].slice(), may: true });
         break;
-      case 'egg':
-        if (!s.hand[p].length) idle(s, p, c);
-        else if (s.hand[p].length === 1) summon(s, p, s.hand[p][0], 'egg', c);
-        else ask(s, p, 'pick', c, { fx: 'egg', opts: s.hand[p].slice(), may: false });
+      case 'egg': // dal mazzo dei demoni, quello che si vuole
+        if (!s.ddeck.length) idle(s, p, c);
+        else if (s.ddeck.length === 1) finish(s, p, 'egg', c, [s.ddeck[0]]);
+        else ask(s, p, 'pick', c, { fx: 'egg', opts: s.ddeck.slice(), may: false });
         break;
       case 'clock':
         addSouls(s, p, 1, c);
@@ -434,12 +472,17 @@
     }
   }
   // Completa un effetto dopo la scelta del giocatore (pick: carte scelte; vuoto = rinuncia).
-  function finish(s, p, fx, c, pick, target, yes) {
-    var I = info(c);
+  function finish(s, p, fx, c, pick, target, yes, v) {
     switch (fx) {
-      case 'steal': takeSouls(s, p, target, I.v, c); break;
+      case 'steal': takeSouls(s, p, target, v, c); break;
+      case 'goldfish':
+        if (!yes) { pushLog(s, { t: 'pass', s: p, c: c }); break; }
+        drop(s, p, c, p, c);
+        addSouls(s, p, 5, c);
+        break;
+      case 'stealAny': takeCard(s, p, pick[0], c); break;
       case 'destiny': s.queue.unshift({ s: p, c: pick[0], via: c }); break;
-      case 'gainBlock': takeCard(s, p, pick[0], c); break;
+      case 'gainBlock': case 'gainBoy': takeCard(s, p, pick[0], c); break;
       case 'annie':
         if (!pick.length) { pushLog(s, { t: 'pass', s: p, c: c }); break; }
         drop(s, p, c, p, c);
@@ -484,7 +527,13 @@
         drop(s, p, c, p, c);
         summon(s, p, pick[0], 'damian', c);
         break;
-      case 'egg': summon(s, p, pick[0], 'egg', c); break;
+      case 'egg': // l'Uovo si schiude: lascia il posto al demone scelto e finisce in fondo al mazzo
+        s.ddeck.splice(s.ddeck.indexOf(pick[0]), 1);
+        s.ddeck = shuffle(s.ddeck); // il mazzo dei demoni è stato sfogliato
+        var eg = s.demons[p].indexOf(c);
+        if (eg >= 0) { s.demons[p].splice(eg, 1); s.ddeck.unshift(c); }
+        summon(s, p, pick[0], 'egg', c);
+        break;
     }
   }
   function checkWin(s) {
@@ -559,10 +608,18 @@
     return { ok: true, state: s };
   }
   function startLocal(names) { return setup(newGame({ local: true, names: names })); }
+  // Contro il computer: il posto 0 è di chi gioca, gli altri sono bot del livello scelto.
+  function startBots(names, level) {
+    var s = setup(newGame({ local: true, names: names }));
+    s.mode = 'bot'; s.bots = {};
+    for (var i = 1; i < names.length; i++) s.bots[i] = level;
+    return s;
+  }
   function rematch(state) {
     if (!state || state.status !== 'gameOver') return { ok: false, error: 'La partita non è finita.' };
-    var s = clone(state);
+    var s = clone(state), bots = s.bots;
     setup(s);
+    if (bots) s.bots = bots;
     touch(s, state.v);
     return { ok: true, state: s };
   }
@@ -648,7 +705,7 @@
           afterRoll(s);
           break;
         }
-        finish(s, P.s, P.fx, P.c, m.pick || [], m.target, m.yes);
+        finish(s, P.s, P.fx, P.c, m.pick || [], m.target, m.yes, P.v);
         run(s);
         break;
       }
@@ -742,7 +799,7 @@
     START_SOULS: START_SOULS, MIN_PLAYERS: MIN_PLAYERS, MAX_PLAYERS: MAX_PLAYERS, BLOCK_SIZE: BLOCK_SIZE,
     info: info, typeOf: typeOf, text: text, isKid: isKid, isAnimal: isAnimal, asBoy: asBoy, asGirl: asGirl, asSweet: asSweet, asRotten: asRotten,
     hasP: hasP, owns: owns, ownerOf: ownerOf, buyCost: buyCost, summonCost: summonCost, reqOk: reqOk, order: order,
-    newGame: newGame, startGame: startGame, startLocal: startLocal, rematch: rematch, join: join, seatOf: seatOf, addSeatKey: addSeatKey,
+    newGame: newGame, startGame: startGame, startLocal: startLocal, startBots: startBots, demonOwner: demonOwner, prio: prio, rematch: rematch, join: join, seatOf: seatOf, addSeatKey: addSeatKey,
     validate: validate, act: act, nextActor: nextActor, waitingFor: waitingFor, legalMoves: legalMoves,
     blockCount: blockCount, demonCount: demonCount, clone: clone, randInt: randInt, shuffle: shuffle,
     _setRng: function (f) { rng = f; }, _forceDice: function () { forced = forced.concat([].slice.call(arguments)); }
