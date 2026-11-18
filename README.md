@@ -12,12 +12,19 @@ https://ginotoretti114-ops.github.io/giochi/
 - **Piccante** (`piccante/`): gioco a prese da 2 a 8 giocatori con scommessa. Ogni presa sbagliata è un
   peperoncino; ogni round una delle 40 missioni cambia le regole. Online (ognuno vede solo le sue carte) o sullo
   stesso telefono, che dice a chi passarlo prima di mostrare le carte.
+- **Diavolerie** (`diavolerie/`): da 2 a 5 giocatori, carte e dadi. Si raccolgono anime, si comprano bambini
+  e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online o sullo
+  stesso telefono (l'unica cosa segreta sono i demoni in mano).
+
+Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
+effetti, solo effetti o niente (la scelta vale per tutti i giochi).
 
 ## Com'è fatto
 
 - `index.html`: la pagina iniziale con l'elenco dei giochi (array `GIOCHI` in fondo alla pagina).
-- `lib/`: librerie condivise tra i giochi: `mqtt.min.js` (mqtt.js 5.16.1, licenza MIT) e `stanze.js`,
-  che gestisce le partite online (stato condiviso, server, salvataggio nel browser).
+- `lib/`: librerie condivise tra i giochi: `mqtt.min.js` (mqtt.js 5.16.1, licenza MIT), `stanze.js`,
+  che gestisce le partite online (stato condiviso, server, salvataggio nel browser), e `suoni.js`, la musica
+  (generata al momento con Web Audio, nessun file audio) e gli effetti sonori.
 - una cartella per ogni gioco, con dentro il suo `index.html`, una `copertina.svg` (600×360) e i suoi file.
 
 Non c'è niente da compilare: quello che finisce sul ramo `main` va online da solo in un paio di minuti.
@@ -27,10 +34,16 @@ Non c'è niente da compilare: quello che finisce sul ramo `main` va online da so
 1. Crea una cartella, per esempio `nuovo-gioco/`, con dentro `index.html` e `copertina.svg`.
 2. Aggiungi una voce all'array `GIOCHI` in `index.html`.
 3. Tutti i giochi stanno sullo stesso sito, quindi condividono la memoria del browser:
-   - usa un prefisso tuo per `localStorage` (Gran Bazar usa `gb-…`, Sottozero `sz-…`, Piccante `pc-…`);
+   - usa un prefisso tuo per `localStorage` (Gran Bazar usa `gb-…`, Sottozero `sz-…`, Piccante `pc-…`,
+     Diavolerie `dv-…`; la scelta dell'audio è `sala-audio`, comune a tutti);
    - per l'online usa argomenti MQTT tuoi (Gran Bazar usa `granbazar/v1/<partita>/state`, Sottozero `sottozero/v1/…`,
-     Piccante `piccante/v1/…`).
+     Piccante `piccante/v1/…`, Diavolerie `diavolerie/v1/…`).
 4. Per un gioco online a turni conviene partire da `lib/stanze.js`, come fa Sottozero.
+5. Per i suoni includi `../lib/suoni.js`, scegli la musica con `Suoni.tema('nome')` (temi: `sala`, `bazar`,
+   `sottozero`, `piccante`, `diavolerie`; per aggiungerne uno basta una voce in `THEMES`), metti il pulsante con
+   `Suoni.bottone()` e suona gli effetti con `Suoni.effetto('carta')` o `Suoni.sequenza([...])`
+   (effetti: `click`, `carta`, `mescola`, `dadi`, `anima`, `moneta`, `compra`, `evoca`, `ruba`, `scarta`, `turno`,
+   `vittoria`, `errore`, `punti`, `fuoco`). I browser fanno partire l'audio solo dopo il primo tocco sulla pagina.
 
 ## Come funziona l'online di Gran Bazar
 
@@ -44,8 +57,8 @@ rimanda le versioni più recenti che conosce, così i due server si riallineano 
 I server sono pubblici: chi conosce il codice della partita può leggerla. Per questo nelle
 partite ci sono solo i nomi scelti dai giocatori e le carte.
 
-Le regole stanno in `gran-bazar/motore.js`, `sottozero/motore.js` e `piccante/motore.js` (codice puro, senza interfaccia).
-Sottozero e Piccante usano lo stesso schema tramite `lib/stanze.js`. Nota: i punti delle carte azione di Sottozero
+Le regole stanno in `gran-bazar/motore.js`, `sottozero/motore.js`, `piccante/motore.js` e `diavolerie/motore.js`
+(codice puro, senza interfaccia). Sottozero, Piccante e Diavolerie usano lo stesso schema tramite `lib/stanze.js`. Nota: i punti delle carte azione di Sottozero
 (oggi 10 ciascuna) sono in `ACTION_VALUE` dentro `sottozero/motore.js`.
 
 In Piccante alcune mosse si fanno tutti insieme (passare carte, scegliere il compagno, giocare in contemporanea):
@@ -54,11 +67,18 @@ nello stato arrivato la riapplica e ripubblica da solo. Le 40 missioni sono in `
 il regolamento ne descrive gli effetti ma non il contenuto carta per carta (carte da distribuire, carte da passare,
 numero vietato, numeri piccanti), quindi quei valori sono ricostruiti e si possono correggere lì.
 
+In Diavolerie le carte sono in `BLOCK`, `DEMONS` e `CANDLES` dentro `diavolerie/motore.js` (numero da tirare, copie,
+effetto); i testi delle carte li scrive `text()`. Il regolamento originale mostra solo una parte delle carte: quelle
+viste hanno nomi nuovi ed effetti uguali, le altre sono ricostruite rispettando la composizione del mazzo
+(32 animali, 34 bambine e 34 bambini, 12 dolci, 12 pesti e 10 né l'uno né l'altro). Quando un tiro attiva più carte
+dello stesso giocatore, il gioco le attiva nell'ordine più utile invece di farlo scegliere.
+
 ## Collaudo
 
 ```
 node gran-bazar/test/motore.test.js            # scenari di regole + 500 partite simulate
 node sottozero/test/motore.test.js             # scenari di regole + 300 partite da 2 a 8 giocatori
 node piccante/test/motore.test.js              # scenari di regole e missioni + 300 partite da 2 a 8 giocatori
+node diavolerie/test/motore.test.js            # scenari di carte e demoni + 300 partite da 2 a 5 giocatori
 PARTITE=3000 node gran-bazar/test/motore.test.js
 ```

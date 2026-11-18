@@ -106,7 +106,7 @@ button.pc:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .pc.land { animation: land .35s cubic-bezier(.2, .8, .2, 1) both; }
 
 /* ---------- lobby ---------- */
-.hubnav { padding-top: 6px; }
+.hubnav { padding-top: 6px; display: flex; justify-content: space-between; align-items: center; }
 .hubnav a { text-decoration: none; display: inline-block; }
 .brand { text-align: center; padding: 18px 0 8px; }
 .fan { display: flex; justify-content: center; align-items: flex-start; height: 108px; margin-bottom: 6px; }
@@ -267,6 +267,7 @@ dl.ms dt { font-weight: 700; }
 dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
 
 @media (prefers-reduced-motion: reduce) { .pc, .pc.land { animation: none; transition: none; } }
+@media (max-width: 400px) { .topbar .bk { display: none; } }
 @media (max-width: 380px) { .opp { padding: 7px 9px; } .opp .bt { font-size: 12px; } }
 </style>
 </head>
@@ -288,6 +289,7 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
 <script src="motore.js"></script>
 <script src="../lib/mqtt.min.js"></script>
 <script src="../lib/stanze.js"></script>
+<script src="../lib/suoni.js"></script>
 <script>
 (function () {
   'use strict';
@@ -496,9 +498,9 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
 
   /* ---------- HTML del tavolo ---------- */
   function topbarHTML(s, P) {
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ ' + (P.local ? 'Esci' : 'Partite') + '</button>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (P.local ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (P.local ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Round ' + s.round + (P.local ? '' : netDot()) + '</span>' +
-      '<span class="right"><button class="linkbtn" data-act="scores">Punti</button><button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + snd() + '<button class="linkbtn" data-act="scores">Punti</button><button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -794,7 +796,7 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + snd() + '</nav>' +
       '<header class="brand">' + fanHTML() + '<h1>Pic<span>cante</span></h1>' +
       '<p class="tag">Scommetti quante prese farai e non sbagliare: ogni presa di troppo o di meno è un peperoncino. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -978,6 +980,37 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
     return '';
   }
 
+  /* ---------- suoni (lib/suoni.js): musica del gioco ed effetti quando cambia il tavolo ---------- */
+  function snd() { return window.Suoni ? Suoni.bottone() : ''; }
+  if (window.Suoni) Suoni.tema('piccante');
+  var sfxSeen = { key: null, snap: null };
+  function sfxSnap(s, P) { return { v: s.v, nonce: s.nonce || '', round: s.round, status: s.status, turn: s.turn, plays: s.trick ? s.trick.plays.length : -1, tricks: s.trickNo, bids: cnt(s.bids), chosen: cnt(s.passSel) + cnt(s.designated) + cnt(s.sim), mine: s.status === 'playing' && (P.local ? false : P.seated && K.waitingFor(s).indexOf(P.me) >= 0) }; }
+  function sfxNames(a, s, P) {
+    var out = [];
+    if (s.round !== a.round) out.push('mescola');
+    else {
+      if (s.trickNo > a.tricks) out.push('carta', 'punti');
+      else if ((s.trick ? s.trick.plays.length : -1) > a.plays) out.push('carta');
+      if (cnt(s.bids) > a.bids) out.push('click');
+      if (cnt(s.passSel) + cnt(s.designated) + cnt(s.sim) > a.chosen) out.push('carta');
+    }
+    if (s.status !== a.status && s.status !== 'playing') out.push(s.status === 'gameOver' ? 'vittoria' : 'punti');
+    if (s.status === 'playing' && b(a.mine) !== b(sfxSnap(s, P).mine) && sfxSnap(s, P).mine) out.push('turno');
+    return out;
+  }
+  function b(x) { return !!x; }
+  function sfxCheck() {
+    if (!window.Suoni || ui.route === 'lobby') return;
+    var s = cur();
+    if (!s || s.status === 'waiting') return;
+    var key = (ui.route === 'local' ? 'L' : ui.gameId) + '/' + s.createdAt, P = persp(s);
+    var prev = sfxSeen.key === key ? sfxSeen.snap : null;
+    if (prev && prev.v === s.v && prev.nonce === (s.nonce || '')) return;
+    sfxSeen.key = key; sfxSeen.snap = sfxSnap(s, P);
+    if (prev) { var n = sfxNames(prev, s, P); if (n.length) Suoni.sequenza(n); }
+  }
+  function cnt(o) { var n = 0; for (var k in o) if (o[k] != null) n++; return n; }
+
   /* ---------- render ---------- */
   function captureFocus() {
     var a = document.activeElement;
@@ -1012,6 +1045,7 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
     if (ui.pendingAnim) ui.animKey = ui.pendingAnim;
     restoreFocus(f);
     updateTitle();
+    sfxCheck();
     // conto alla rovescia dei 3 secondi per guardare le carte
     clearTimeout(ui.peekTimer);
     var s = ui.route === 'lobby' ? null : cur();

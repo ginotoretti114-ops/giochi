@@ -106,7 +106,7 @@ button.zc:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .zc.land { animation: land .42s cubic-bezier(.2, .8, .2, 1) both; }
 
 /* ---------- lobby ---------- */
-.hubnav { padding-top: 6px; }
+.hubnav { padding-top: 6px; display: flex; justify-content: space-between; align-items: center; }
 .hubnav a { text-decoration: none; display: inline-block; }
 .brand { text-align: center; padding: 18px 0 8px; }
 .fan { display: flex; justify-content: center; align-items: flex-start; height: 112px; margin-bottom: 6px; }
@@ -241,6 +241,7 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
 
 @media (prefers-reduced-motion: reduce) { .zc, .zc.land { animation: none; transition: none; } }
 @media (max-width: 380px) { .opps { grid-template-columns: 1fr; } }
+@media (max-width: 400px) { .topbar .bk { display: none; } }
 </style>
 </head>
 <body>
@@ -258,6 +259,7 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
 <script src="motore.js"></script>
 <script src="../lib/mqtt.min.js"></script>
 <script src="../lib/stanze.js"></script>
+<script src="../lib/suoni.js"></script>
 <script>
 (function () {
   'use strict';
@@ -396,9 +398,9 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
 
   /* ---------- HTML del tavolo ---------- */
   function topbarHTML(s, P) {
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ ' + (P.local ? 'Esci' : 'Partite') + '</button>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (P.local ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (P.local ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Round ' + s.round + ' di ' + s.rounds + (P.local ? '' : netDot()) + '</span>' +
-      '<span class="right"><button class="linkbtn" data-act="scores">Punti</button><button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + snd() + '<button class="linkbtn" data-act="scores">Punti</button><button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -579,7 +581,7 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + snd() + '</nav>' +
       '<header class="brand">' + fanHTML() + '<h1>Sotto<span>zero</span></h1>' +
       '<p class="tag">Scambia le carte della tua griglia e chiudi ogni round con meno punti possibile. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -774,6 +776,36 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
     if (ui.pendingAnim) ui.animKey = ui.pendingAnim;
     restoreFocus(f);
     updateTitle();
+    sfxCheck();
+  }
+
+  /* ---------- suoni (lib/suoni.js): musica del gioco ed effetti quando cambia il tavolo ---------- */
+  function snd() { return window.Suoni ? Suoni.bottone() : ''; }
+  if (window.Suoni) Suoni.tema('sottozero');
+  var sfxSeen = { key: null, snap: null };
+  function sfxSnap(s, P) { return { v: s.v, nonce: s.nonce || '', round: s.round, status: s.status, turn: s.turn, last: JSON.stringify(s.last || null), tail: JSON.stringify((s.log || [])[(s.log || []).length - 1] || null), mine: s.status === 'playing' && !P.local && P.seated && s.turn === P.me }; }
+  function sfxNames(a, s, P) {
+    var out = [];
+    if (s.round !== a.round) out.push('mescola');
+    else {
+      var e = (s.log || [])[(s.log || []).length - 1];
+      if (s.last && JSON.stringify(s.last) !== a.last) out.push(s.last.t === 'toss' ? 'scarta' : 'carta');
+      if (e && JSON.stringify(e) !== a.tail) { if (e.t === 'clear') out.push('fuoco'); else if (e.t === 'caught') out.push('ruba'); else if (e.t === 'uno') out.push('punti'); }
+    }
+    if (s.status !== a.status && s.status !== 'playing') out.push(s.status === 'gameOver' ? 'vittoria' : 'punti');
+    if (s.status === 'playing' && b(a.mine) !== b(sfxSnap(s, P).mine) && sfxSnap(s, P).mine) out.push('turno');
+    return out;
+  }
+  function b(x) { return !!x; }
+  function sfxCheck() {
+    if (!window.Suoni || ui.route === 'lobby') return;
+    var s = ui.route === 'local' ? ui.local : ui.game;
+    if (!s || s.status === 'waiting') return;
+    var key = (ui.route === 'local' ? 'L' : ui.gameId) + '/' + s.createdAt, P = persp(s);
+    var prev = sfxSeen.key === key ? sfxSeen.snap : null;
+    if (prev && prev.v === s.v && prev.nonce === (s.nonce || '')) return;
+    sfxSeen.key = key; sfxSeen.snap = sfxSnap(s, P);
+    if (prev) { var n = sfxNames(prev, s, P); if (n.length) Suoni.sequenza(n); }
   }
 
   /* ---------- rotte ---------- */

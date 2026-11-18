@@ -267,8 +267,9 @@ table.vals-t td, table.vals-t th { text-align: left; }
 .netdot { margin-left: 8px; vertical-align: 3px; }
 .field.share { font-size: 14px; color: var(--muted); }
 .note { text-align: center; font-size: 13px; color: var(--muted); max-width: 44ch; margin: 18px auto 0; line-height: 1.45; }
-.hubnav { padding-top: 6px; }
+.hubnav { padding-top: 6px; display: flex; justify-content: space-between; align-items: center; }
 .hubnav a { text-decoration: none; display: inline-block; }
+@media (max-width: 400px) { .topbar .bk { display: none; } }
 </style>
 </head>
 <body>
@@ -340,6 +341,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
 <script src="motore.js"></script>
 <script>window.GB_HUB_URL = "../";</script>
 <script src="../lib/mqtt.min.js"></script>
+<script src="../lib/suoni.js"></script>
 <script>
 (function () {
   'use strict';
@@ -507,9 +509,9 @@ table.vals-t td, table.vals-t th { text-align: left; }
   /* ---------- HTML del tavolo ---------- */
   function topbarHTML(s, P) {
     return '<header class="topbar">' +
-      '<button class="linkbtn" data-act="' + (P.local ? 'lobby' : 'lobby') + '">‹ ' + (P.local ? 'Esci' : 'Partite') + '</button>' +
+      '<button class="linkbtn" data-act="lobby" aria-label="' + (P.local ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (P.local ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Manche ' + s.round + (P.local ? '' : netDot()) + '</span>' +
-      '<span class="right"><button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span>' +
+      '<span class="right">' + snd() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span>' +
       '</header>';
   }
   function bannersHTML(s, P) {
@@ -696,7 +698,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    var hub = typeof window.GB_HUB_URL === 'string' ? '<nav class="hubnav"><a class="linkbtn" href="' + esc(window.GB_HUB_URL) + '">‹ Tutti i giochi</a></nav>' : '';
+    var hub = typeof window.GB_HUB_URL === 'string' ? '<nav class="hubnav"><a class="linkbtn" href="' + esc(window.GB_HUB_URL) + '">‹ Tutti i giochi</a>' + snd() + '</nav>' : '';
     return hub + '<header class="brand">' + fanHTML() + '<h1>Gran <span>Bazar</span></h1>' +
       '<p class="tag">Compra, scambia e vendi merci contro un altro mercante. Vince chi conquista due manche.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -879,6 +881,30 @@ table.vals-t td, table.vals-t th { text-align: left; }
     });
     document.title = mine ? '● Tocca a te · Gran Bazar' : 'Gran Bazar';
   }
+  /* ---------- suoni (lib/suoni.js): musica del gioco ed effetti quando cambia il tavolo ---------- */
+  function snd() { return window.Suoni ? Suoni.bottone() : ''; }
+  if (window.Suoni) Suoni.tema('bazar');
+  var sfxSeen = { key: null, snap: null };
+  function sfxSnap(s, P) { return { v: s.v, nonce: s.nonce || '', round: s.round, status: s.status, turn: s.turn, last: JSON.stringify(s.last || null), mine: s.status === 'playing' && !P.local && P.seated && s.turn === P.me }; }
+  function sfxNames(a, s, P) {
+    var out = [];
+    if (s.round !== a.round) out.push('mescola');
+    else if (s.last && JSON.stringify(s.last) !== a.last) out.push(s.last.t === 'sell' ? 'moneta' : 'carta');
+    if (s.status !== a.status && s.status !== 'playing') out.push(s.status === 'gameOver' ? 'vittoria' : 'punti');
+    if (s.status === 'playing' && b(a.mine) !== b(sfxSnap(s, P).mine) && sfxSnap(s, P).mine) out.push('turno');
+    return out;
+  }
+  function b(x) { return !!x; }
+  function sfxCheck() {
+    if (!window.Suoni || ui.route === 'lobby') return;
+    var s = curGame();
+    if (!s || s.status === 'waiting') return;
+    var key = (ui.route === 'local' ? 'L' : ui.gameId) + '/' + s.createdAt, P = persp(s);
+    var prev = sfxSeen.key === key ? sfxSeen.snap : null;
+    if (prev && prev.v === s.v && prev.nonce === (s.nonce || '')) return;
+    sfxSeen.key = key; sfxSeen.snap = sfxSnap(s, P);
+    if (prev) { var n = sfxNames(prev, s, P); if (n.length) Suoni.sequenza(n); }
+  }
   function render() {
     var f = captureFocus();
     var html;
@@ -891,6 +917,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
     if (ui.pendingAnimKey) ui.animKey = ui.pendingAnimKey;
     restoreFocus(f);
     updateTitle();
+    sfxCheck();
   }
   // Aggiorna solo selezione e barra mosse, così le carte si sollevano con la transizione.
   function renderSelection() {

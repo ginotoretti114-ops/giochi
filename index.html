@@ -41,6 +41,7 @@ body {
 }
 main { max-width: 780px; margin: 0 auto; padding: 40px 16px 48px; }
 header h1 { font: 56px/1 var(--font-display); margin: 0; text-wrap: balance; }
+header .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 header h1 span { color: var(--saffron); }
 header p { color: var(--muted); margin: 12px 0 0; max-width: 42ch; font-size: 17px; }
 .list { list-style: none; padding: 0; margin: 30px 0 0; display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
@@ -62,7 +63,7 @@ footer { margin-top: 30px; color: var(--muted); font-size: 14px; }
 <body>
 <main>
   <header>
-    <h1>Sala <span>giochi</span></h1>
+    <div class="top"><h1>Sala <span>giochi</span></h1><span id="snd"></span></div>
     <p>Giochi da tavolo da fare online con gli amici: crei la partita, mandi il link e si gioca.</p>
   </header>
   <ul class="list" id="list">
@@ -70,6 +71,7 @@ footer { margin-top: 30px; color: var(--muted); font-size: 14px; }
   </ul>
   <footer>Altri giochi in arrivo.</footer>
 </main>
+<script src="lib/suoni.js"></script>
 <script>
 // Per aggiungere un gioco: crea la sua cartella (con index.html e copertina.svg) e aggiungi una voce qui.
 var GIOCHI = [
@@ -93,8 +95,18 @@ var GIOCHI = [
     descrizione: 'Scommetti quante prese farai: ogni presa di troppo o di meno è un peperoncino. Ogni round una missione cambia le regole.',
     etichette: ['2–8 giocatori', '20–40 minuti', 'Online o sullo stesso telefono'],
     copertina: 'piccante/copertina.svg'
+  },
+  {
+    cartella: 'diavolerie/',
+    nome: 'Diavolerie',
+    descrizione: 'Tira i dadi, raccogli anime e compra amici nel Quartiere; poi spegnili per evocare demoni. Vince chi ne ha 3 e 10 anime.',
+    etichette: ['2–5 giocatori', '30–45 minuti', 'Online o sullo stesso telefono'],
+    copertina: 'diavolerie/copertina.svg'
   }
 ];
+
+// Musica di sottofondo della sala e pulsante audio (la scelta vale per tutti i giochi).
+if (window.Suoni) { Suoni.tema('sala'); document.getElementById('snd').innerHTML = Suoni.bottone(); }
 
 (function () {
   var list = document.getElementById('list');
