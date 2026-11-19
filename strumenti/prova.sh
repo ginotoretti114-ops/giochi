@@ -23,7 +23,8 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
 fi
 git rev-parse -q --verify refs/heads/prova >/dev/null || { echo "Manca il ramo «prova»." >&2; exit 1; }
 
-git fetch -q origin
+# rami remoti in refs/remotes/origin/ anche se il clone non li tiene
+git fetch -q origin '+refs/heads/*:refs/remotes/origin/*'
 # il ramo «prova» locale deve contenere quello online, così nessun commit va perso
 if git rev-parse -q --verify refs/remotes/origin/prova >/dev/null && ! git merge-base --is-ancestor origin/prova refs/heads/prova; then
   echo "Il ramo «prova» online ha commit che qui mancano: aggiornalo prima (git pull sul ramo prova)." >&2; exit 1
