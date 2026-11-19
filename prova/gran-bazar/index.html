@@ -368,6 +368,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
 <div id="app"></div>
 <div id="layer"></div>
 <script src="../lib/ambiente.js"></script>
+<script src="../lib/profilo.js"></script>
 <script src="motore.js"></script>
 <script>window.GB_HUB_URL = "../";</script>
 <script src="../lib/mqtt.min.js"></script>
@@ -669,6 +670,8 @@ table.vals-t td, table.vals-t th { text-align: left; }
 
   function boardHTML(s) {
     var P = persp(s);
+    // esperienza, medaglie e sfide del giorno a fine partita (lib/profilo.js)
+    if (window.Profilo) Profilo.osserva('gran-bazar', s, P, { vinto: !!s.result && s.result.winner === P.me });
     var myTurn = s.status === 'playing' && P.seated && P.canAct && s.turn === P.me;
     var showHand = P.seated && !(P.local && ui.curtain);
     var key = animKeyOf(s);
@@ -735,7 +738,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    var hub = typeof window.GB_HUB_URL === 'string' ? '<nav class="hubnav"><a class="linkbtn" href="' + esc(window.GB_HUB_URL) + '">‹ Tutti i giochi</a>' + snd() + '</nav>' : '';
+    var hub = typeof window.GB_HUB_URL === 'string' ? '<nav class="hubnav"><a class="linkbtn" href="' + esc(window.GB_HUB_URL) + '">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip(window.GB_HUB_URL + '#profilo') : '') + snd() + '</span></nav>' : '';
     return hub + (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Gran <span>Bazar</span></h1>' +
       '<p class="tag">Compra, scambia e vendi merci contro un altro mercante. Vince chi conquista due manche.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +

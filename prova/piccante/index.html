@@ -316,6 +316,7 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
 <div id="app"></div>
 <div id="layer"></div>
 <script src="../lib/ambiente.js"></script>
+<script src="../lib/profilo.js"></script>
 <script src="motore.js"></script>
 <script src="../lib/mqtt.min.js"></script>
 <script src="../lib/stanze.js"></script>
@@ -772,6 +773,8 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
   function animKeyOf(s) { return s.v + '/' + s.round + '/' + (s.nonce || ''); }
   function boardHTML(s) {
     var P = persp(s);
+    // esperienza, medaglie e sfide del giorno a fine partita (lib/profilo.js)
+    if (window.Profilo) Profilo.osserva('piccante', s, P, { vinto: !!(s.result && s.result.winners) && s.result.winners.indexOf(P.me) >= 0 });
     syncSel(s, P);
     var key = animKeyOf(s), anim = ui.animKey !== key;
     ui.pendingAnim = key;
@@ -832,7 +835,7 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + snd() + '</nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + snd() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Pic<span>cante</span></h1>' +
       '<p class="tag">Scommetti quante prese farai e non sbagliare: ogni presa di troppo o di meno è un peperoncino. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +

@@ -277,6 +277,7 @@ table.score td.z { color: var(--bad); }
 <div id="app"></div>
 <div id="layer"></div>
 <script src="../lib/ambiente.js"></script>
+<script src="../lib/profilo.js"></script>
 <script src="motore.js"></script>
 <script src="bot.js"></script>
 <script src="../lib/mqtt.min.js"></script>
@@ -492,6 +493,12 @@ table.score td.z { color: var(--bad); }
   }
   function boardHTML(s) {
     var P = persp(s);
+    // esperienza, medaglie e sfide del giorno a fine partita (lib/profilo.js)
+    if (window.Profilo) {
+      Profilo.osserva('sette-stelle', s, P, { vinto: !!s.result && s.result.winner === P.me });
+      // le sette carte diverse di un round: impresa per le medaglie e le sfide del giorno
+      if (!P.local && P.seated && P.me >= 0 && s.last && s.last.seven === P.me) Profilo.evento('sette-stelle', 'sette', s.createdAt + ':' + s.last.round);
+    }
     var e = lastCardEvent(s), key = e ? gameKey(s) + ':' + s.createdAt + ':' + e.i : null;
     var fresh = key && ui.seenCard !== key ? e : null;
     if (key) ui.seenCard = key;
@@ -556,7 +563,7 @@ table.score td.z { color: var(--bad); }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + S.bottone() + '</nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Sette <span>Stelle</span></h1>' +
       '<p class="tag">Pesca stelle numerate e fermati in tempo: con un doppione sballi e perdi il round. Sette numeri diversi valgono 15 punti in più. Vince chi arriva a 200. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
