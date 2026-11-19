@@ -332,6 +332,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
 <div id="app"></div>
 <div id="layer"></div>
 <script src="../lib/ambiente.js"></script>
+<script src="../lib/profilo.js"></script>
 <script src="motore.js"></script>
 <script src="bot.js"></script>
 <script src="../lib/mqtt.min.js"></script>
@@ -735,6 +736,8 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   }
   function boardHTML(s) {
     var P = persp(s);
+    // esperienza, medaglie e sfide del giorno a fine partita (lib/profilo.js)
+    if (window.Profilo) Profilo.osserva('diavolerie', s, P, { vinto: !!s.result && s.result.winner === P.me });
     var key = (ui.route === 'local' ? 'L' + s.createdAt : ui.gameId) + '/' + (s.prompt ? s.prompt.c + s.prompt.s : '') + '/' + s.turnNo + '/' + s.phase;
     if (ui.selKey !== key) { ui.selKey = key; ui.sel = []; }
     var rollE = s.log[lastRollIndex(s)], rollKey = s.roll && rollE ? gameKey(s) + ':' + s.createdAt + ':' + rollE.i : null;
@@ -792,7 +795,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + S.bottone() + '</nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Diavole<span>rie</span></h1>' +
       '<p class="tag">Raccogli anime, compra amici nel Quartiere e poi spegnili per evocare i demoni: vince chi ne ha 3 insieme a 10 anime. Da 2 a 5 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +

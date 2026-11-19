@@ -287,6 +287,7 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
 <div id="app"></div>
 <div id="layer"></div>
 <script src="../lib/ambiente.js"></script>
+<script src="../lib/profilo.js"></script>
 <script src="motore.js"></script>
 <script src="../lib/mqtt.min.js"></script>
 <script src="../lib/stanze.js"></script>
@@ -562,6 +563,8 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   function animKeyOf(s) { return s.v + '/' + s.round + '/' + (s.nonce || ''); }
   function boardHTML(s) {
     var P = persp(s);
+    // esperienza, medaglie e sfide del giorno a fine partita (lib/profilo.js)
+    if (window.Profilo) Profilo.osserva('sottozero', s, P, { vinto: !!(s.result && s.result.champions) && s.result.champions.indexOf(P.me) >= 0 });
     var key = animKeyOf(s), anim = ui.animKey !== key;
     ui.pendingAnim = key;
     var others = s.seats.map(function (x, i) { return i; }).filter(function (i) { return i !== P.me; });
@@ -618,7 +621,7 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + snd() + '</nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + snd() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Sotto<span>zero</span></h1>' +
       '<p class="tag">Scambia le carte della tua griglia e chiudi ogni round con meno punti possibile. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +

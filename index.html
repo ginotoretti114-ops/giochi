@@ -68,12 +68,14 @@ footer { margin-top: 30px; color: var(--muted); font-size: 14px; }
     <div class="top"><h1>Sala <span>giochi</span></h1><span id="snd"></span></div>
     <p>Giochi da tavolo da fare online con gli amici: crei la partita, mandi il link e si gioca.</p>
   </header>
+  <section id="profilo" aria-label="Il tuo profilo"></section>
   <ul class="list" id="list">
     <li class="game"><div class="body"><h2>Gran Bazar</h2><a class="play" href="gran-bazar/">Gioca</a></div></li>
   </ul>
   <footer>Altri giochi in arrivo.</footer>
 </main>
 <script src="lib/ambiente.js"></script>
+<script src="lib/profilo.js"></script>
 <script src="lib/suoni.js"></script>
 <script>
 // Per aggiungere un gioco: crea la sua cartella (con index.html e copertina.svg) e aggiungi una voce qui.
@@ -121,6 +123,17 @@ var GIOCHI = [
     copertina: 'polvere-e-piombo/copertina.svg'
   }
 ];
+
+// Profilo del giocatore: livello, sfide di oggi e medaglie. Si ridisegna quando si torna indietro da un gioco
+// (la pagina può arrivare dalla cache del browser) o quando un'altra scheda gioca una partita.
+(function () {
+  var el = document.getElementById('profilo');
+  function aggiorna() { if (window.Profilo) Profilo.disegna(el); }
+  aggiorna();
+  window.addEventListener('pageshow', function (e) { if (e.persisted) aggiorna(); });
+  window.addEventListener('storage', function (e) { if (!e.key || /sala-profilo$/.test(e.key)) aggiorna(); });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') aggiorna(); });
+})();
 
 // Musica di sottofondo della sala e pulsante audio (la scelta vale per tutti i giochi).
 if (window.Suoni) { Suoni.tema('sala'); document.getElementById('snd').innerHTML = Suoni.bottone(); }
