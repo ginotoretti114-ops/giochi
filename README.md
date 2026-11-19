@@ -16,6 +16,13 @@ https://ginotoretti114-ops.github.io/giochi/
   e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online, sullo
   stesso telefono (l'unica cosa segreta sono i demoni in mano) o contro il computer: da 1 a 4 bot, livello
   facile, medio o difficile.
+- **Sette Stelle** (`sette-stelle/`): da 2 a 8 giocatori, «pesca o fermati». Si pescano stelle numerate da 0 a 12:
+  con un doppione si sballa, con sette numeri diversi si chiude il round con 15 punti in più; vince chi arriva a 200.
+  Online (con bot per riempire il tavolo), sullo stesso telefono o contro il computer (da 1 a 5 bot).
+- **Polvere e Piombo** (`polvere-e-piombo/`): da 4 a 7 giocatori, western a ruoli segreti: Sceriffo e Vice contro
+  Fuorilegge, più un Rinnegato. 80 carte con valore e seme (per «Estrai!»), 16 personaggi, distanze e armi.
+  Online (ognuno vede solo ruolo e carte sue; i bot completano il tavolo), sullo stesso telefono (che dice a chi
+  passarlo) o contro il computer (da 3 a 6 bot).
 
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
 effetti, solo effetti o niente (la scelta vale per tutti i giochi).
@@ -36,12 +43,12 @@ Non c'è niente da compilare: quello che finisce sul ramo `main` va online da so
 2. Aggiungi una voce all'array `GIOCHI` in `index.html`.
 3. Tutti i giochi stanno sullo stesso sito, quindi condividono la memoria del browser:
    - usa un prefisso tuo per `localStorage` (Gran Bazar usa `gb-…`, Sottozero `sz-…`, Piccante `pc-…`,
-     Diavolerie `dv-…`; la scelta dell'audio è `sala-audio`, comune a tutti);
+     Diavolerie `dv-…`, Sette Stelle `ss-…`, Polvere e Piombo `pp-…`; la scelta dell'audio è `sala-audio`, comune a tutti);
    - per l'online usa argomenti MQTT tuoi (Gran Bazar usa `granbazar/v1/<partita>/state`, Sottozero `sottozero/v1/…`,
-     Piccante `piccante/v1/…`, Diavolerie `diavolerie/v1/…`).
+     Piccante `piccante/v1/…`, Diavolerie `diavolerie/v1/…`, Sette Stelle `settestelle/v1/…`, Polvere e Piombo `polvereepiombo/v1/…`).
 4. Per un gioco online a turni conviene partire da `lib/stanze.js`, come fa Sottozero.
 5. Per i suoni includi `../lib/suoni.js`, scegli la musica con `Suoni.tema('nome')` (temi: `sala`, `bazar`,
-   `sottozero`, `piccante`, `diavolerie`; per aggiungerne uno basta una voce in `THEMES`), metti il pulsante con
+   `sottozero`, `piccante`, `diavolerie`, `settestelle`, `polvere`; per aggiungerne uno basta una voce in `THEMES`), metti il pulsante con
    `Suoni.bottone()` e suona gli effetti con `Suoni.effetto('carta')` o `Suoni.sequenza([...])`
    (effetti: `click`, `carta`, `mescola`, `dadi`, `anima`, `moneta`, `compra`, `evoca`, `ruba`, `scarta`, `turno`,
    `vittoria`, `errore`, `punti`, `fuoco`). I browser fanno partire l'audio solo dopo il primo tocco sulla pagina.
@@ -82,6 +89,21 @@ restituisce una mossa per il motore. Il facile sceglie quasi a caso; il medio d�
 per vincere, colpisce chi è in testa e ritira i dadi quando conviene. Le partite contro il computer restano nel
 browser (`dv-bot`) e non passano dai server.
 
+## Sette Stelle e Polvere e Piombo
+
+Seguono le regole dei giochi originali con nomi e grafica nuovi. In Sette Stelle il mazzo è quello originale
+(94 carte: 79 numeri, 6 bonus, 9 azioni); l'unica scelta nostra è che, se due giocatori sono in testa a pari punti
+sopra i 200, si gioca un altro round. In Polvere e Piombo le 80 carte hanno lo stesso valore e seme delle originali,
+così «Estrai!» ha le stesse probabilità (cuori per Botte e Galera, dal 2 al 9 di picche per il Candelotto);
+le decisioni durante il turno degli altri (schivare, la Sfida, i Bisonti, il Mercato, restare in vita) passano
+da un `prompt` per volta, e chi deve rispondere è `nextActor`.
+
+Entrambi hanno i bot in `bot.js` (`SetteStelleBot` e `PolvereBot`, livelli `facile`, `medio`, `difficile`), che giocano
+sia contro il computer sia nelle partite online: nella sala d'attesa chi crea la partita può aggiungere bot, e durante
+la partita li muove il suo telefono (se non c'è, dopo qualche secondo ci pensano gli altri giocatori seduti).
+I bot di Polvere e Piombo usano solo quello che vedrebbe un giocatore: il proprio ruolo e le proprie carte, lo Sceriffo,
+i ruoli dei morti e una «reputazione» pubblica (`rep`) che il motore aggiorna quando qualcuno attacca qualcun altro.
+
 ## Collaudo
 
 ```
@@ -90,5 +112,9 @@ node sottozero/test/motore.test.js             # scenari di regole + 300 partite
 node piccante/test/motore.test.js              # scenari di regole e missioni + 300 partite da 2 a 8 giocatori
 node diavolerie/test/motore.test.js            # scenari di carte e demoni + 300 partite da 2 a 5 giocatori
 node diavolerie/test/bot.test.js               # sfide tra i livelli dei bot: il più forte deve vincere più spesso
+node sette-stelle/test/motore.test.js          # scenari di regole + 400 partite da 2 a 8 giocatori
+node sette-stelle/test/bot.test.js             # i bot dei tre livelli uno contro l'altro
+node polvere-e-piombo/test/motore.test.js      # ruoli, distanze, carte e personaggi + 300 partite da 4 a 7 giocatori
+node polvere-e-piombo/test/bot.test.js         # i bot dei tre livelli: vittorie per posto, ruoli a caso
 PARTITE=3000 node gran-bazar/test/motore.test.js
 ```

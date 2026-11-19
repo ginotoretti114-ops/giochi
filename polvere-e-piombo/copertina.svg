@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="600" height="360" role="img" aria-label="Polvere e Piombo: stella da sceriffo davanti a un ventaglio di carte, nel deserto di notte">
+  <defs>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="13" cy="13" r="1.5" fill="#f5aa3e" fill-opacity=".12"/>
+    </pattern>
+    <radialGradient id="dusk" cx="50%" cy="100%" r="75%">
+      <stop offset="0" stop-color="#b8542a" stop-opacity=".55"/>
+      <stop offset=".55" stop-color="#3d2a5e" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#131833" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#fff0b8"/><stop offset=".5" stop-color="#f5c542"/><stop offset="1" stop-color="#c47a12"/></linearGradient>
+    <linearGradient id="parch" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#fbf1d9"/><stop offset="1" stop-color="#e8cc96"/></linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#f0f7ff"/><stop offset="1" stop-color="#b4d3fa"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#000" flood-opacity=".4"/>
+    </filter>
+  </defs>
+  <rect width="600" height="360" fill="#131833"/>
+  <rect width="600" height="360" fill="url(#dots)"/>
+  <rect width="600" height="360" fill="url(#dusk)"/>
+  <circle cx="486" cy="78" r="38" fill="#fff3cf" fill-opacity=".92"/>
+  <circle cx="474" cy="70" r="7" fill="#e9dcb4" fill-opacity=".7"/><circle cx="498" cy="92" r="5" fill="#e9dcb4" fill-opacity=".6"/>
+  <path d="M0 300 Q 80 284 160 296 T 330 292 T 480 298 T 600 290 V360 H0 Z" fill="#1d1430"/>
+  <g fill="#0e0b20">
+    <path d="M70 300 V214 a12 12 0 0 1 24 0 V300 Z"/><path d="M70 262 H56 a10 10 0 0 1 -10 -10 V236 a7 7 0 0 1 14 0 V248 H70 Z"/><path d="M94 250 H106 V226 a7 7 0 0 1 14 0 V246 a10 10 0 0 1 -10 10 H94 Z"/>
+    <path d="M520 300 V236 a10 10 0 0 1 20 0 V300 Z"/><path d="M540 270 H550 V250 a6 6 0 0 1 12 0 V266 a8 8 0 0 1 -8 8 H540 Z"/>
+  </g>
+  <g filter="url(#shadow)" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <g transform="rotate(-18 300 520) translate(300 200)">
+      <rect x="-48" y="-68" width="96" height="134" rx="11" fill="url(#parch)" stroke="#a8763e" stroke-width="5"/>
+      <text x="-34" y="-44" font-size="18" fill="#c4173a">A♥</text>
+      <polygon points="0.0,-30.0 4.6,-15.1 18.4,-22.4 11.1,-8.6 26.0,-4.0 11.1,0.6 18.4,14.4 4.6,7.1 0.0,22.0 -4.6,7.1 -18.4,14.4 -11.1,0.6 -26.0,-4.0 -11.1,-8.6 -18.4,-22.4 -4.6,-15.1" fill="#ff7a2a" stroke="#c4173a" stroke-width="3" stroke-linejoin="round"/>
+    </g>
+    <g transform="rotate(18 300 520) translate(300 200)">
+      <rect x="-48" y="-68" width="96" height="134" rx="11" fill="url(#blue)" stroke="#3d7fd6" stroke-width="5"/>
+      <text x="-34" y="-44" font-size="18" fill="#1b2246">K♠</text>
+      <rect x="-20" y="-24" width="40" height="46" rx="10" fill="#8a5a2e" stroke="#5a3613" stroke-width="3"/>
+      <path d="M-20 -10 H20 M-20 8 H20" stroke="#5a3613" stroke-width="3"/>
+    </g>
+  </g>
+  <g filter="url(#shadow)">
+    <polygon points="300.0,94.0 321.0,131.6 364.1,131.0 342.0,168.0 364.1,205.0 321.0,204.4 300.0,242.0 279.0,204.4 235.9,205.0 258.0,168.0 235.9,131.0 279.0,131.6" fill="url(#gold)" stroke="#7a4a00" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="300.0" cy="94.0" r="10" fill="url(#gold)" stroke="#7a4a00" stroke-width="2"/><circle cx="364.1" cy="131.0" r="10" fill="url(#gold)" stroke="#7a4a00" stroke-width="2"/><circle cx="364.1" cy="205.0" r="10" fill="url(#gold)" stroke="#7a4a00" stroke-width="2"/><circle cx="300.0" cy="242.0" r="10" fill="url(#gold)" stroke="#7a4a00" stroke-width="2"/><circle cx="235.9" cy="205.0" r="10" fill="url(#gold)" stroke="#7a4a00" stroke-width="2"/><circle cx="235.9" cy="131.0" r="10" fill="url(#gold)" stroke="#7a4a00" stroke-width="2"/>
+    <circle cx="300" cy="168" r="30" fill="#f5c542" stroke="#7a4a00" stroke-width="3"/>
+    <polygon points="300.0,148.0 304.7,161.5 319.0,161.8 307.6,170.5 311.8,184.2 300.0,176.0 288.2,184.2 292.4,170.5 281.0,161.8 295.3,161.5" fill="#7a4a00"/>
+  </g>
+</svg>
