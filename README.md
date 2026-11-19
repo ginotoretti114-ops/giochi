@@ -27,6 +27,10 @@ https://ginotoretti114-ops.github.io/giochi/
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
 effetti, solo effetti o niente (la scelta vale per tutti i giochi).
 
+C'è anche un sito di prova, https://ginotoretti114-ops.github.io/giochi/prova/, dove le novità arrivano prima che
+sul sito vero: ha una striscia rosa con la scritta PROVA, le sue partite online e la sua memoria del browser, così
+le prove non toccano le partite vere. Quando le novità vanno bene passano al sito vero (`strumenti/prova.sh`).
+
 Le pagine si adattano allo schermo. Sul telefono (sotto i 1000 pixel di larghezza) tutto sta in una colonna, con le
 mosse in basso a portata di pollice. Sul computer (o su un tablet in orizzontale) la lobby e il tavolo si dividono
 in due colonne: a sinistra quello che è di tutti (avversari, mercato, dadi, carte in tavola, cronaca), a destra lo

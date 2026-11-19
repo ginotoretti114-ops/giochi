@@ -366,6 +366,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
+<script src="../lib/ambiente.js"></script>
 <script src="motore.js"></script>
 <script>window.GB_HUB_URL = "../";</script>
 <script src="../lib/mqtt.min.js"></script>
@@ -1025,8 +1026,14 @@ table.vals-t td, table.vals-t th { text-align: left; }
   }
   function saveRoom(id, s) { mem.states[id] = s; LS.set('gb-room-' + id, JSON.stringify(s)); }
 
-  function topicOf(id) { return 'granbazar/v1/' + id + '/state'; }
-  function idOfTopic(t) { var m = /^granbazar\/v1\/([a-z0-9]{6,20})\/state$/.exec(t); return m ? m[1] : null; }
+  // nel sito di prova (lib/ambiente.js) gli argomenti hanno il prefisso «prova/»
+  var GB_TOPIC = window.SALA ? window.SALA.argomento('granbazar/v1') : 'granbazar/v1';
+  function topicOf(id) { return GB_TOPIC + '/' + id + '/state'; }
+  function idOfTopic(t) {
+    if (t.indexOf(GB_TOPIC + '/') !== 0) return null;
+    var m = /^([a-z0-9]{6,20})\/state$/.exec(t.slice(GB_TOPIC.length + 1));
+    return m ? m[1] : null;
+  }
   function brokers() {
     var q = null;
     try { q = new URLSearchParams(location.search).get('broker'); } catch (e) { q = null; }

@@ -3,6 +3,11 @@
 Sito statico pubblicato con GitHub Pages dal ramo `main` (cartella radice): https://ginotoretti114-ops.github.io/giochi/
 Non c'è nessuna build: i file si modificano e si pubblicano così come sono.
 
+Sito di prova: https://ginotoretti114-ops.github.io/giochi/prova/
+- Le modifiche nuove si fanno sul ramo `prova` (stessi percorsi e stessi test di sempre). Dopo il commit, `strumenti/prova.sh pubblica` le mette sul sito di prova; quando l'utente le approva, `strumenti/prova.sh promuovi` le porta sul sito vero. Solo una correzione urgente che l'utente chiede per il sito vero va direttamente su `main`.
+- La cartella `prova/` di `main` la scrive lo script: mai a mano. Nei comandi git il ramo si scrive `refs/heads/prova`, perché `prova` è anche una cartella.
+- Ogni pagina include per primo `lib/ambiente.js`: sotto `/prova/` le chiavi di `localStorage` prendono il prefisso `prova:`, gli argomenti MQTT `prova/` (con `lib/stanze.js` o `SALA.argomento(...)`) e compare la scritta PROVA. Un gioco nuovo deve fare lo stesso.
+
 - Testi e interfacce in italiano.
 - Ogni gioco ha la sua cartella con `index.html` e `copertina.svg` (600×360) e va aggiunto all'array `GIOCHI` in `index.html` della radice.
 - Nei giochi, il link «‹ Tutti i giochi» porta a `../` (Gran Bazar lo attiva con `window.GB_HUB_URL = "../"`).
