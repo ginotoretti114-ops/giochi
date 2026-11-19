@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gran Bazar</title>
+<meta name="description" content="Gioco di carte per due mercanti: compra, scambia e vendi, online con un amico o sullo stesso telefono.">
+<meta name="theme-color" content="#131833">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='12' y='4' width='40' height='56' rx='7' fill='%231f93ab'/%3E%3Cpath d='M21 27l5-8h12l5 8-11 14z' fill='none' stroke='%23fffaf0' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<style>
+:root {
+  /* Bazar di notte: tavolo indaco stampato a blocchi, carte smaltate con filo d'oro, accento zafferano. */
+  /* Layout: una colonna (max 520px) come seduti al tavolo: avversario in alto, banco e mercato al centro, la tua mano e le mosse in basso. */
+  --table: #131833;
+  --panel: #1b2246;
+  --raise: #283161;
+  --line: #3b4784;
+  --text: #f6eedd;
+  --muted: #b3b5d4;
+  --saffron: #f5aa3e;
+  --on-saffron: #2a1903;
+  --bad: #ff9f8a;
+  --font-display: "Rozha One", Georgia, "Times New Roman", serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --dia: #1f93ab; --gol: #e4b43a; --sil: #b4bdcd; --clo: #b8346f; --spi: #e06a2c; --lea: #8a5734; --cam: #dcc28d;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background-color: var(--table);
+  background-image:
+    radial-gradient(circle, rgba(245, 170, 62, .09) 1.6px, transparent 2.2px),
+    radial-gradient(circle, rgba(255, 255, 255, .045) 1px, transparent 1.6px);
+  background-size: 24px 24px, 24px 24px;
+  background-position: 0 0, 12px 12px;
+  color: var(--text);
+  font: 16px/1.4 var(--font-body);
+  -webkit-text-size-adjust: 100%;
+}
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+#app { max-width: 520px; margin: 0 auto; padding: 0 16px; min-height: 100%; display: flex; flex-direction: column; }
+button { font: inherit; color: inherit; }
+h1, h2, h3 { text-wrap: balance; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.err { color: var(--bad); }
+
+/* ---------- carte ---------- */
+.c-dia { --c: var(--dia); --ink: #fffaf0; }
+.c-gol { --c: var(--gol); --ink: #3a2700; }
+.c-sil { --c: var(--sil); --ink: #1f2738; }
+.c-clo { --c: var(--clo); --ink: #fff6f9; }
+.c-spi { --c: var(--spi); --ink: #3a1606; }
+.c-lea { --c: var(--lea); --ink: #fff3e3; }
+.c-cam { --c: var(--cam); --ink: #3b2a12; }
+.card {
+  position: relative; display: grid; place-items: center;
+  width: 100%; aspect-ratio: 5 / 7; margin: 0; padding: 0; border: 0; border-radius: 9px;
+  background: var(--c);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--c) 74%, #fff) 0%, var(--c) 46%, color-mix(in srgb, var(--c) 70%, #000) 100%);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 224, 160, .62), 0 2px 0 rgba(0, 0, 0, .35), 0 6px 14px rgba(0, 0, 0, .28);
+  cursor: pointer; container-type: inline-size;
+  transition: transform .16s ease, box-shadow .16s ease;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.card::before {
+  content: ""; position: absolute; inset: 4px; border-radius: 6px; pointer-events: none;
+  border: 1px dashed rgba(255, 255, 255, .3);
+  border: 1px dashed color-mix(in srgb, var(--ink) 34%, transparent);
+}
+.card svg { width: 60%; height: auto; margin-bottom: 14%; }
+.card .lbl {
+  position: absolute; left: 0; right: 0; bottom: 8%; text-align: center;
+  font-size: 9px; font-size: clamp(8px, 15cqi, 11px); font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+}
+@container (max-width: 52px) {
+  .card .lbl { display: none; }
+  .card svg { margin-bottom: 0; width: 66%; }
+}
+.card:disabled { cursor: default; }
+.card[aria-pressed="true"] {
+  transform: translateY(-9px);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 224, 160, .62), 0 0 0 3px var(--saffron), 0 12px 20px rgba(0, 0, 0, .45);
+}
+.card:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.slot-empty { aspect-ratio: 5 / 7; border-radius: 9px; border: 1.5px dashed var(--line); }
+@keyframes arrive {
+  0% { transform: perspective(500px) rotateY(88deg); filter: brightness(1.7); }
+  100% { transform: none; filter: none; }
+}
+.card.arrive { animation: arrive .46s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 80ms); }
+.chip {
+  display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px;
+  background: var(--c); color: var(--ink); vertical-align: -5px; margin: 0 1px;
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 160, .5);
+}
+.chip svg { width: 15px; height: 15px; }
+.gi { width: 18px; height: 18px; vertical-align: -4px; }
+
+/* ---------- lobby ---------- */
+.brand { text-align: center; padding: 26px 0 8px; }
+.fan { display: flex; justify-content: center; align-items: flex-start; height: 122px; margin-bottom: 6px; }
+.fan .lbl { display: none; }
+.fan .card svg { margin-bottom: 0; }
+.fan .card { width: 64px; flex: none; margin: 0 -9px; transform: translateY(var(--y)) rotate(var(--r)); transform-origin: 50% 130%; cursor: default; }
+.brand h1 { font: 52px/1 var(--font-display); margin: 6px 0 0; letter-spacing: .01em; color: var(--text); }
+.brand h1 span { color: var(--saffron); }
+.brand .tag { color: var(--muted); margin: 8px auto 0; max-width: 32ch; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 14px 0 0; display: grid; gap: 10px; }
+.h2 { font: 22px/1.15 var(--font-display); margin: 0; }
+.lab { font-size: 14px; color: var(--muted); }
+.field {
+  width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+  background: var(--table); color: var(--text); font: 17px/1.2 var(--font-body);
+}
+.field:focus-visible { outline: 3px solid var(--saffron); outline-offset: 1px; }
+.games { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.gitem { display: flex; align-items: stretch; gap: 6px; }
+.gopen {
+  flex: 1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px; text-align: left;
+  padding: 11px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--raise); cursor: pointer;
+}
+.gopen:focus-visible, .icon-btn:focus-visible, .btn:focus-visible, .linkbtn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.gnames { font-weight: 700; }
+.gnames i { font-style: normal; color: var(--muted); font-weight: 400; }
+.gstate { grid-column: 1; font-size: 14px; color: var(--muted); }
+.gcta { grid-column: 2; grid-row: 1 / span 2; font-weight: 700; font-size: 14px; padding: 7px 11px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+.gitem.hot .gopen { border-color: var(--saffron); }
+.gitem.hot .gstate { color: var(--saffron); }
+.gitem.hot .gcta { background: var(--saffron); color: var(--on-saffron); border-color: var(--saffron); }
+.icon-btn { width: 44px; flex: none; display: grid; place-items: center; border-radius: 12px; border: 1.5px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.icon-btn svg { width: 20px; height: 20px; }
+.howto ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.howto li::marker { color: var(--saffron); font-weight: 700; }
+.foot { text-align: center; margin: 18px 0 28px; }
+
+/* ---------- pulsanti ---------- */
+.btn {
+  appearance: none; border: 1.5px solid var(--line); background: var(--raise); color: var(--text);
+  border-radius: 12px; padding: 12px 14px; font: 700 15px/1.15 var(--font-body); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 46px;
+  touch-action: manipulation;
+}
+.btn.primary { background: var(--saffron); border-color: var(--saffron); color: var(--on-saffron); }
+.btn.wide { width: 100%; }
+.btn.sm { min-height: 36px; padding: 7px 12px; font-size: 14px; }
+.btn.sq { width: 40px; min-height: 40px; padding: 0; font-size: 20px; }
+.btn:disabled { opacity: .42; cursor: default; }
+.btn .chip { vertical-align: 0; }
+.linkbtn { background: none; border: 0; padding: 8px 4px; color: var(--muted); font-weight: 700; font-size: 14px; cursor: pointer; }
+.linkbtn.accent { color: var(--saffron); }
+
+/* ---------- tavolo ---------- */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0 2px; }
+.topbar .round { font: 17px/1 var(--font-display); }
+.topbar .right { display: flex; gap: 4px; }
+.banner { margin: 8px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--raise); border: 1px solid var(--line); font-size: 14px; display: grid; gap: 8px; }
+.banner .btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.seat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 9px 12px; }
+.seat-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.seat .nm { font-weight: 700; font-size: 17px; }
+.seals { display: inline-flex; gap: 4px; }
+.seal { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid var(--saffron); display: inline-grid; place-items: center; }
+.seal.on { background: var(--saffron); color: var(--on-saffron); }
+.seal svg { width: 9px; height: 9px; }
+.facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 14px; color: var(--muted); margin-left: auto; }
+.fact b { color: var(--text); font-variant-numeric: tabular-nums; }
+.fact.lead { color: var(--saffron); }
+.fact.lead b { color: var(--saffron); }
+.opp { margin-top: 8px; }
+.status { font: 26px/1.1 var(--font-display); text-align: center; margin: 10px 0 2px; }
+.status.mine { color: var(--saffron); }
+.lastmove { text-align: center; font-size: 14px; color: var(--muted); margin: 0 0 4px; min-height: 1.5em; }
+.lastmove .chip { width: 18px; height: 18px; }
+.sec-title { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .09em; margin: 12px 2px 7px; }
+.sec-title b { color: var(--text); font-variant-numeric: tabular-nums; }
+.sec-title b.low { color: var(--bad); }
+.piles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pile { display: flex; align-items: center; gap: 6px; padding: 5px 6px 5px 5px; border-radius: 11px; background: var(--panel); border: 1px solid var(--line); min-width: 0; }
+.pile .chip { flex: none; }
+.vals { display: flex; gap: 2px; flex-wrap: wrap; align-items: center; font-variant-numeric: tabular-nums; }
+.tok {
+  min-width: 15px; height: 17px; padding: 0 3px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11.5px; font-weight: 700; line-height: 1;
+  background: rgba(255, 255, 255, .08);
+  background: color-mix(in srgb, var(--c) 26%, var(--panel)); color: var(--text);
+}
+.tok.top { min-width: 20px; height: 20px; border-radius: 10px; font-size: 13px; background: var(--c); color: var(--ink); }
+.tok small { font-size: 9px; margin-left: 1px; opacity: .85; }
+.pile.out { opacity: .5; }
+.gone { font-size: 13px; color: var(--muted); }
+.bonusline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; color: var(--muted); margin: 8px 2px 0; }
+.bonusline b { color: var(--text); }
+.hexa { display: inline-grid; place-items: center; min-width: 26px; height: 20px; padding: 0 4px; border-radius: 6px; background: #0d1126; border: 1px solid var(--line); color: var(--text); font-weight: 700; font-size: 12px; }
+.market { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; padding-top: 8px; }
+.me { margin-top: 12px; }
+.hand { display: flex; justify-content: center; gap: 5px; margin-top: 12px; min-height: 40px; }
+.hand .card { width: calc((100% - 30px) / 7); flex: none; }
+.hand .handback { width: calc((100% - 30px) / 7); aspect-ratio: 5 / 7; border-radius: 8px; background: repeating-linear-gradient(45deg, var(--raise) 0 4px, var(--line) 4px 6px); border: 1px solid var(--line); }
+.hand .empty-hand { align-self: center; font-size: 14px; color: var(--muted); }
+
+/* ---------- barra mosse ---------- */
+.actions {
+  position: sticky; bottom: 0; z-index: 2; margin: 14px -16px 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  background: rgba(19, 24, 51, .94); border-top: 1px solid var(--line);
+  display: grid; gap: 8px; margin-top: auto;
+}
+.spacer { flex: 1; min-height: 14px; }
+.hint { margin: 0; font-size: 15px; color: var(--muted); min-height: 2.8em; }
+.hint.err { color: var(--bad); }
+.hint .chip { width: 18px; height: 18px; }
+.btnrow { display: flex; gap: 8px; }
+.btnrow .primary { flex: 1; }
+.stepper { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.give-row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.give-row:empty { display: none; }
+.stepper b { min-width: 1.2em; text-align: center; font-size: 18px; font-variant-numeric: tabular-nums; }
+
+/* ---------- fogli sovrapposti ---------- */
+.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(8, 10, 24, .7); display: flex; align-items: flex-end; justify-content: center; }
+.sheet {
+  width: 100%; max-width: 560px; max-height: 88%; overflow: auto; background: var(--panel);
+  border: 1px solid var(--line); border-bottom: 0; border-radius: 20px 20px 0 0;
+  padding: 20px 18px calc(22px + env(safe-area-inset-bottom)); display: grid; gap: 12px;
+}
+.sheet h2 { font: 28px/1.1 var(--font-display); margin: 0; }
+.sheet h3 { font-size: 15px; margin: 6px 0 0; color: var(--saffron); text-transform: uppercase; letter-spacing: .07em; }
+.sheet p, .sheet ul { margin: 0; }
+.sheet ul { padding-left: 20px; display: grid; gap: 6px; }
+.sheet .center { text-align: center; }
+.eyebrow { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.curtain { background: var(--table); align-items: center; padding: 16px; }
+.curtain .sheet { text-align: center; padding: 26px 20px 24px; border-radius: 20px; border-bottom: 1px solid var(--line); max-width: 440px; }
+.curtain .fan { margin-top: -4px; }
+table.score { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.score th, table.score td { padding: 7px 4px; text-align: right; border-bottom: 1px solid var(--line); }
+table.score th:first-child, table.score td:first-child { text-align: left; color: var(--muted); font-weight: 400; }
+table.score thead th { font-weight: 700; color: var(--text); }
+table.score tr.total td { font: 26px/1 var(--font-display); color: var(--text); border-bottom: 0; padding-top: 10px; }
+table.score tr.total td:first-child { font: 700 15px/1 var(--font-body); color: var(--muted); }
+table.score small { color: var(--muted); font-size: 12px; }
+table.vals-t td, table.vals-t th { text-align: left; }
+.log { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.log li { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.log li.sep { color: var(--saffron); font-weight: 700; }
+.sealrow { display: flex; justify-content: center; gap: 22px; font-size: 15px; }
+.sealrow > span { display: inline-flex; align-items: center; gap: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .card.arrive { animation: none; transition: none; }
+}
+@media (min-width: 560px) {
+  .market { gap: 10px; }
+}
+/* ---------- versione autonoma: stato della connessione e link da condividere ---------- */
+.row-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.net { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.net i, .netdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.net.up i, .netdot.up { background: #6fd39b; box-shadow: 0 0 0 3px rgba(111, 211, 155, .18); }
+.net.down i, .netdot.down, .net.off i, .netdot.off { background: var(--bad); }
+.netdot { margin-left: 8px; vertical-align: 3px; }
+.field.share { font-size: 14px; color: var(--muted); }
+.note { text-align: center; font-size: 13px; color: var(--muted); max-width: 44ch; margin: 18px auto 0; line-height: 1.45; }
+.hubnav { padding-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+.hubnav a { text-decoration: none; display: inline-block; }
+@media (max-width: 400px) { .topbar .bk { display: none; } }
+
+/* ---------- computer e schermi larghi: lobby e tavolo su due colonne, fogli al centro ---------- */
+@media (min-width: 1000px) {
+  #app.wide { max-width: 1240px; padding: 0 28px; }
+  #app.wide > .hubnav { width: 100%; max-width: 1040px; margin: 0 auto; }
+  .desk { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 440px); gap: 0 28px; align-items: start; }
+  .desk > div { min-width: 0; }
+  .desk .col-r { position: sticky; top: 10px; max-height: calc(100vh - 20px); overflow: auto; padding: 0 4px 12px; margin: 0 -4px; scrollbar-width: thin; }
+  .desk .col-r > :first-child { margin-top: 8px; }
+  .desk .actions { position: static; margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); max-height: none; overflow: visible; }
+  .desk.lobby { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); width: 100%; max-width: 1040px; margin: 0 auto 28px; gap: 0 24px; }
+  .desk.lobby .col-r { position: static; max-height: none; overflow: visible; padding: 0; margin: 0; }
+  .desk.lobby .col-r > .panel:first-child { margin-top: 14px; }
+  .desk.lobby .note { margin-top: 16px; }
+}
+@media (min-width: 700px) and (min-height: 520px) {
+  .overlay { align-items: center; padding: 24px; }
+  .sheet { border-radius: 20px; border-bottom: 1px solid var(--line); max-height: 86vh; padding-bottom: 22px; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled):hover, .chip-btn:hover, .gopen:hover { filter: brightness(1.12); }
+  .seg button:not([aria-pressed="true"]):hover { color: var(--text); }
+  .linkbtn:hover { color: var(--text); }
+}
+@media (min-width: 1000px) {
+  .desk .market { max-width: 640px; margin: 0 auto; }
+  .desk .col-l > .seat:first-child { margin-top: 8px; }
+}
+</style>
+</head>
+<body>
+<svg class="defs" aria-hidden="true" focusable="false">
+  <symbol id="i-dia" viewBox="0 0 48 48">
+    <path d="M14 9H34L42 19H6Z" fill="currentColor" opacity=".22"/>
+    <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M6 19L14 9H34L42 19L24 41Z"/>
+      <path d="M6 19H42"/>
+      <path d="M14 9L19 19L24 9L29 19L34 9"/>
+      <path d="M19 19L24 41L29 19"/>
+    </g>
+  </symbol>
+  <symbol id="i-gol" viewBox="0 0 48 48">
+    <g fill="currentColor" fill-opacity=".24" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M4 41H23L20 32H7Z"/>
+      <path d="M25 41H44L41 32H28Z"/>
+      <path d="M14.5 29.5H33.5L30.5 20.5H17.5Z"/>
+    </g>
+    <path d="M10.5 36.5h6M31.5 36.5h6M21 25h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+    <path d="M37 6l1.6 4.2 4.2 1.6-4.2 1.6L37 17.6l-1.6-4.2-4.2-1.6 4.2-1.6z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-sil" viewBox="0 0 48 48">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M10 31v6c0 2.8 6.3 5 14 5s14-2.2 14-5v-6"/>
+      <path d="M10 25v6c0 2.8 6.3 5 14 5s14-2.2 14-5v-6"/>
+      <path d="M10 18v7c0 2.8 6.3 5 14 5s14-2.2 14-5v-7"/>
+      <ellipse cx="24" cy="18" rx="14" ry="5" fill="currentColor" fill-opacity=".24"/>
+    </g>
+    <path d="M24 14.2l1.2 2.5 2.7.3-2 1.8.6 2.6-2.5-1.4-2.5 1.4.6-2.6-2-1.8 2.7-.3z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-clo" viewBox="0 0 48 48">
+    <g fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M13 9H41V17H13a4 4 0 0 1 0-8z"/>
+      <path d="M9 20H37V28H9a4 4 0 0 1 0-8z"/>
+      <path d="M13 31H41V39H13a4 4 0 0 1 0-8z"/>
+    </g>
+    <path d="M20 9l-3 8M26 9l-3 8M32 9l-3 8M38 9l-3 8M20 31l-3 8M26 31l-3 8M32 31l-3 8M38 31l-3 8" stroke="currentColor" stroke-width="1.6" opacity=".75"/>
+    <path d="M14 24H34" stroke="currentColor" stroke-width="1.8" stroke-dasharray="2 3" opacity=".8"/>
+  </symbol>
+  <symbol id="i-spi" viewBox="0 0 48 48">
+    <path d="M10 25C13 14 35 14 38 25Z" fill="currentColor" fill-opacity=".38" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M5 25H43C42 35 34 41 24 41S6 35 5 25Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+    <g fill="currentColor"><circle cx="18.5" cy="21" r="1.7"/><circle cx="24.5" cy="18.4" r="1.7"/><circle cx="30" cy="21.6" r="1.7"/></g>
+    <path d="M26 15C25.5 10 29.5 6.5 35 6.8C34.6 11.8 31 15 26 15Z" fill="currentColor"/>
+    <path d="M14 31.5H34" stroke="currentColor" stroke-width="1.8" stroke-dasharray="1 3.2" stroke-linecap="round" opacity=".8"/>
+  </symbol>
+  <symbol id="i-lea" viewBox="0 0 48 48">
+    <path d="M13 7C17 11 21 11 24 9C27 11 31 11 35 7C36 12 38 15 42 17C39 22 39 26 42 31C38 33 36 36 35 41C31 37 27 37 24 39C21 37 17 37 13 41C12 36 10 33 6 31C9 26 9 22 6 17C10 15 12 12 13 7Z" fill="currentColor" fill-opacity=".24" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M15.5 14.5C18.5 16.5 21 16.5 24 15.2C27 16.5 29.5 16.5 32.5 14.5C33 18 34.5 20 36 22C35 25 35 27 36 28.8C33.8 30 33 32 32.6 34C29.5 32.2 27 32.2 24 33.2C21 32.2 18.5 32.2 15.4 34C15 32 14.2 30 12 28.8C13 27 13 25 12 22C13.5 20 15 18 15.5 14.5Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2.4"/>
+  </symbol>
+  <symbol id="i-cam" viewBox="0 0 48 48">
+    <g fill="currentColor">
+      <ellipse cx="21" cy="25.5" rx="12.5" ry="6.5"/>
+      <ellipse cx="20" cy="19" rx="7.8" ry="7"/>
+      <ellipse cx="39.6" cy="11.6" rx="5" ry="3" transform="rotate(-14 39.6 11.6)"/>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-linecap="round">
+      <path d="M30.5 24C33.5 20.5 34.5 16 36.6 12.6" stroke-width="5.2"/>
+      <path d="M13 30L12 42M18 31.5L18.5 42M25 31.5L25.5 42M30 29.5L32 42" stroke-width="2.9"/>
+      <path d="M9.2 23.5C7.2 25.5 7 28.5 8 30.6" stroke-width="2"/>
+    </g>
+  </symbol>
+  <symbol id="i-seal" viewBox="0 0 24 24"><path d="M12 3.5l2.5 5.3 5.8.7-4.3 4 1.1 5.8L12 16.4l-5.1 2.9 1.1-5.8-4.3-4 5.8-.7z" fill="currentColor"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div id="app"></div>
+<div id="layer"></div>
+<script src="../lib/ambiente.js"></script>
+<script src="motore.js"></script>
+<script>window.GB_HUB_URL = "../";</script>
+<script src="../lib/mqtt.min.js"></script>
+<script src="../lib/suoni.js"></script>
+<script>
+(function () {
+  'use strict';
+  var E = window.GranBazar;
+  var $app = document.getElementById('app');
+  var $layer = document.getElementById('layer');
+
+  // Su schermi larghi (computer, tablet in orizzontale) lobby e tavolo si dividono in due colonne.
+  var WIDE_MQ = window.matchMedia ? window.matchMedia('(min-width: 1000px)') : null;
+  function isWide() { return !!(WIDE_MQ && WIDE_MQ.matches); }
+  var LABEL = { dia: 'Diamanti', gol: 'Oro', sil: 'Argento', clo: 'Tessuti', spi: 'Spezie', lea: 'Cuoio', cam: 'Cammello' };
+  // Due server MQTT pubblici e gratuiti: la partita viaggia su entrambi, così basta che uno risponda.
+  var DEFAULT_BROKERS = ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt'];
+
+  var LS = {
+    get: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* niente memoria locale */ } },
+    del: function (k) { try { window.localStorage.removeItem(k); } catch (e) { /* idem */ } }
+  };
+
+  function rnd36(n) {
+    var out = '', abc = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0; i < n; i++) out += abc[E.randInt(36)];
+    return out;
+  }
+
+  var ui = {
+    route: 'lobby', gameId: null,
+    online: 'connecting', everUp: false, myKey: null,
+    game: null, gameLoading: false, gameMissing: false, missTimer: null,
+    sel: { market: [], hand: [], camels: 0 },
+    busy: false, error: '', copied: false,
+    sheet: null, sheetId: null, hideResultKey: null,
+    local: null, curtain: false,
+    name: LS.get('gb-name') || '', ln1: LS.get('gb-ln1') || '', ln2: LS.get('gb-ln2') || '',
+    animKey: null, device: null
+  };
+
+  ui.device = LS.get('gb-device');
+  if (!ui.device) { ui.device = 'd' + rnd36(14); LS.set('gb-device', ui.device); }
+  ui.myKey = 'd:' + ui.device;
+
+  /* ---------- utilità di testo ---------- */
+  function esc(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function ico(t) { return '<svg aria-hidden="true" viewBox="0 0 48 48"><use href="#i-' + t + '"/></svg>'; }
+  function chip(t) { return '<span class="chip c-' + t + '" role="img" aria-label="' + LABEL[t] + '">' + ico(t) + '</span>'; }
+  function chips(list) { return list.map(chip).join(''); }
+  function nameOf(s, p) { return (s.seats[p] && s.seats[p].name) || ('Giocatore ' + (p + 1)); }
+  function hname(s, p) { return esc(nameOf(s, p)); }
+  function plural(n, one, many) { return n === 1 ? one : many; }
+  function sealsHTML(n) {
+    var h = '<span class="seals" role="img" aria-label="' + n + ' ' + plural(n, 'sigillo', 'sigilli') + ' su 2">';
+    for (var i = 0; i < 2; i++) h += '<span class="seal' + (i < n ? ' on' : '') + '">' + (i < n ? '<svg viewBox="0 0 24 24"><use href="#i-seal"/></svg>' : '') + '</span>';
+    return h + '</span>';
+  }
+  function cardInner(t) { return ico(t) + '<span class="lbl">' + LABEL[t] + '</span>'; }
+
+  /* ---------- prospettiva ---------- */
+  function curGame() { return ui.route === 'local' ? ui.local : ui.game; }
+  function persp(s) {
+    if (s.mode === 'local') {
+      var me = s.status === 'playing' ? s.turn : (s.result ? s.result.next : 0);
+      return { me: me, seated: true, local: true, canAct: !ui.curtain };
+    }
+    var seat = E.seatOf(s, ui.myKey);
+    return { me: seat >= 0 ? seat : 0, seated: seat >= 0, local: false, canAct: seat >= 0 };
+  }
+  function who(s, P, p) { return (!P.local && P.seated && p === P.me) ? 'tu' : hname(s, p); }
+
+  function describe(l, s, P) {
+    var mine = !P.local && P.seated && l.s === P.me;
+    var subj = mine ? 'Hai' : hname(s, l.s) + ' ha';
+    switch (l.t) {
+      case 'take': return subj + ' preso ' + chip(l.g);
+      case 'camels': return subj + ' preso ' + l.n + ' ' + plural(l.n, 'cammello', 'cammelli');
+      case 'swap': return subj + ' scambiato: preso ' + chips(l.took) + ', lasciato ' + chips(l.gave);
+      case 'sell':
+        return subj + ' venduto ' + l.n + ' × ' + chip(l.g) + ' per ' + E.sum(l.got) + ' rupie' + (l.bonusK ? ' + bonus ×' + l.bonusK : '');
+      case 'round': return 'Manche ' + l.r + ': comincia ' + who(s, P, l.s);
+      case 'end': {
+        var h = (s.history || []).filter(function (x) { return x.round === l.r; })[0];
+        var tot = h ? ' (' + h.totals[0] + ' a ' + h.totals[1] + ')' : '';
+        return l.w >= 0 ? 'Manche ' + l.r + ' vinta da ' + who(s, P, l.w) + tot : 'Manche ' + l.r + ' pari' + tot;
+      }
+    }
+    return '';
+  }
+
+  /* ---------- selezione e mossa proposta ---------- */
+  function clearSel() { ui.sel = { market: [], hand: [], camels: 0 }; }
+  function hasSel() { return ui.sel.market.length || ui.sel.hand.length || ui.sel.camels; }
+  function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
+
+  function computeAction(s, P) {
+    var me = P.me, sel = ui.sel;
+    if (s.status === 'roundEnd') return { hint: 'Manche finita.', ended: true };
+    if (s.status === 'gameOver') return { hint: 'Partita finita.', ended: true };
+    if (!P.seated) return { hint: 'Stai guardando la partita.', watch: true };
+    if (s.turn !== me) return { hint: 'Aspetta la mossa di ' + hname(s, s.turn) + ': il tavolo si aggiorna da solo.', wait: true };
+    if (!P.local && ui.online !== 'up') return { hint: 'Senza connessione: aspetto di ricollegarmi per mandare la mossa.', wait: true };
+    var hand = s.hands[me];
+    var mSel = sel.market.filter(function (i) { return s.market[i]; });
+    var mCam = mSel.filter(function (i) { return s.market[i] === 'cam'; });
+    var mGoods = mSel.filter(function (i) { return s.market[i] !== 'cam'; });
+    var hSel = sel.hand.filter(function (i) { return i < hand.length; });
+    var give = hSel.length + sel.camels;
+    var e, move;
+    if (!mSel.length && !hSel.length && !sel.camels) {
+      return { hint: 'Tocca le carte del mercato per prendere, o quelle della tua mano per vendere.', idle: true };
+    }
+    if (mCam.length && mGoods.length) return { err: 'I cammelli si prendono tutti insieme, senza altre carte.' };
+    if (mCam.length) {
+      if (hSel.length || sel.camels) return { err: 'Per prendere i cammelli non lasci nulla: togli la selezione dalla tua mano.' };
+      move = { type: 'camels' };
+      return {
+        move: move, label: 'Prendi ' + mCam.length + ' ' + plural(mCam.length, 'cammello', 'cammelli'),
+        hint: 'Vanno nella tua mandria; i posti liberi si riempiono dal mazzo.' + deckWarn(s, mCam.length)
+      };
+    }
+    if (!mGoods.length) {
+      if (sel.camels) return { err: 'I cammelli non si vendono.' };
+      var types = uniq(hSel.map(function (i) { return hand[i]; }));
+      if (types.length > 1) return { err: 'Si vende un solo tipo di merce alla volta.' };
+      var g = types[0], n = hSel.length, have = E.countOf(hand, g);
+      var more = have > n ? { good: g, count: have } : null;
+      move = { type: 'sell', good: g, n: n };
+      e = E.validate(s, me, move);
+      if (e) return { err: e, more: more };
+      var pv = E.salePreview(s, g, n);
+      var gain = pv.values.length ? pv.values.join(' + ') + (pv.values.length > 1 ? ' = ' + pv.rupees : '') + ' rupie' : 'nessun gettone (la pila è finita)';
+      return {
+        move: move, more: more, label: 'Vendi ' + n + ' × ' + chip(g),
+        hint: 'Ricevi ' + gain + (pv.bonusK ? ' e un bonus ×' + pv.bonusK : '') + '.'
+      };
+    }
+    if (mGoods.length === 1) {
+      if (give) return { err: 'Per uno scambio prendi almeno 2 merci dal mercato.' };
+      move = { type: 'take', idx: mGoods[0] };
+      e = E.validate(s, me, move);
+      if (e) return { err: e };
+      return { move: move, label: 'Prendi ' + chip(s.market[mGoods[0]]), hint: 'Al suo posto arriva la prima carta del mazzo.' + deckWarn(s, 1) };
+    }
+    var need = mGoods.length;
+    var ctx = { need: need, give: give };
+    if (give < need) {
+      var miss = need - give;
+      return { swap: ctx, hint: 'Scambio: scegli ancora ' + miss + ' ' + plural(miss, 'carta', 'carte') + ' da lasciare, dalla mano o cammelli dalla mandria.' };
+    }
+    if (give > need) { var extra = give - need; return { swap: ctx, err: 'Stai lasciando ' + extra + ' ' + plural(extra, 'carta', 'carte') + ' di troppo.' }; }
+    move = { type: 'swap', take: mGoods.slice(), give: hSel.slice(), camels: sel.camels };
+    e = E.validate(s, me, move);
+    if (e) return { swap: ctx, err: e };
+    var left = hSel.map(function (i) { return hand[i]; });
+    for (var c = 0; c < sel.camels; c++) left.push('cam');
+    return {
+      swap: ctx, move: move, label: 'Scambia ' + need + ' carte',
+      hint: 'Prendi ' + chips(mGoods.map(function (i) { return s.market[i]; })) + ' e lasci ' + chips(left) + '.'
+    };
+  }
+  function deckWarn(s, k) {
+    if (s.deck.length >= k) return '';
+    return ' Il mazzo non basta: la manche finisce subito dopo.';
+  }
+
+  /* ---------- HTML del tavolo ---------- */
+  function topbarHTML(s, P) {
+    return '<header class="topbar">' +
+      '<button class="linkbtn" data-act="lobby" aria-label="' + (P.local ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (P.local ? 'Esci' : 'Partite') + '</span></button>' +
+      '<span class="round">Manche ' + s.round + (P.local ? '' : netDot()) + '</span>' +
+      '<span class="right">' + snd() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span>' +
+      '</header>';
+  }
+  function bannersHTML(s, P) {
+    var h = '';
+    if (s && !P.local && !P.seated && s.status !== 'waiting') {
+      h += '<div class="banner"><span>Stai guardando la partita di ' + hname(s, 0) + ' e ' + hname(s, 1) + '. Sei uno dei due? Riprendi il tuo posto:</span>' +
+        '<span class="btnrow"><button class="btn sm" data-act="claim" data-seat="0">Sono ' + hname(s, 0) + '</button>' +
+        '<button class="btn sm" data-act="claim" data-seat="1">Sono ' + hname(s, 1) + '</button></span></div>';
+    }
+    if (!P.local && (ui.online === 'down' || ui.online === 'off')) h += '<div class="banner">Connessione persa: riprovo da solo. Le mosse ripartono appena torna la rete.</div>';
+    return h;
+  }
+  function seatFacts(s, p, showBonus) {
+    var pu = E.purse(s, p), lead = s.herds[p] > s.herds[1 - p];
+    var money = showBonus
+      ? '<span class="fact"><b>' + (pu.goods + pu.bonus) + '</b> rupie' + (pu.nBonus ? ' <span class="small">(bonus ' + pu.bonus + ')</span>' : '') + '</span>'
+      : '<span class="fact"><b>' + pu.goods + '</b> rupie' + (pu.nBonus ? ' + ' + pu.nBonus + ' bonus' : '') + '</span>';
+    return '<span class="fact' + (lead ? ' lead' : '') + '" title="Cammelli nella mandria">' + ico('cam').replace('<svg', '<svg class="gi"') + ' <b>' + s.herds[p] + '</b></span>' + money;
+  }
+  function oppHTML(s, p) {
+    return '<section class="seat opp" aria-label="Avversario">' +
+      '<div class="seat-top"><span class="nm">' + hname(s, p) + '</span>' + sealsHTML(s.seals[p]) +
+      '<span class="facts"><span class="fact"><b>' + s.hands[p].length + '</b> ' + plural(s.hands[p].length, 'carta', 'carte') + '</span>' + seatFacts(s, p, false) + '</span></div>' +
+      '</section>';
+  }
+  function statusHTML(s, P) {
+    var text, cls = '';
+    if (s.status === 'playing') {
+      if (P.local) { text = 'Tocca a ' + hname(s, s.turn); cls = ' mine'; }
+      else if (P.seated && s.turn === P.me) { text = 'Tocca a te'; cls = ' mine'; }
+      else text = 'Tocca a ' + hname(s, s.turn);
+    } else if (s.status === 'roundEnd') text = 'Manche ' + s.round + ' finita';
+    else text = 'Partita finita';
+    var lm = s.last ? describe(s.last, s, P) : (s.status === 'playing' ? 'Nuova manche: comincia ' + who(s, P, s.starter) + '.' : '');
+    return '<div class="status' + cls + '" id="status" aria-live="polite">' + text + '</div><p class="lastmove">' + lm + '</p>';
+  }
+  // Il gettone in cima è evidenziato; tre o più valori uguali di fila diventano "1×6".
+  function tokensHTML(t) {
+    if (!t.length) return '<span class="gone">finiti</span>';
+    var h = '<span class="tok top">' + t[0] + '</span>', i = 1;
+    while (i < t.length) {
+      var j = i;
+      while (j < t.length && t[j] === t[i]) j++;
+      if (j - i >= 3) h += '<span class="tok">' + t[i] + '<small>×' + (j - i) + '</small></span>';
+      else for (var k = i; k < j; k++) h += '<span class="tok">' + t[k] + '</span>';
+      i = j;
+    }
+    return h;
+  }
+  function bankHTML(s) {
+    var piles = E.GOODS.map(function (g) {
+      var t = s.tokens[g];
+      var vals = tokensHTML(t);
+      return '<div class="pile c-' + g + (t.length ? '' : ' out') + '" role="group" aria-label="Gettoni ' + LABEL[g] + ': ' + (t.length ? t.join(', ') : 'finiti') + '">' + chip(g) + '<span class="vals">' + vals + '</span></div>';
+    }).join('');
+    var bonus = ['3', '4', '5'].map(function (k) {
+      return '<span><span class="hexa">×' + k + (k === '5' ? '+' : '') + '</span> <b>' + s.bonus[k].length + '</b></span>';
+    }).join('');
+    return '<section aria-label="Gettoni rimasti"><div class="sec-title"><span>Gettoni</span><span>pile finite <b>' + E.emptyPiles(s) + '</b>/3</span></div>' +
+      '<div class="piles">' + piles + '</div>' +
+      '<div class="bonusline"><span>Bonus</span>' + bonus + '<span title="5 rupie a chi ha più cammelli a fine manche">' + chip('cam') + ' <b>+5</b></span></div></section>';
+  }
+  function marketHTML(s, P, myTurn, anim) {
+    var cards = s.market.map(function (c, i) {
+      if (!c) return '<div class="slot-empty" aria-label="Posto vuoto"></div>';
+      var k = anim.indexOf(i);
+      return '<button type="button" id="m-' + i + '" class="card c-' + c + (k >= 0 ? ' arrive' : '') + '"' + (k >= 0 ? ' style="--i:' + k + '"' : '') +
+        ' data-act="m" data-i="' + i + '" aria-pressed="' + (ui.sel.market.indexOf(i) >= 0) + '"' + (myTurn ? '' : ' disabled') +
+        ' aria-label="Mercato: ' + LABEL[c] + '">' + cardInner(c) + '</button>';
+    }).join('');
+    return '<section aria-label="Mercato"><div class="sec-title"><span>Mercato</span><span>mazzo <b class="' + (s.deck.length <= 5 ? 'low' : '') + '">' + s.deck.length + '</b></span></div>' +
+      '<div class="market">' + cards + '</div></section>';
+  }
+  function meHTML(s, P, myTurn, showHand) {
+    var me = P.me, hand = s.hands[me];
+    var cards;
+    if (!showHand) {
+      cards = hand.map(function () { return '<span class="handback"></span>'; }).join('') || '<span class="empty-hand">Mano vuota</span>';
+    } else if (!hand.length) {
+      cards = '<span class="empty-hand">Mano vuota</span>';
+    } else {
+      cards = hand.map(function (c, i) {
+        return '<button type="button" id="h-' + i + '" class="card c-' + c + '" data-act="h" data-i="' + i + '" aria-pressed="' + (ui.sel.hand.indexOf(i) >= 0) + '"' +
+          (myTurn ? '' : ' disabled') + ' aria-label="Tua mano: ' + LABEL[c] + '">' + cardInner(c) + '</button>';
+      }).join('');
+    }
+    var label = P.local ? hname(s, me) : (P.seated ? 'Tu' : hname(s, me));
+    return '<section class="seat me" aria-label="La tua mano">' +
+      '<div class="seat-top"><span class="nm">' + label + '</span>' + sealsHTML(s.seals[me]) +
+      '<span class="facts">' + seatFacts(s, me, showHand) + '</span></div>' +
+      '<div class="hand">' + cards + '</div><div id="give-row" class="give-row">' + (showHand ? giveRowHTML(s, P) : '') + '</div></section>';
+  }
+  function giveRowHTML(s, P) {
+    if (!P.seated || s.status !== 'playing' || s.turn !== P.me || !s.herds[P.me]) return '';
+    var a = computeAction(s, P);
+    if (!a.swap) return '';
+    return '<div class="stepper"><span>Lascia anche cammelli</span>' +
+      '<button type="button" class="btn sq" data-act="cam-" aria-label="Un cammello in meno"' + (ui.sel.camels <= 0 ? ' disabled' : '') + '>−</button>' +
+      '<b>' + ui.sel.camels + '</b>' +
+      '<button type="button" class="btn sq" data-act="cam+" aria-label="Un cammello in più"' + (ui.sel.camels >= s.herds[P.me] ? ' disabled' : '') + '>+</button>' +
+      '<span class="muted">di ' + s.herds[P.me] + '</span></div>';
+  }
+  function actionsHTML(s, P) {
+    var a = computeAction(s, P);
+    var myTurn = s.status === 'playing' && P.seated && P.canAct && s.turn === P.me;
+    var h = '<p class="hint' + (a.err ? ' err' : '') + '" role="status">' + (a.err || a.hint || '') + '</p>';
+    if (a.more) {
+      h += '<div><button type="button" class="btn sm" data-act="sel-all" data-g="' + a.more.good + '">Seleziona tutte le carte ' + chip(a.more.good) + ' (' + a.more.count + ')</button></div>';
+    }
+    if (a.ended) {
+      h += '<div class="btnrow"><button type="button" class="btn primary" data-act="show-result">Vedi il risultato</button></div>';
+    } else if (myTurn) {
+      h += '<div class="btnrow"><button type="button" class="btn" data-act="clear"' + (hasSel() ? '' : ' disabled') + '>Annulla</button>' +
+        '<button type="button" class="btn primary" data-act="do"' + (a.move && !ui.busy ? '' : ' disabled') + '>' + (ui.busy ? 'Salvo…' : (a.label || 'Scegli una mossa')) + '</button></div>';
+    }
+    if (ui.error) h += '<p class="err small" role="alert">' + esc(ui.error) + '</p>';
+    return h;
+  }
+
+  function animKeyOf(s) { return s.v + '/' + s.round + '/' + (s.mode || ''); }
+
+  function boardHTML(s) {
+    var P = persp(s);
+    var myTurn = s.status === 'playing' && P.seated && P.canAct && s.turn === P.me;
+    var showHand = P.seated && !(P.local && ui.curtain);
+    var key = animKeyOf(s);
+    var anim = [];
+    if (ui.animKey !== key && !(P.local && ui.curtain)) {
+      anim = s.last ? (s.last.slots || []) : (s.status === 'playing' ? [0, 1, 2, 3, 4] : []);
+      ui.pendingAnimKey = key;
+    }
+    if (isWide()) return topbarHTML(s, P) + bannersHTML(s, P) +
+      '<div class="desk"><div class="col-l">' + oppHTML(s, 1 - P.me) + marketHTML(s, P, myTurn, anim) + bankHTML(s) + '</div>' +
+      '<div class="col-r">' + statusHTML(s, P) + meHTML(s, P, myTurn, showHand) + '<div id="actions" class="actions">' + actionsHTML(s, P) + '</div></div></div>';
+    return topbarHTML(s, P) + bannersHTML(s, P) +
+      oppHTML(s, 1 - P.me) + statusHTML(s, P) + marketHTML(s, P, myTurn, anim) +
+      meHTML(s, P, myTurn, showHand) + bankHTML(s) +
+      '<div class="spacer"></div><div id="actions" class="actions">' + actionsHTML(s, P) + '</div>';
+  }
+
+  /* ---------- lobby ---------- */
+  function fanHTML() {
+    var cards = ['lea', 'spi', 'dia', 'gol', 'cam'];
+    return '<div class="fan" aria-hidden="true">' + cards.map(function (c, i) {
+      return '<div class="card c-' + c + '" style="--r:' + ((i - 2) * 9) + 'deg;--y:' + (Math.abs(i - 2) * 7) + 'px">' + cardInner(c) + '</div>';
+    }).join('') + '</div>';
+  }
+  function netChipHTML() {
+    var t = { up: 'collegato', connecting: 'mi collego…', down: 'senza connessione', off: 'non disponibile' }[ui.online] || '';
+    return '<span class="net ' + ui.online + '" role="status"><i></i>' + t + '</span>';
+  }
+  function netDot() { return '<i class="netdot ' + ui.online + '" title="' + (ui.online === 'up' ? 'Collegato' : 'Non collegato') + '"></i>'; }
+  function shareUrl(id) { return location.href.split('#')[0] + '#partita-' + id; }
+  function gameItemHTML(g) {
+    var seat = E.seatOf(g, ui.myKey);
+    var has2 = (g.seats[1].keys && g.seats[1].keys.length) || g.seats[1].name;
+    var st, cta = 'Apri', hot = false;
+    if (g.status === 'waiting') {
+      if (seat === 0) { st = 'Manda il link al tuo amico'; cta = 'Link'; }
+      else { st = 'Posto libero al tavolo'; cta = 'Siediti'; hot = true; }
+    } else if (g.status === 'playing') {
+      if (seat >= 0 && g.turn === seat) { st = 'Manche ' + g.round + ' · tocca a te'; cta = 'Gioca'; hot = true; }
+      else st = 'Manche ' + g.round + ' · tocca a ' + hname(g, g.turn);
+    } else if (g.status === 'roundEnd') {
+      st = 'Manche ' + g.round + ' finita';
+      if (seat >= 0 && g.result && g.result.next === seat) { cta = 'Continua'; hot = true; }
+    } else {
+      st = g.result && g.result.winner >= 0 ? 'Vince ' + hname(g, g.result.winner) : 'Partita finita';
+    }
+    var score = g.status === 'waiting' ? '' : ' · sigilli ' + g.seals[0] + '–' + g.seals[1];
+    return '<li class="gitem' + (hot ? ' hot' : '') + '">' +
+      '<button type="button" class="gopen" data-act="open" data-id="' + esc(g.id) + '">' +
+      '<span class="gnames">' + hname(g, 0) + ' <i>contro</i> ' + (has2 ? hname(g, 1) : '<i>…</i>') + '</span>' +
+      '<span class="gstate">' + st + score + '</span><span class="gcta">' + cta + '</span></button>' +
+      '<button type="button" class="icon-btn" data-act="ask-del" data-id="' + esc(g.id) + '" aria-label="Togli dalla lista"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button></li>';
+  }
+  function roomsListHTML() {
+    var rooms = roomIds().map(function (id) {
+      var s = loadRoom(id);
+      if (!s) return null;
+      var o = E.clone(s); o.id = id; return o;
+    }).filter(Boolean);
+    if (!rooms.length) return '<p class="muted">Nessuna partita ancora: creane una e manda il link al tuo amico.</p>';
+    rooms.sort(function (x, y) { return (y.updatedAt || 0) - (x.updatedAt || 0); });
+    return '<ul class="games">' + rooms.map(gameItemHTML).join('') + '</ul>';
+  }
+  function lobbyHTML() {
+    var saved = ui.local && ui.local.status !== 'gameOver';
+    var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
+    var hub = typeof window.GB_HUB_URL === 'string' ? '<nav class="hubnav"><a class="linkbtn" href="' + esc(window.GB_HUB_URL) + '">‹ Tutti i giochi</a>' + snd() + '</nav>' : '';
+    return hub + (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Gran <span>Bazar</span></h1>' +
+      '<p class="tag">Compra, scambia e vendi merci contro un altro mercante. Vince chi conquista due manche.</p></header>' +
+      '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
+      '<input id="nm" class="field" maxlength="24" autocomplete="nickname" placeholder="Come ti chiamano?" value="' + esc(ui.name) + '">' +
+      '<button type="button" class="btn primary wide" data-act="new"' + (ui.online === 'up' ? '' : ' disabled') + '>' + label + '</button>' +
+      (ui.online === 'down' || ui.online === 'off' ? '<p class="muted small" style="margin:0">Non riesco a raggiungere i server di gioco. Controlla la connessione: riprovo da solo.</p>' : '') +
+      '</section>' +
+      (isWide() ? '</div><div class="col-r">' : '') + '<section class="panel"><h2 class="h2">Le tue partite</h2>' + roomsListHTML() + '</section>' +
+      '<section class="panel"><h2 class="h2">Sullo stesso telefono</h2><p class="muted small" style="margin:0">Vi passate il telefono a ogni turno: la mano dell\'altro resta coperta.</p>' +
+      '<button type="button" class="btn wide" data-act="go-local">' + (saved ? 'Riprendi la partita sul telefono' : 'Gioca in due qui') + '</button>' +
+      (saved ? '<button type="button" class="linkbtn" data-act="local-reset">Ricomincia da capo</button>' : '') + '</section>' +
+      '<section class="panel howto"><h2 class="h2">Per giocare con un amico</h2><ol>' +
+      '<li>Scrivi il tuo nome e tocca <b>Nuova partita online</b>.</li>' +
+      '<li>Manda il link della partita al tuo amico, per esempio su WhatsApp.</li>' +
+      '<li>Lui lo apre, scrive il suo nome e si siede. Il tavolo si aggiorna da solo a ogni mossa, anche se giocate a ore di distanza.</li>' +
+      '</ol></section>' +
+      '<p class="note">Le mosse passano da due server pubblici gratuiti (HiveMQ ed EMQX), senza account: viaggiano solo i nomi e le carte. Ogni partita resta salvata anche sui vostri telefoni.</p>' +
+      '<p class="foot"><button type="button" class="linkbtn accent" data-act="rules">Regole in breve</button></p>' + (isWide() ? '</div></div>' : '');
+  }
+  function localSetupHTML() {
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span></span></header>' +
+      '<section class="panel"><h2 class="h2">Chi gioca?</h2>' +
+      '<label class="lab" for="ln1">Primo mercante</label><input id="ln1" class="field" maxlength="24" value="' + esc(ui.ln1) + '" placeholder="Giocatore 1">' +
+      '<label class="lab" for="ln2">Secondo mercante</label><input id="ln2" class="field" maxlength="24" value="' + esc(ui.ln2) + '" placeholder="Giocatore 2">' +
+      '<button type="button" class="btn primary wide" data-act="local-start">Mescola e inizia</button>' +
+      '<p class="muted small" style="margin:0">Chi comincia lo decide il mazzo. A ogni turno passate il telefono: la mano dell\'altro resta coperta.</p></section>';
+  }
+  function shellHTML(msg, back) {
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span></span><span></span></header>' +
+      '<section class="panel"><p style="margin:0">' + msg + '</p>' + (back ? '<button type="button" class="btn wide" data-act="lobby">Torna alle partite</button>' : '') + '</section>';
+  }
+  function waitingHTML(s) {
+    var seat = E.seatOf(s, ui.myKey);
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Tavolo apparecchiato' + netDot() + '</span><button class="linkbtn" data-act="rules">Regole</button></header>';
+    if (seat === 0) {
+      var url = shareUrl(ui.gameId), canShare = typeof navigator.share === 'function';
+      return top + '<section class="panel">' + fanHTML() + '<h2 class="h2">Manda il link al tuo amico</h2>' +
+        '<p style="margin:0">Quando lo apre e si siede, le carte vengono distribuite e si comincia.</p>' +
+        '<input id="share-url" class="field share" readonly value="' + esc(url) + '" aria-label="Link della partita">' +
+        '<div class="btnrow">' + (canShare ? '<button type="button" class="btn primary" data-act="share">Condividi…</button>' : '') +
+        '<button type="button" class="btn' + (canShare ? '' : ' primary') + '" data-act="copy">' + (ui.copied ? 'Copiato!' : 'Copia link') + '</button></div>' +
+        '<p class="muted small" style="margin:0">Puoi chiudere la pagina: la partita resta in «Le tue partite».</p></section>';
+    }
+    return top + '<section class="panel">' + fanHTML() + '<h2 class="h2">' + hname(s, 0) + ' ti aspetta al tavolo</h2>' +
+      '<label class="lab" for="nm">Il tuo nome</label><input id="nm" class="field" maxlength="24" autocomplete="nickname" placeholder="Come ti chiamano?" value="' + esc(ui.name) + '">' +
+      '<button type="button" class="btn primary wide" data-act="join"' + (ui.online === 'up' ? '' : ' disabled') + '>' + (ui.online === 'up' ? 'Siediti e distribuisci' : 'Mi collego…') + '</button>' +
+      (ui.error ? '<p class="err small" role="alert">' + esc(ui.error) + '</p>' : '') + '</section>';
+  }
+  function onlineGameHTML() {
+    if (!ui.game) {
+      if (ui.online === 'off') return shellHTML('Il gioco online non riesce a partire in questo browser: prova ad aprire il link con Chrome o Safari.', true);
+      return ui.gameMissing
+        ? shellHTML('Non trovo ancora questa partita. Si carica appena l\'altro giocatore apre la pagina; controlla anche che il link sia completo.', true)
+        : shellHTML('Cerco la partita…');
+    }
+    if (ui.game.status === 'waiting') return waitingHTML(ui.game);
+    return boardHTML(ui.game);
+  }
+
+  /* ---------- fogli sovrapposti ---------- */
+  function resultKey(s) { return s ? s.v + '/' + s.round : null; }
+  function resultHTML(s, P) {
+    var r = s.result, w = r.winner, me = P.me;
+    var cols = P.local || !P.seated ? [0, 1] : [me, 1 - me];
+    var colName = function (p) { return (!P.local && P.seated && p === me) ? 'Tu' : hname(s, p); };
+    var title;
+    if (s.status === 'gameOver') {
+      title = (!P.local && P.seated && w === me) ? 'Hai vinto la partita!' : hname(s, w) + ' vince la partita';
+    } else if (w < 0) title = 'Manche ' + r.round + ' in perfetta parità';
+    else title = (!P.local && P.seated && w === me) ? 'Manche ' + r.round + ' tua!' : 'Manche ' + r.round + ' a ' + hname(s, w);
+    var why = r.reason === 'tokens' ? 'Tre pile di gettoni sono finite.' : 'Il mazzo è finito.';
+    if (r.decidedBy === 'nBonus') why += ' Rupie pari: vince chi ha più gettoni bonus.';
+    if (r.decidedBy === 'nGoods') why += ' Rupie e bonus pari: vince chi ha più gettoni merce.';
+    if (w < 0) why += ' Nessuno prende il sigillo.';
+    var row = function (label, f) { return '<tr><td>' + label + '</td>' + cols.map(function (p) { return '<td>' + f(p) + '</td>'; }).join('') + '</tr>'; };
+    var bonusVals = function (p) {
+      var b = s.won[p].bonus.map(function (t) { return t.v; });
+      return r.scores[p].bonus + (b.length ? ' <small>(' + b.join(' + ') + ')</small>' : '');
+    };
+    var table = '<table class="score"><thead><tr><th></th>' + cols.map(function (p) { return '<th>' + colName(p) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      row('Merci', function (p) { return r.scores[p].goods + ' <small>(' + r.scores[p].nGoods + ' gettoni)</small>'; }) +
+      row('Bonus', bonusVals) +
+      row('Cammelli', function (p) { return (r.scores[p].camel ? '+5' : '–') + ' <small>(' + r.scores[p].herd + ')</small>'; }) +
+      '<tr class="total"><td>Totale</td>' + cols.map(function (p) { return '<td>' + r.scores[p].total + '</td>'; }).join('') + '</tr></tbody></table>';
+    var seals = '<div class="sealrow">' + cols.map(function (p) { return '<span>' + colName(p) + ' ' + sealsHTML(s.seals[p]) + '</span>'; }).join('') + '</div>';
+    var btns = '';
+    var canGo = P.local || P.seated;
+    if (s.status === 'roundEnd') {
+      if (P.local || (canGo && r.next === me)) {
+        btns += '<button type="button" class="btn primary wide" data-act="next-round"' + (ui.busy ? ' disabled' : '') + '>Distribuisci la manche ' + (r.round + 1) + '</button>' +
+          '<p class="muted small center">Comincia ' + who(s, P, r.next) + ', che ha perso questa manche.</p>';
+      } else {
+        btns += '<p class="muted center">La prossima manche la distribuisce ' + hname(s, r.next) + ', che ha perso questa: aspetta un attimo.</p>';
+      }
+    } else if (canGo) {
+      btns += '<button type="button" class="btn primary wide" data-act="rematch"' + (ui.busy ? ' disabled' : '') + '>Rivincita</button>';
+      if (P.local) btns += '<button type="button" class="btn wide" data-act="local-reset">Nuovi giocatori</button>';
+    }
+    btns += '<button type="button" class="btn wide" data-act="hide-result">Guarda il tavolo</button>';
+    if (ui.error) btns += '<p class="err small" role="alert">' + esc(ui.error) + '</p>';
+    return '<div class="overlay" data-act="hide-result" data-self="1"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="res-t">' +
+      '<p class="eyebrow">' + why + '</p><h2 id="res-t">' + title + '</h2>' + table + seals + btns + '</div></div>';
+  }
+  function curtainHTML(s) {
+    var P = { local: true, seated: true, me: s.turn };
+    var lm = s.last ? describe(s.last, s, P) + '.' : 'Nuova manche: le carte sono distribuite.';
+    return '<div class="overlay curtain"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cur-t">' +
+      fanHTML() + '<p class="eyebrow">Passa il telefono</p><h2 id="cur-t">Tocca a ' + hname(s, s.turn) + '</h2><p class="muted">' + lm + '</p>' +
+      '<button type="button" class="btn primary wide" data-act="uncurtain">Sono ' + hname(s, s.turn) + ': mostra la mia mano</button></div></div>';
+  }
+  function rulesHTML() {
+    var rows = E.GOODS.map(function (g) {
+      return '<tr><td>' + chip(g) + ' ' + LABEL[g] + '</td><td>' + E.CARD_COUNTS[g] + '</td><td>' + E.TOKEN_VALUES[g].join(' · ') + '</td></tr>';
+    }).join('');
+    return sheetWrap('Come si gioca',
+      '<p>Siete due mercanti. Ogni manche finisce con un conteggio delle rupie; chi vince 2 manche vince la partita.</p>' +
+      '<h3>Nel tuo turno: prendi oppure vendi</h3>' +
+      '<ul><li><b>Una merce</b>: la metti in mano e al suo posto arriva la prima carta del mazzo.</li>' +
+      '<li><b>Tutti i cammelli</b> del mercato: vanno nella tua mandria e i posti si riempiono dal mazzo.</li>' +
+      '<li><b>Scambio</b>: prendi 2 o più merci e lasci lo stesso numero di carte, dalla mano e/o cammelli dalla mandria. Non puoi lasciare un tipo di merce che stai prendendo.</li>' +
+      '<li>A fine turno puoi avere al massimo <b>7 carte</b> in mano. I cammelli non contano.</li></ul>' +
+      '<h3>Vendere</h3>' +
+      '<ul><li>Un solo tipo di merce, quante carte vuoi. Diamanti, oro e argento: almeno 2.</li>' +
+      '<li>Prendi un gettone per carta, partendo dal più alto della pila. Se la pila è finita puoi vendere lo stesso.</li>' +
+      '<li>Vendendo 3, 4 o 5+ carte prendi anche un bonus da 1–3, 4–6 o 8–10 rupie. L\'avversario non ne vede il valore fino al conteggio.</li></ul>' +
+      '<h3>Fine della manche</h3>' +
+      '<ul><li>Quando 3 pile di gettoni sono finite, oppure quando il mercato va riempito e il mazzo è vuoto.</li>' +
+      '<li>Chi ha più cammelli prende 5 rupie (in parità nessuno). Vince chi ha più rupie; a pari rupie chi ha più bonus, poi chi ha più gettoni merce.</li>' +
+      '<li>La manche dopo la comincia chi ha perso.</li></ul>' +
+      '<h3>Carte e gettoni</h3>' +
+      '<table class="score vals-t"><thead><tr><th>Merce</th><th>Carte</th><th>Gettoni</th></tr></thead><tbody>' + rows +
+      '<tr><td>' + chip('cam') + ' Cammelli</td><td>11</td><td>+5 a chi ne ha di più</td></tr></tbody></table>');
+  }
+  function logHTML(s) {
+    var P = persp(s);
+    var items = (s.log || []).slice().reverse().map(function (l) {
+      var sep = l.t === 'round' || l.t === 'end';
+      return '<li' + (sep ? ' class="sep"' : '') + '>' + describe(l, s, P) + '</li>';
+    }).join('');
+    return sheetWrap('Storico', items ? '<ul class="log">' + items + '</ul>' : '<p class="muted">Ancora nessuna mossa.</p>');
+  }
+  function delHTML() {
+    var g = loadRoom(ui.sheetId);
+    var label = g ? hname(g, 0) + ' contro ' + (g.seats[1].name ? hname(g, 1) : '…') : 'Questa partita';
+    return '<div class="overlay" data-act="close" data-self="1"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="del-t">' +
+      '<h2 id="del-t">Togliere la partita dalla lista?</h2><p>' + label + ': sparisce solo da questo telefono. Se riapri il link della partita, la ritrovi.</p>' +
+      '<div class="btnrow"><button type="button" class="btn" data-act="close">Tienila</button><button type="button" class="btn primary" data-act="del">Togli</button></div></div></div>';
+  }
+  function sheetWrap(title, body) {
+    return '<div class="overlay" data-act="close" data-self="1"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t">' +
+      '<h2 id="sh-t">' + title + '</h2>' + body + '<button type="button" class="btn wide" data-act="close">Chiudi</button></div></div>';
+  }
+  function layerHTML() {
+    var s = (ui.route === 'lobby') ? null : curGame();
+    if (ui.sheet === 'rules') return rulesHTML();
+    if (ui.sheet === 'log' && s) return logHTML(s);
+    if (ui.sheet === 'del') return delHTML();
+    if (s && s.mode === 'local' && ui.route === 'local' && ui.curtain && s.status === 'playing') return curtainHTML(s);
+    if (s && (s.status === 'roundEnd' || s.status === 'gameOver') && s.result && ui.hideResultKey !== resultKey(s)) return resultHTML(s, persp(s));
+    return '';
+  }
+
+  /* ---------- render ---------- */
+  function captureFocus() {
+    var a = document.activeElement;
+    if (!a || !a.id || a === document.body) return null;
+    return { id: a.id, start: a.selectionStart, end: a.selectionEnd, input: a.tagName === 'INPUT' };
+  }
+  function restoreFocus(f) {
+    if (!f) return;
+    var el = document.getElementById(f.id);
+    if (!el || el.disabled) return;
+    try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+    if (f.input && f.start != null) { try { el.setSelectionRange(f.start, f.end); } catch (e) { /* ok */ } }
+  }
+  function updateTitle() {
+    var mine = roomIds().some(function (id) {
+      var s = loadRoom(id);
+      return s && s.status === 'playing' && E.seatOf(s, ui.myKey) === s.turn;
+    });
+    document.title = mine ? '● Tocca a te · Gran Bazar' : 'Gran Bazar';
+  }
+  /* ---------- suoni (lib/suoni.js): musica del gioco ed effetti quando cambia il tavolo ---------- */
+  function snd() { return window.Suoni ? Suoni.bottone() : ''; }
+  if (window.Suoni) Suoni.tema('bazar');
+  var sfxSeen = { key: null, snap: null };
+  function sfxSnap(s, P) { return { v: s.v, nonce: s.nonce || '', round: s.round, status: s.status, turn: s.turn, last: JSON.stringify(s.last || null), mine: s.status === 'playing' && !P.local && P.seated && s.turn === P.me }; }
+  function sfxNames(a, s, P) {
+    var out = [];
+    if (s.round !== a.round) out.push('mescola');
+    else if (s.last && JSON.stringify(s.last) !== a.last) out.push(s.last.t === 'sell' ? 'moneta' : 'carta');
+    if (s.status !== a.status && s.status !== 'playing') out.push(s.status === 'gameOver' ? 'vittoria' : 'punti');
+    if (s.status === 'playing' && b(a.mine) !== b(sfxSnap(s, P).mine) && sfxSnap(s, P).mine) out.push('turno');
+    return out;
+  }
+  function b(x) { return !!x; }
+  function sfxCheck() {
+    if (!window.Suoni || ui.route === 'lobby') return;
+    var s = curGame();
+    if (!s || s.status === 'waiting') return;
+    var key = (ui.route === 'local' ? 'L' : ui.gameId) + '/' + s.createdAt, P = persp(s);
+    var prev = sfxSeen.key === key ? sfxSeen.snap : null;
+    if (prev && prev.v === s.v && prev.nonce === (s.nonce || '')) return;
+    sfxSeen.key = key; sfxSeen.snap = sfxSnap(s, P);
+    if (prev) { var n = sfxNames(prev, s, P); if (n.length) Suoni.sequenza(n); }
+  }
+  function render() {
+    var f = captureFocus();
+    var html;
+    ui.pendingAnimKey = null;
+    if (ui.route === 'lobby') html = lobbyHTML();
+    else if (ui.route === 'local') html = ui.local ? boardHTML(ui.local) : localSetupHTML();
+    else html = onlineGameHTML();
+    $app.innerHTML = html;
+    $app.classList.toggle('wide', html.indexOf('<div class="desk') >= 0);
+    $layer.innerHTML = layerHTML();
+    if (ui.pendingAnimKey) ui.animKey = ui.pendingAnimKey;
+    restoreFocus(f);
+    updateTitle();
+    sfxCheck();
+  }
+  // Aggiorna solo selezione e barra mosse, così le carte si sollevano con la transizione.
+  function renderSelection() {
+    var s = curGame();
+    if (!s || !document.getElementById('actions')) { render(); return; }
+    var P = persp(s);
+    s.market.forEach(function (c, i) {
+      var el = document.getElementById('m-' + i);
+      if (el) el.setAttribute('aria-pressed', String(ui.sel.market.indexOf(i) >= 0));
+    });
+    (s.hands[P.me] || []).forEach(function (c, i) {
+      var el = document.getElementById('h-' + i);
+      if (el) el.setAttribute('aria-pressed', String(ui.sel.hand.indexOf(i) >= 0));
+    });
+    var f = captureFocus();
+    document.getElementById('actions').innerHTML = actionsHTML(s, P);
+    var gr = document.getElementById('give-row');
+    if (gr) gr.innerHTML = giveRowHTML(s, P);
+    restoreFocus(f);
+  }
+
+  /* ---------- rotte ---------- */
+  function route() {
+    var h = (location.hash || '').replace(/^#/, '');
+    if (h === 'locale') { ui.route = 'local'; ui.gameId = null; }
+    else if (/^partita-[a-z0-9]{6,20}$/.test(h)) { ui.route = 'game'; openGame(h.slice(8)); }
+    else { ui.route = 'lobby'; ui.gameId = null; }
+    ui.sheet = null; ui.error = '';
+    clearSel();
+    render();
+    window.scrollTo(0, 0);
+  }
+  function go(hash) {
+    if (('#' + (location.hash || '').replace(/^#/, '')) === hash || (hash === '' && !location.hash)) { route(); return; }
+    location.hash = hash;
+  }
+  window.addEventListener('hashchange', route);
+
+  /* ---------- rete: MQTT su due server pubblici ---------- */
+  var net = { links: [] };
+  var ID_RE = /^[a-z0-9]{6,20}$/;
+
+  function validState(s) {
+    return !!(s && s.app === 'gran-bazar' && typeof s.v === 'number' && s.seats && s.seats.length === 2 &&
+      s.hands && s.hands[0] && s.hands[1] && Array.isArray(s.market) && s.tokens && s.bonus &&
+      Array.isArray(s.won) && Array.isArray(s.seals) && Array.isArray(s.herds));
+  }
+
+  // Le partite stanno sul telefono (localStorage, con copia in memoria) e sui server.
+  var mem = { ids: null, states: {} };
+  function roomIds() {
+    if (!mem.ids) {
+      var a = [];
+      try { a = JSON.parse(LS.get('gb-rooms') || '[]'); } catch (e) { a = []; }
+      mem.ids = Array.isArray(a) ? a.filter(function (x) { return ID_RE.test(x); }) : [];
+    }
+    return mem.ids.slice();
+  }
+  function setRoomIds(a) { mem.ids = a.slice(0, 30); LS.set('gb-rooms', JSON.stringify(mem.ids)); }
+  function addRoom(id) { var a = roomIds().filter(function (x) { return x !== id; }); a.unshift(id); setRoomIds(a); }
+  function dropRoom(id) { setRoomIds(roomIds().filter(function (x) { return x !== id; })); delete mem.states[id]; LS.del('gb-room-' + id); }
+  function loadRoom(id) {
+    if (!id) return null;
+    if (mem.states[id]) return mem.states[id];
+    var s = null;
+    try { s = JSON.parse(LS.get('gb-room-' + id) || 'null'); } catch (e) { s = null; }
+    if (validState(s)) { mem.states[id] = s; return s; }
+    return null;
+  }
+  function saveRoom(id, s) { mem.states[id] = s; LS.set('gb-room-' + id, JSON.stringify(s)); }
+
+  // nel sito di prova (lib/ambiente.js) gli argomenti hanno il prefisso «prova/»
+  var GB_TOPIC = window.SALA ? window.SALA.argomento('granbazar/v1') : 'granbazar/v1';
+  function topicOf(id) { return GB_TOPIC + '/' + id + '/state'; }
+  function idOfTopic(t) {
+    if (t.indexOf(GB_TOPIC + '/') !== 0) return null;
+    var m = /^([a-z0-9]{6,20})\/state$/.exec(t.slice(GB_TOPIC.length + 1));
+    return m ? m[1] : null;
+  }
+  function brokers() {
+    var q = null;
+    try { q = new URLSearchParams(location.search).get('broker'); } catch (e) { q = null; }
+    return q ? q.split(',').filter(Boolean) : DEFAULT_BROKERS;
+  }
+  // Vince la versione più alta; a pari versione (due scritture insieme) decide il nonce, uguale per tutti.
+  function isNewer(a, b) {
+    if (!b) return true;
+    if (a.v !== b.v) return a.v > b.v;
+    return String(a.nonce || '') > String(b.nonce || '');
+  }
+  function sameVersion(a, b) { return !!(a && b && a.v === b.v && String(a.nonce || '') === String(b.nonce || '')); }
+  function watchedIds() { var ids = roomIds(); if (ui.gameId && ids.indexOf(ui.gameId) < 0) ids.push(ui.gameId); return ids; }
+
+  function initNet() {
+    var lib = window.mqtt;
+    if (!lib || typeof lib.connect !== 'function') { ui.online = 'off'; render(); return; }
+    brokers().forEach(function (url) {
+      var link = { url: url, up: false, seen: {}, timer: null, client: null };
+      try {
+        link.client = lib.connect(url, {
+          clientId: 'gb_' + rnd36(12), clean: true, keepalive: 30, reconnectPeriod: 4000,
+          connectTimeout: 10000, protocolVersion: 4, resubscribe: true
+        });
+      } catch (e) { return; }
+      link.client.on('connect', function () {
+        link.up = true; link.seen = {};
+        var ids = watchedIds();
+        if (ids.length) link.client.subscribe(ids.map(topicOf), { qos: 1 });
+        clearTimeout(link.timer);
+        link.timer = setTimeout(function () { pushNewer(link); }, 3000);
+        netChanged();
+      });
+      var down = function () { if (link.up) { link.up = false; netChanged(); } };
+      link.client.on('close', down);
+      link.client.on('offline', down);
+      link.client.on('error', function () { /* il client riprova da solo */ });
+      link.client.on('message', function (topic, payload) { onMessage(link, topic, payload); });
+      net.links.push(link);
+    });
+    if (!net.links.length) ui.online = 'off';
+    render();
+    setTimeout(function () { if (ui.online === 'connecting') { ui.online = 'down'; render(); } }, 12000);
+  }
+  function netChanged() {
+    var up = net.links.some(function (l) { return l.up; });
+    var next = up ? 'up' : ((ui.everUp || ui.online === 'down') ? 'down' : 'connecting');
+    if (up) ui.everUp = true;
+    if (next !== ui.online) { ui.online = next; render(); }
+  }
+  function publishTo(link, id, s) {
+    try { link.client.publish(topicOf(id), JSON.stringify(s), { qos: 1, retain: true }); return true; } catch (e) { return false; }
+  }
+  function publish(id, s) {
+    var n = 0;
+    net.links.forEach(function (l) { if (l.up && publishTo(l, id, s)) n++; });
+    return n;
+  }
+  // Dopo una riconnessione: se questo server ha una versione più vecchia della nostra, gliela rimandiamo.
+  function pushNewer(link) {
+    if (!link.up) return;
+    watchedIds().forEach(function (id) {
+      var local = loadRoom(id);
+      if (local && (!link.seen[id] || isNewer(local, link.seen[id]))) publishTo(link, id, local);
+    });
+  }
+  function watchRoom(id) {
+    net.links.forEach(function (l) { if (l.up) { try { l.client.subscribe(topicOf(id), { qos: 1 }); } catch (e) { /* ok */ } } });
+  }
+  function unwatchRoom(id) {
+    net.links.forEach(function (l) { if (l.up) { try { l.client.unsubscribe(topicOf(id)); } catch (e) { /* ok */ } } });
+  }
+  function onMessage(link, topic, payload) {
+    var id = idOfTopic(topic);
+    if (!id || !payload || !payload.length) return;
+    var data;
+    try { data = JSON.parse(payload.toString()); } catch (e) { return; }
+    if (!validState(data)) return;
+    if (!link.seen[id] || isNewer(data, link.seen[id])) link.seen[id] = { v: data.v, nonce: data.nonce };
+    var local = loadRoom(id);
+    if (local && !isNewer(data, local)) {
+      if (!sameVersion(data, local)) publishTo(link, id, local); // questo server è rimasto indietro
+      return;
+    }
+    saveRoom(id, data);
+    if (roomIds().indexOf(id) < 0) addRoom(id);
+    onRoomData(id, local, data);
+  }
+  function onRoomData(id, prev, data) {
+    var seat = E.seatOf(data, ui.myKey);
+    var mineNow = seat >= 0 && data.status === 'playing' && data.turn === seat;
+    var minePrev = !!prev && seat >= 0 && prev.status === 'playing' && prev.turn === seat;
+    if (mineNow && !minePrev && prev) { try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) { /* ok */ } }
+    if (ui.route === 'game' && ui.gameId === id) onGameData(data);
+    else if (ui.route === 'lobby') render();
+    else updateTitle();
+  }
+  function onGameData(data) {
+    var prev = ui.game;
+    ui.game = data; ui.gameLoading = false; ui.gameMissing = false;
+    if (!prev || prev.v !== data.v || prev.round !== data.round || prev.nonce !== data.nonce) {
+      clearSel();
+      if (prev) ui.error = '';
+    }
+    render();
+  }
+  function openGame(id) {
+    ui.gameId = id;
+    ui.game = loadRoom(id);
+    ui.gameLoading = !ui.game; ui.gameMissing = false; ui.hideResultKey = null;
+    if (ui.missTimer) clearTimeout(ui.missTimer);
+    if (!ui.game) {
+      ui.missTimer = setTimeout(function () {
+        if (ui.gameId === id && !ui.game) { ui.gameMissing = true; if (ui.route === 'game') render(); }
+      }, 9000);
+    }
+    watchRoom(id);
+  }
+
+  // Calcola il nuovo stato partendo dall'ultima versione nota e lo pubblica su tutti i server collegati.
+  function writeGame(make, opts) {
+    opts = opts || {};
+    var id = ui.gameId;
+    var cur = id ? (loadRoom(id) || ui.game) : null;
+    if (!cur) return;
+    if (opts.expectV != null && cur.v !== opts.expectV) {
+      ui.error = 'Il tavolo era cambiato: ecco la situazione aggiornata.';
+      ui.game = cur; clearSel(); render(); return;
+    }
+    var r = make(E.clone(cur));
+    if (!r.ok) { ui.error = r.error; render(); return; }
+    var next = r.state;
+    if (next.log && next.log.length > 40) next.log = next.log.slice(next.log.length - 40);
+    next.nonce = rnd36(10);
+    if (!publish(id, next)) {
+      ui.error = 'Sei offline: la mossa non è partita. Riprova appena torna la connessione.';
+      render(); return;
+    }
+    saveRoom(id, next);
+    addRoom(id);
+    ui.game = next; clearSel(); ui.error = '';
+    render();
+  }
+
+  function createGame() {
+    if (ui.online !== 'up') return;
+    var name = (ui.name || '').trim() || 'Giocatore 1';
+    LS.set('gb-name', name);
+    var id = rnd36(10);
+    var s = E.newGame({ key: ui.myKey, name: name });
+    s.nonce = rnd36(10);
+    addRoom(id); saveRoom(id, s);
+    watchRoom(id);
+    publish(id, s);
+    go('#partita-' + id);
+  }
+
+  /* ---------- partita sullo stesso telefono ---------- */
+  function loadLocal() {
+    var raw = LS.get('gb-local');
+    if (!raw) return null;
+    try { var s = JSON.parse(raw); return s && s.mode === 'local' && s.hands ? s : null; } catch (e) { return null; }
+  }
+  function saveLocal() { if (ui.local) LS.set('gb-local', JSON.stringify(ui.local)); else LS.del('gb-local'); }
+
+  /* ---------- azioni ---------- */
+  function tapMarket(i) {
+    var s = curGame(); if (!s) return;
+    var c = s.market[i]; if (!c) return;
+    var sel = ui.sel;
+    if (c === 'cam') {
+      var cams = [];
+      s.market.forEach(function (x, j) { if (x === 'cam') cams.push(j); });
+      var all = cams.every(function (j) { return sel.market.indexOf(j) >= 0; });
+      if (all) sel.market = sel.market.filter(function (j) { return cams.indexOf(j) < 0; });
+      else { sel.market = cams; sel.hand = []; sel.camels = 0; }
+    } else {
+      sel.market = sel.market.filter(function (j) { return s.market[j] !== 'cam'; });
+      var k = sel.market.indexOf(i);
+      if (k >= 0) sel.market.splice(k, 1); else sel.market.push(i);
+      if (sel.market.length < 2) sel.camels = 0;
+    }
+    ui.error = '';
+    renderSelection();
+  }
+  function tapHand(i) {
+    var s = curGame(); if (!s) return;
+    var sel = ui.sel;
+    sel.market = sel.market.filter(function (j) { return s.market[j] !== 'cam'; });
+    var k = sel.hand.indexOf(i);
+    if (k >= 0) sel.hand.splice(k, 1); else sel.hand.push(i);
+    ui.error = '';
+    renderSelection();
+  }
+  function doMove() {
+    var s = curGame(); if (!s) return;
+    var P = persp(s);
+    var a = computeAction(s, P);
+    if (!a.move) return;
+    if (P.local) {
+      var r = E.applyMove(s, P.me, a.move);
+      if (!r.ok) { ui.error = r.error; renderSelection(); return; }
+      ui.local = r.state; clearSel(); ui.error = '';
+      if (r.state.status === 'playing') ui.curtain = true;
+      saveLocal(); render();
+      return;
+    }
+    var seat = P.me;
+    writeGame(function (cur) { return E.applyMove(cur, seat, a.move); }, { expectV: s.v });
+  }
+
+  var actions = {
+    m: function (el) { tapMarket(+el.dataset.i); },
+    h: function (el) { tapHand(+el.dataset.i); },
+    'cam+': function () { var s = curGame(); if (s && ui.sel.camels < s.herds[persp(s).me]) { ui.sel.camels++; renderSelection(); } },
+    'cam-': function () { if (ui.sel.camels > 0) { ui.sel.camels--; renderSelection(); } },
+    clear: function () { clearSel(); ui.error = ''; renderSelection(); },
+    'sel-all': function (el) {
+      var s = curGame(); if (!s) return;
+      var g = el.dataset.g, hand = s.hands[persp(s).me];
+      ui.sel.market = []; ui.sel.camels = 0;
+      ui.sel.hand = hand.map(function (c, i) { return c === g ? i : -1; }).filter(function (i) { return i >= 0; });
+      renderSelection();
+    },
+    'do': doMove,
+    'new': createGame,
+    open: function (el) { go('#partita-' + el.dataset.id); },
+    lobby: function () { go(''); },
+    'go-local': function () { go('#locale'); },
+    'ask-del': function (el) { ui.sheet = 'del'; ui.sheetId = el.dataset.id; render(); },
+    del: function () {
+      var id = ui.sheetId; ui.sheet = null;
+      if (id) { dropRoom(id); unwatchRoom(id); }
+      render();
+    },
+    share: function () {
+      var s = ui.game;
+      var text = (s ? nameOf(s, 0) : 'Un amico') + ' ti sfida a Gran Bazar: apri il link e siediti al tavolo.';
+      if (navigator.share) navigator.share({ title: 'Gran Bazar', text: text, url: shareUrl(ui.gameId) }).catch(function () { /* annullato */ });
+      else actions.copy();
+    },
+    copy: function () {
+      var url = shareUrl(ui.gameId);
+      var done = function () { ui.copied = true; render(); setTimeout(function () { ui.copied = false; render(); }, 2200); };
+      var fallback = function () { var el = document.getElementById('share-url'); if (el) { el.focus(); el.select(); } };
+      try { navigator.clipboard.writeText(url).then(done, fallback); } catch (e) { fallback(); }
+    },
+    close: function () { ui.sheet = null; render(); },
+    rules: function () { ui.sheet = 'rules'; render(); },
+    log: function () { ui.sheet = 'log'; render(); },
+    'hide-result': function () { ui.hideResultKey = resultKey(curGame()); ui.error = ''; render(); },
+    'show-result': function () { ui.hideResultKey = null; render(); },
+    join: function () {
+      var name = (ui.name || '').trim() || 'Giocatore 2';
+      LS.set('gb-name', name);
+      var key = ui.myKey;
+      writeGame(function (cur) {
+        if (E.seatOf(cur, key) >= 0) return { ok: false, error: 'Sei già seduto a questo tavolo.' };
+        return E.join(cur, key, name);
+      }, { lease: true });
+    },
+    claim: function (el) {
+      var seat = +el.dataset.seat, key = ui.myKey;
+      writeGame(function (cur) { return E.addSeatKey(cur, seat, key); });
+    },
+    'next-round': function () {
+      if (ui.route === 'local') {
+        var r = E.nextRound(ui.local); if (!r.ok) return;
+        ui.local = r.state; ui.curtain = true; ui.hideResultKey = null; saveLocal(); render(); return;
+      }
+      var s = ui.game; if (!s) return;
+      writeGame(function (cur) { return E.nextRound(cur); }, { expectV: s.v });
+    },
+    rematch: function () {
+      if (ui.route === 'local') {
+        var r = E.rematch(ui.local); if (!r.ok) return;
+        ui.local = r.state; ui.curtain = true; ui.hideResultKey = null; saveLocal(); render(); return;
+      }
+      var s = ui.game; if (!s) return;
+      writeGame(function (cur) { return E.rematch(cur); }, { expectV: s.v });
+    },
+    'local-start': function () {
+      var n1 = (ui.ln1 || '').trim() || 'Giocatore 1', n2 = (ui.ln2 || '').trim() || 'Giocatore 2';
+      ui.local = E.startLocal(n1, n2); ui.curtain = true; ui.hideResultKey = null; saveLocal(); render();
+    },
+    'local-reset': function () { ui.local = null; ui.curtain = false; saveLocal(); ui.hideResultKey = null; if (ui.route === 'local') render(); else go('#locale'); },
+    uncurtain: function () { ui.curtain = false; render(); window.scrollTo(0, 0); }
+  };
+
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-act]');
+    if (!el || el.disabled) return;
+    if (el.dataset.self && ev.target !== el) return; // clic dentro il foglio, non sullo sfondo
+    var fn = actions[el.dataset.act];
+    if (fn) { ev.preventDefault(); fn(el, ev); }
+  });
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (t.id === 'nm') { ui.name = t.value; LS.set('gb-name', t.value); }
+    else if (t.id === 'ln1') { ui.ln1 = t.value; LS.set('gb-ln1', t.value); }
+    else if (t.id === 'ln2') { ui.ln2 = t.value; LS.set('gb-ln2', t.value); }
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && ui.sheet) { ui.sheet = null; render(); }
+  });
+
+  /* ---------- avvio ---------- */
+  ui.local = loadLocal();
+  ui.curtain = !!ui.local;
+  if (WIDE_MQ) {
+    var onWide = function () { render(); };
+    if (WIDE_MQ.addEventListener) WIDE_MQ.addEventListener('change', onWide); else if (WIDE_MQ.addListener) WIDE_MQ.addListener(onWide);
+  }
+  route();
+  initNet();
+})();
+</script>
+</body>
+</html>

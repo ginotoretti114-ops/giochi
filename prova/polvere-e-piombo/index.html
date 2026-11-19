@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polvere e Piombo</title>
+<meta name="description" content="Gioco di carte western da 4 a 7 giocatori con ruoli segreti: lo Sceriffo e i Vice contro i Fuorilegge, e un Rinnegato che vuole restare l'ultimo.">
+<meta name="theme-color" content="#131833">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.4 5.6 6 .5-4.6 4 1.4 5.9L12 15l-5.2 3 1.4-5.9-4.6-4 6-.5z' fill='%23f5aa3e'/%3E%3Ccircle cx='12' cy='11' r='2.4' fill='%23131833'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<style>
+:root {
+  /* Polvere e Piombo: la notte indaco della sala giochi con carte di cartoncino come i manifesti del saloon:
+     marroni quelle da giocare subito, azzurre quelle che restano in gioco. */
+  /* Layout: una colonna (max 560px): gli avversari a due a due, il saloon con la cronaca, la tua zona con le carte, le mosse in basso. */
+  --table: #131833;
+  --panel: #1b2246;
+  --raise: #283161;
+  --line: #3b4784;
+  --text: #f6eedd;
+  --muted: #b3b5d4;
+  --saffron: #f5aa3e;
+  --on-saffron: #2a1903;
+  --bad: #ff9f8a;
+  --good: #7ad7a2;
+  --blood: #e2414f;
+  --font-display: "Rozha One", Georgia, "Times New Roman", serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background-color: var(--table);
+  background-image: radial-gradient(circle, rgba(245, 170, 62, .08) 1.5px, transparent 2.1px), linear-gradient(180deg, rgba(120, 70, 30, .1), transparent 40%);
+  background-size: 26px 26px, 100% 100%;
+  color: var(--text); font: 16px/1.4 var(--font-body); -webkit-text-size-adjust: 100%;
+}
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+#app { max-width: 560px; margin: 0 auto; padding: 0 16px; min-height: 100%; display: flex; flex-direction: column; }
+button { font: inherit; color: inherit; }
+h1, h2, h3 { text-wrap: balance; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.err { color: var(--bad); }
+
+/* ---------- carte ---------- */
+.pc { --w: 58px; position: relative; flex: none; width: var(--w); aspect-ratio: 5 / 7; border-radius: calc(var(--w) * .12); padding: 0; border: 0;
+  background: linear-gradient(170deg, #fbf1d9, #e8cc96); color: #3b2410; display: grid; place-items: center; overflow: hidden;
+  box-shadow: inset 0 0 0 calc(var(--w) * .045) #a8763e, 0 2px 0 rgba(0, 0, 0, .3), 0 5px 12px rgba(0, 0, 0, .28); font-family: var(--font-body); transition: transform .15s ease; }
+.pc.blue { background: linear-gradient(170deg, #f0f7ff, #b4d3fa); color: #10284d; box-shadow: inset 0 0 0 calc(var(--w) * .045) #3d7fd6, 0 2px 0 rgba(0, 0, 0, .3), 0 5px 12px rgba(0, 0, 0, .28); }
+.pc .rk { position: absolute; top: calc(var(--w) * .06); left: calc(var(--w) * .09); font: 700 calc(var(--w) * .19)/1 var(--font-body); color: #1b2246; }
+.pc .rk.red { color: #c4173a; }
+.pc .rg { position: absolute; top: calc(var(--w) * .05); right: calc(var(--w) * .08); font: calc(var(--w) * .24)/1 var(--font-display); color: #10284d; }
+.pc .ic { font: calc(var(--w) * .42)/1 var(--emoji); margin-top: calc(var(--w) * -.08); }
+.pc .nm { position: absolute; bottom: calc(var(--w) * .07); left: 3px; right: 3px; text-align: center; font: 700 calc(var(--w) * .145)/1.05 var(--font-body); }
+.pc.back { background: repeating-linear-gradient(45deg, #6b4524 0 5px, #7d5530 5px 10px); box-shadow: inset 0 0 0 calc(var(--w) * .045) #f5aa3e, 0 2px 0 rgba(0, 0, 0, .3); }
+.pc.back::after { content: "★"; color: #f5aa3e; font-size: calc(var(--w) * .45); }
+button.pc { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button.pc:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+button.pc[aria-pressed="true"] { transform: translateY(-8px); box-shadow: 0 0 0 3px var(--saffron), 0 10px 18px rgba(0, 0, 0, .45); }
+.pc.new { animation: pop .45s both; }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.9); } to { opacity: 1; transform: none; } }
+.chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px 2px 5px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #d7e8fd; color: #10284d; white-space: nowrap; }
+.chip i { font: normal 13px/1 var(--emoji); }
+.chip.jail { background: #ffd7d2; color: #6b0f0f; }
+.chip.dyn { background: #ffe1a8; color: #5a2d00; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.fan { display: flex; justify-content: center; align-items: flex-start; height: 104px; margin-bottom: 6px; }
+.fan .pc { --w: 62px; margin: 0 -7px; transform: translateY(var(--y)) rotate(var(--r)); transform-origin: 50% 140%; }
+
+/* ---------- lobby ---------- */
+.hubnav { padding-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+.hubnav a { text-decoration: none; display: inline-block; }
+.brand { text-align: center; padding: 14px 0 8px; }
+.brand h1 { font: 46px/1 var(--font-display); margin: 4px 0 0; }
+.brand h1 span { color: var(--saffron); }
+.brand .tag { color: var(--muted); margin: 8px auto 0; max-width: 38ch; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 14px 0 0; display: grid; gap: 10px; }
+.h2 { font: 22px/1.15 var(--font-display); margin: 0; }
+.lab { font-size: 14px; color: var(--muted); }
+.field { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--table); color: var(--text); font: 17px/1.2 var(--font-body); }
+.field:focus-visible { outline: 3px solid var(--saffron); outline-offset: 1px; }
+.field.share { font-size: 14px; color: var(--muted); }
+.row-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.net { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.net i, .netdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.net.up i, .netdot.up { background: var(--good); box-shadow: 0 0 0 3px rgba(122, 215, 162, .18); }
+.net.down i, .netdot.down, .net.off i, .netdot.off { background: var(--bad); }
+.netdot { margin-left: 8px; vertical-align: 3px; }
+.games { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.gitem { display: flex; align-items: stretch; gap: 6px; }
+.gopen { flex: 1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px; text-align: left; padding: 11px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--raise); cursor: pointer; }
+.gnames { font-weight: 700; }
+.gstate { grid-column: 1; font-size: 14px; color: var(--muted); }
+.gcta { grid-column: 2; grid-row: 1 / span 2; font-weight: 700; font-size: 14px; padding: 7px 11px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+.gitem.hot .gopen { border-color: var(--saffron); }
+.gitem.hot .gstate { color: var(--saffron); }
+.gitem.hot .gcta { background: var(--saffron); color: var(--on-saffron); border-color: var(--saffron); }
+.icon-btn { width: 44px; flex: none; display: grid; place-items: center; border-radius: 12px; border: 1.5px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.icon-btn svg { width: 20px; height: 20px; }
+.howto ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.howto li::marker { color: var(--saffron); font-weight: 700; }
+.note { text-align: center; font-size: 13px; color: var(--muted); max-width: 44ch; margin: 18px auto 0; line-height: 1.45; }
+.foot { text-align: center; margin: 14px 0 28px; }
+.seated { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.seated li { display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 12px; border-radius: 12px; background: var(--raise); min-height: 44px; }
+.seated .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--table); font-weight: 700; font-size: 13px; flex: none; }
+.seated .tag { margin-left: auto; font-size: 13px; color: var(--muted); }
+.seated .icon-btn { width: 36px; height: 36px; }
+.names { display: grid; gap: 8px; }
+.names .row { display: flex; gap: 6px; }
+.names .row .field { flex: 1; }
+
+/* ---------- pulsanti ---------- */
+.btn { appearance: none; border: 1.5px solid var(--line); background: var(--raise); color: var(--text); border-radius: 12px; padding: 12px 14px; font: 700 15px/1.15 var(--font-body); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; touch-action: manipulation; }
+.btn.primary { background: var(--saffron); border-color: var(--saffron); color: var(--on-saffron); }
+.btn.danger { background: #8f1d2c; border-color: #c4344a; color: #fff; }
+.btn.wide { width: 100%; }
+.btn.sm { min-height: 38px; padding: 7px 12px; font-size: 14px; }
+.btn:disabled { opacity: .42; cursor: default; }
+.btn small { font-weight: 400; opacity: .85; }
+.btn:focus-visible, .linkbtn:focus-visible, .gopen:focus-visible, .icon-btn:focus-visible, .opp:focus-visible, .tgt:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.linkbtn { background: none; border: 0; padding: 8px 4px; color: var(--muted); font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; }
+.linkbtn.accent { color: var(--saffron); }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.btnrow .btn { flex: 1; }
+.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; }
+.seg button { background: transparent; border: 0; padding: 8px 11px; font-weight: 700; font-size: 15px; color: var(--muted); cursor: pointer; min-width: 40px; }
+.seg button[aria-pressed="true"] { background: var(--saffron); color: var(--on-saffron); }
+.seg button:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+.botb { font: 13px/1 var(--emoji); }
+.thinking { display: inline-block; animation: think 1s ease-in-out infinite; }
+@keyframes think { 50% { opacity: .35; } }
+
+/* ---------- tavolo ---------- */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 6px 0 2px; }
+.topbar .round { font: 17px/1 var(--font-display); white-space: nowrap; }
+.topbar .right { display: flex; align-items: center; gap: 0; }
+.banner { margin: 8px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--raise); border: 1px solid var(--line); font-size: 14px; display: grid; gap: 8px; }
+.status { font: 25px/1.1 var(--font-display); text-align: center; margin: 10px 0 2px; }
+.status.is-turn { color: var(--saffron); }
+.status.is-ask { color: #ff8a8a; }
+.opps { display: grid; gap: 8px; margin-top: 8px; grid-template-columns: 1fr 1fr; }
+.opp { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 8px 9px 9px; min-width: 0; display: grid; gap: 5px; align-content: start; cursor: pointer; }
+.opp.turn { border-color: var(--saffron); box-shadow: 0 0 0 1px var(--saffron); }
+.opp.ask { border-color: var(--blood); box-shadow: 0 0 0 1px var(--blood); }
+.opp.dead { opacity: .55; }
+.opp .hd { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.av { font: 20px/1 var(--emoji); flex: none; }
+.opp .nm { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.role { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; white-space: nowrap; background: rgba(255, 255, 255, .1); color: var(--muted); flex: none; }
+.role.S { background: #f5c542; color: #3b2a00; }
+.role.V { background: #8fc4ff; color: #0b2a52; }
+.role.F { background: #ff8f8f; color: #4a0b0b; }
+.role.R { background: #c9a6ff; color: #2c0b52; }
+.opp .star { margin-left: auto; width: 22px; height: 22px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #f5c542; color: #3b2a00; font-size: 14px; }
+.line2 { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.line2 b { color: var(--text); }
+.hp { display: inline-flex; gap: 2px; align-items: center; }
+.hp i { width: 9px; height: 9px; border-radius: 50%; background: var(--blood); box-shadow: 0 0 0 1px rgba(0, 0, 0, .3); }
+.hp i.off { background: rgba(255, 255, 255, .14); }
+.hp.big i { width: 13px; height: 13px; }
+.hp.hit { animation: hit .6s ease; }
+@keyframes hit { 30% { transform: scale(1.35); filter: drop-shadow(0 0 6px #ff4d4d); } }
+.dst.ok { color: var(--saffron); font-weight: 700; }
+.saloon { margin-top: 10px; padding: 10px 12px; border-radius: 16px; background: radial-gradient(ellipse at 50% 0%, #3d2a3e, #1b2246 70%); border: 1px solid var(--line); display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
+.piles { display: grid; justify-items: center; gap: 3px; font-size: 12px; color: var(--muted); }
+.piles .pc { --w: 46px; }
+.cron { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; min-width: 0; }
+.cron li { padding: 3px 8px; border-radius: 9px; background: rgba(255, 255, 255, .05); }
+.cron li.new { animation: pop .35s both; }
+.cron li.bad { color: #ffb4a8; }
+.mine { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px 12px; margin-top: 12px; display: grid; gap: 8px; }
+.mine.turn { border-color: var(--saffron); }
+.mine .hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mine .av { font-size: 28px; }
+.mine .who { min-width: 0; }
+.mine .who b { font: 19px/1.1 var(--font-display); }
+.mine .who .cn { display: block; font-size: 13px; color: var(--muted); }
+.mine .who .role { vertical-align: 3px; margin-left: 4px; }
+.mine .hd .hp { margin-left: auto; }
+.mine .ab { margin: 0; font-size: 13px; color: var(--muted); }
+.zone h3 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.hand { display: flex; flex-wrap: wrap; gap: 7px; }
+.hand .pc { --w: 58px; }
+.pass { text-align: center; display: grid; gap: 10px; padding: 8px 0; }
+.pass b { font: 22px/1.1 var(--font-display); color: var(--saffron); }
+.actions { position: sticky; bottom: 0; z-index: 2; margin: 14px -16px 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(19, 24, 51, .96); border-top: 1px solid var(--line); display: grid; gap: 8px; margin-top: auto; max-height: 62vh; overflow: auto; }
+.spacer { flex: 1; min-height: 14px; }
+.hint { margin: 0; font-size: 15px; color: var(--muted); }
+.hint b { color: var(--text); }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opts .pc { --w: 56px; }
+
+/* ---------- fogli ---------- */
+.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(8, 10, 24, .72); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { width: 100%; max-width: 560px; max-height: 90%; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-bottom: 0; border-radius: 20px 20px 0 0; padding: 20px 18px calc(22px + env(safe-area-inset-bottom)); display: grid; gap: 12px; }
+.sheet h2 { font: 28px/1.1 var(--font-display); margin: 0; }
+.sheet h3 { font-size: 15px; margin: 6px 0 0; color: var(--saffron); text-transform: uppercase; letter-spacing: .07em; }
+.sheet p, .sheet ul { margin: 0; }
+.sheet ul { padding-left: 20px; display: grid; gap: 6px; }
+.eyebrow { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.detail { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.detail .pc { --w: 104px; }
+.detail .txt { font-size: 16px; }
+.tgts { display: grid; gap: 6px; }
+.tgt { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--raise); cursor: pointer; min-height: 48px; }
+.tgt:disabled { opacity: .45; cursor: default; }
+.tgt .av { font-size: 22px; }
+.tgt .t { flex: 1; min-width: 0; }
+.tgt .t small { display: block; color: var(--muted); font-size: 13px; }
+.tgt.go { border-color: var(--saffron); }
+.log { list-style: none; padding: 0; margin: 0; }
+.log li { padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.log li.sep { color: var(--saffron); font-weight: 700; }
+.catalog { display: grid; gap: 10px; }
+.catalog .row { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
+.catalog .pc { --w: 44px; }
+.catalog .ch { font: 28px/1 var(--emoji); width: 44px; text-align: center; }
+.catalog .t { font-size: 14px; }
+.catalog .t b { display: block; }
+table.score { width: 100%; border-collapse: collapse; }
+table.score th, table.score td { padding: 7px 6px; text-align: left; border-bottom: 1px solid var(--line); }
+table.score td:last-child { white-space: nowrap; text-align: right; }
+table.score thead th { color: var(--muted); font-size: 13px; }
+table.score tr.win td { color: var(--saffron); font-weight: 700; }
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
+.confetti i { position: absolute; top: -40px; font: 26px/1 var(--emoji); animation: fall var(--t) linear var(--d) both; }
+@keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
+
+@media (prefers-reduced-motion: reduce) { .pc.new, .cron li.new, .hp.hit, .confetti i, .thinking { animation: none !important; } }
+@media (max-width: 400px) { .topbar .bk { display: none; } .hand .pc { --w: 54px; } .opp { padding: 7px 8px 8px; } .line2 { gap: 6px; font-size: 12px; } .hp.big i { width: 11px; height: 11px; } }
+
+/* ---------- computer e schermi larghi: lobby e tavolo su due colonne, fogli al centro ---------- */
+@media (min-width: 1000px) {
+  #app.wide { max-width: 1240px; padding: 0 28px; }
+  #app.wide > .hubnav { width: 100%; max-width: 1040px; margin: 0 auto; }
+  .desk { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 440px); gap: 0 28px; align-items: start; }
+  .desk > div { min-width: 0; }
+  .desk .col-r { position: sticky; top: 10px; max-height: calc(100vh - 20px); overflow: auto; padding: 0 4px 12px; margin: 0 -4px; scrollbar-width: thin; }
+  .desk .col-r > :first-child { margin-top: 8px; }
+  .desk .actions { position: static; margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); max-height: none; overflow: visible; }
+  .desk.lobby { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); width: 100%; max-width: 1040px; margin: 0 auto 28px; gap: 0 24px; }
+  .desk.lobby .col-r { position: static; max-height: none; overflow: visible; padding: 0; margin: 0; }
+  .desk.lobby .col-r > .panel:first-child { margin-top: 14px; }
+  .desk.lobby .note { margin-top: 16px; }
+}
+@media (min-width: 700px) and (min-height: 520px) {
+  .overlay { align-items: center; padding: 24px; }
+  .sheet { border-radius: 20px; border-bottom: 1px solid var(--line); max-height: 86vh; padding-bottom: 22px; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled):hover, .chip-btn:hover, .gopen:hover { filter: brightness(1.12); }
+  .seg button:not([aria-pressed="true"]):hover { color: var(--text); }
+  .linkbtn:hover { color: var(--text); }
+}
+@media (min-width: 1000px) {
+  .desk .opps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .desk .hand .pc { --w: 64px; }
+  .desk .opts .pc { --w: 62px; }
+  .desk .saloon { grid-template-columns: auto 1fr; }
+  .desk .piles .pc { --w: 56px; }
+}
+</style>
+</head>
+<body>
+<svg class="defs" aria-hidden="true" focusable="false">
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div id="app"></div>
+<div id="layer"></div>
+<script src="../lib/ambiente.js"></script>
+<script src="motore.js"></script>
+<script src="bot.js"></script>
+<script src="../lib/mqtt.min.js"></script>
+<script src="../lib/stanze.js"></script>
+<script src="../lib/suoni.js"></script>
+<script>
+(function () {
+  'use strict';
+  var K = window.Polvere;
+  var BOT = window.PolvereBot;
+  var S = window.Suoni || { tema: function () {}, effetto: function () {}, sequenza: function () {}, bottone: function () { return ''; } };
+  var $app = document.getElementById('app');
+  var $layer = document.getElementById('layer');
+
+  // Su schermi larghi (computer, tablet in orizzontale) lobby e tavolo si dividono in due colonne.
+  var WIDE_MQ = window.matchMedia ? window.matchMedia('(min-width: 1000px)') : null;
+  function isWide() { return !!(WIDE_MQ && WIDE_MQ.matches); }
+  var LS = {
+    get: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* niente memoria */ } },
+    del: function (k) { try { window.localStorage.removeItem(k); } catch (e) { /* idem */ } }
+  };
+  function loadJSON(k, d) { try { var v = JSON.parse(LS.get(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } }
+  function rnd36(n) { var o = '', a = 'abcdefghijklmnopqrstuvwxyz0123456789'; for (var i = 0; i < n; i++) o += a[K.randInt(36)]; return o; }
+  function range(n) { var a = []; for (var i = 0; i < n; i++) a.push(i); return a; }
+  var LEVEL_OK = { facile: 1, medio: 1, difficile: 1 };
+
+  var ui = {
+    route: 'lobby', gameId: null, online: 'connecting',
+    game: null, gameMissing: false, missTimer: null,
+    local: null, bot: null, sheet: null, sheetId: null, card: null, who: -1, hideResultKey: null,
+    name: LS.get('pp-name') || '',
+    localNames: (function () { var a = loadJSON('pp-lnames', null); return Array.isArray(a) && a.length >= 4 ? a.slice(0, K.MAX_PLAYERS) : ['', '', '', '']; })(),
+    botN: Math.max(3, Math.min(6, +LS.get('pp-botn') || 4)),
+    botLv: (function () { var v = LS.get('pp-botlv'); return LEVEL_OK[v] ? v : 'medio'; })(),
+    botFast: LS.get('pp-botfast') === '1',
+    botTimer: null, botKey: null, handOpen: -1, sel: [], mode: null, selKey: null,
+    error: '', copied: false, seenKey: null, seenI: 0, lastMine: false, prevHp: null, pendingJoin: null
+  };
+  ui.device = LS.get('pp-device');
+  if (!ui.device) { ui.device = 'd' + rnd36(14); LS.set('pp-device', ui.device); }
+  ui.myKey = 'd:' + ui.device;
+  S.tema('polvere');
+
+  function validState(s) {
+    return !!(s && s.app === 'polvere' && typeof s.v === 'number' && Array.isArray(s.seats) && s.seats.length >= 1 &&
+      s.seats.length <= K.MAX_PLAYERS && s.hand && typeof s.hand === 'object' && Array.isArray(s.deck));
+  }
+  var net = window.Stanze ? window.Stanze({
+    topic: 'polvereepiombo/v1', memoria: 'pp-', valida: validState,
+    quandoArriva: function (id, prev, data) { onRoom(id, prev, data); },
+    quandoCambiaRete: function (x) { ui.online = x; render(); }
+  }) : null;
+
+  /* ---------- testo ---------- */
+  function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function nameOf(s, p) { return (s.seats[p] && s.seats[p].name) || ('Giocatore ' + (p + 1)); }
+  function hn(s, p) { return esc(nameOf(s, p)); }
+  function plural(n, a, b) { return n === 1 ? a : b; }
+  var ICON = { sparo: '💥', schivata: '💨', borraccia: '🥤', giro: '🥃', corriere: '📦', bottino: '💰', mercato: '🏪', borseggio: '👛', lazo: '➰',
+    sfida: '⚔️', raffica: '🔥', bisonti: '🐃', botte: '🛢️', galera: '⛓️', candelotto: '🧨', cannocchiale: '🔭', cavallo: '🐎',
+    rapida: '🔫', revolver: '🔫', fucile: '🔫', carabina: '🔫', lungo: '🔫' };
+  var SUIT = { C: '♥', Q: '♦', F: '♣', P: '♠' };
+  var ROLE_TXT = K.ROLES;
+  function cname(c) { var T = K.typeOf(c); return T ? T.name : ''; }
+  function cfull(c) { var m = K.info(c); return m ? cname(c) + ' ' + m.r + SUIT[m.s] : ''; }
+  function cardHTML(c, opts) {
+    opts = opts || {};
+    var m = K.info(c), T = K.typeOf(c);
+    if (!m) return '';
+    var tag = opts.btn ? 'button' : 'span', red = m.s === 'C' || m.s === 'Q';
+    var attrs = opts.btn ? ' type="button" data-act="' + opts.btn + '" data-c="' + c + '"' + (opts.pressed != null ? ' aria-pressed="' + opts.pressed + '"' : '') + ' aria-label="' + esc(cfull(c)) + '"' : ' role="img" aria-label="' + esc(cfull(c)) + '"';
+    var st = opts.w ? ' style="--w:' + opts.w + 'px' + (opts.style ? ';' + opts.style : '') + '"' : (opts.style ? ' style="' + opts.style + '"' : '');
+    return '<' + tag + ' class="pc' + (T.blue ? ' blue' : '') + (opts.cls ? ' ' + opts.cls : '') + '"' + attrs + st + '>' +
+      '<span class="rk' + (red ? ' red' : '') + '">' + m.r + SUIT[m.s] + '</span>' + (T.weapon ? '<span class="rg">' + T.weapon + '</span>' : '') +
+      '<span class="ic" aria-hidden="true">' + ICON[m.k] + '</span><span class="nm">' + esc(T.name) + '</span></' + tag + '>';
+  }
+  function backHTML(w) { return '<span class="pc back" style="--w:' + w + 'px" role="img" aria-label="Mazzo"></span>'; }
+  function chipHTML(c) {
+    var k = K.kindOf(c), T = K.typeOf(c);
+    var label = T.weapon ? T.name + ' ' + T.weapon : T.name;
+    return '<span class="chip' + (k === 'galera' ? ' jail' : k === 'candelotto' ? ' dyn' : '') + '"><i aria-hidden="true">' + ICON[k] + '</i>' + esc(label) + '</span>';
+  }
+  function hpHTML(s, p, big) {
+    var h = '', bumped = ui.hpBump && ui.hpBump[p];
+    for (var i = 0; i < s.max[p]; i++) h += '<i' + (i < s.hp[p] ? '' : ' class="off"') + '></i>';
+    return '<span class="hp' + (big ? ' big' : '') + (bumped ? ' hit' : '') + '" role="img" aria-label="' + Math.max(0, s.hp[p]) + ' punti vita su ' + s.max[p] + '">' + h + '</span>';
+  }
+
+  /* ---------- prospettiva ---------- */
+  function cur() { return ui.route === 'local' ? ui.local : ui.route === 'bot' ? ui.bot : ui.game; }
+  function persp(s) {
+    if (s.mode === 'local') { var a = K.nextActor(s); return { me: a >= 0 ? a : s.turn, seated: true, local: true, open: a >= 0 && ui.handOpen === a }; }
+    if (s.mode === 'bot') return { me: 0, seated: true, bot: true, open: true };
+    var seat = K.seatOf(s, ui.myKey);
+    return { me: seat, seated: seat >= 0, open: seat >= 0 };
+  }
+  function isMe(P, p) { return !P.local && P.seated && p === P.me; }
+  function Who(s, P, p) { return isMe(P, p) ? 'Tu' : hn(s, p); }
+  function who(s, P, p) { return isMe(P, p) ? 'tu' : hn(s, p); }
+  function whom(s, P, p) { return isMe(P, p) ? 'te' : hn(s, p); }
+  function v(P, p, tu, lui) { return isMe(P, p) ? tu : lui; }
+  function isMine(s, P) { return P.seated && s.status === 'playing' && P.me >= 0 && K.nextActor(s) === P.me; }
+  function canAct(s, P) { return isMine(s, P) && P.open && (P.local || P.bot || ui.online === 'up'); }
+  function isBot(s, p) { return !!(s.bots && s.bots[p]); }
+  function botTag(s, p) { return isBot(s, p) ? ' <span class="botb" title="Computer, livello ' + esc(s.bots[p]) + '">🤖</span>' : ''; }
+  function gameKey(s) { return s.mode === 'local' ? 'L' + s.createdAt : s.mode === 'bot' ? 'B' + s.createdAt : ui.gameId; }
+  // Il ruolo si vede se è lo Sceriffo, se il giocatore è morto, se è il tuo (o a fine partita).
+  function roleShown(s, P, p) { return p === s.sheriff || !s.alive[p] || s.status === 'gameOver' || (p === P.me && P.open); }
+  function roleHTML(s, P, p) {
+    if (!roleShown(s, P, p)) return '<span class="role">?</span>';
+    var r = s.role[p];
+    return '<span class="role ' + r + '">' + (r === 'S' ? '★ ' : '') + ROLE_TXT[r] + '</span>';
+  }
+
+  /* ---------- cronaca ---------- */
+  var WHY = { sparo: 'Sparo!', raffica: 'Raffica', bisonti: 'Bisonti!', sfida: 'Sfida', candelotto: 'Candelotto' };
+  function line(e, s, P) {
+    var p = e.s;
+    switch (e.t) {
+      case 'turn': return { e: '🔔', t: isMe(P, p) ? 'Tocca a te' : 'Turno di ' + hn(s, p), sep: true };
+      case 'draw': return e.n ? { e: '🂠', t: Who(s, P, p) + ' ' + v(P, p, 'peschi', 'pesca') + ' ' + e.n + ' ' + plural(e.n, 'carta', 'carte') + (e.peek ? ' (dopo averne guardate 3)' : '') } : null;
+      case 'show': return { e: '🃏', t: Who(s, P, p) + ' ' + v(P, p, 'mostri', 'mostra') + ' ' + esc(cfull(e.c)) + (e.extra ? ': è rossa, un\'altra carta' : '') };
+      case 'lesta': return { e: '🖐️', t: Who(s, P, p) + ' ' + v(P, p, 'prendi', 'prende') + ' una carta dalla mano di ' + whom(s, P, e.from) };
+      case 'raccatta': return { e: '🧺', t: Who(s, P, p) + ' ' + v(P, p, 'prendi', 'prende') + ' ' + esc(cfull(e.c)) + ' dagli scarti' };
+      case 'estrai': {
+        var what = { botte: e.ok ? 'la Botte para il colpo' : 'la Botte non basta', galera: e.ok ? 'evade dalla Galera' : 'resta in Galera', candelotto: e.ok ? 'il Candelotto esplode!' : 'il Candelotto non esplode' }[e.why];
+        return { e: '🎴', t: Who(s, P, p) + ' ' + v(P, p, 'estrai', 'estrae') + ' ' + e.c.map(function (c) { var m = K.info(c); return m.r + SUIT[m.s]; }).join(' e ') + ': ' + what, bad: !e.ok === (e.why !== 'candelotto') };
+      }
+      case 'play':
+        if (K.kindOf(e.c) === 'borseggio' || K.kindOf(e.c) === 'lazo') return null;
+        if (e.as === 'sparo') return { e: '💥', t: Who(s, P, p) + ' ' + v(P, p, 'spari', 'spara') + ' a ' + whom(s, P, e.to) };
+        return { e: ICON[K.kindOf(e.c)] || '🂠', t: Who(s, P, p) + ' ' + v(P, p, 'giochi', 'gioca') + ' ' + esc(cname(e.c)) + (e.to != null ? ' contro ' + whom(s, P, e.to) : '') };
+      case 'equip':
+        if (K.kindOf(e.c) === 'galera') return { e: '⛓️', t: Who(s, P, p) + ' ' + v(P, p, 'metti', 'mette') + ' ' + whom(s, P, e.to) + ' in Galera' };
+        return { e: ICON[K.kindOf(e.c)], t: Who(s, P, p) + ' ' + v(P, p, 'metti', 'mette') + ' in gioco ' + esc(cname(e.c)) };
+      case 'miss': return { e: '💨', t: e.how === 'botte' ? 'La Botte salva ' + whom(s, P, p) : Who(s, P, p) + ' ' + v(P, p, 'schivi', 'schiva') + (e.cards && e.cards.length > 1 ? ' due volte' : '') };
+      case 'half': return { e: '🛢️', t: 'La Botte vale una sola Schivata!: ne serve un\'altra' };
+      case 'hurt': return { e: '🩸', t: Who(s, P, p) + ' ' + v(P, p, 'perdi', 'perde') + ' ' + e.n + ' ' + plural(e.n, 'punto', 'punti') + ' vita' + (e.why && WHY[e.why] && e.why !== 'sparo' ? ' (' + WHY[e.why] + ')' : ''), bad: true };
+      case 'heal': return e.n ? { e: '❤️', t: Who(s, P, p) + ' ' + v(P, p, 'recuperi', 'recupera') + ' ' + e.n + ' ' + plural(e.n, 'punto', 'punti') + ' vita' } : null;
+      case 'saved': return { e: '🥤', t: Who(s, P, p) + ' ' + v(P, p, 'resti', 'resta') + ' in piedi' + (e.beer ? ' con la Borraccia' : ' scartando carte') };
+      case 'dead': return { e: '☠️', t: Who(s, P, p) + ' ' + v(P, p, 'sei eliminato', 'è eliminato') + ': ' + v(P, p, 'eri', 'era') + ' ' + ROLE_TXT[e.role], bad: true };
+      case 'vulture': return { e: '⚰️', t: Who(s, P, p) + ' ' + v(P, p, 'prendi', 'prende') + ' le ' + e.n + ' carte di ' + hn(s, e.from) };
+      case 'reward': return { e: '🎁', t: Who(s, P, p) + ' ' + v(P, p, 'peschi', 'pesca') + ' 3 carte di ricompensa' };
+      case 'penalty': return { e: '😱', t: 'Lo Sceriffo ha eliminato un Vice: scarta tutte le sue carte', bad: true };
+      case 'cerotto': return { e: '🩹', t: Who(s, P, p) + ' ' + v(P, p, 'peschi', 'pesca') + ' ' + e.n + ' ' + plural(e.n, 'carta', 'carte') + ' (Nino Cerotto)' };
+      case 'rancore': return { e: '😤', t: Who(s, P, p) + ' ' + v(P, p, 'prendi', 'prende') + ' una carta a ' + whom(s, P, e.from) + ' (Ciro Rancore)' };
+      case 'vuote': return { e: '👐', t: Who(s, P, p) + ' ' + v(P, p, 'resti', 'resta') + ' senza carte e ' + v(P, p, 'ne peschi', 'ne pesca') + ' una' };
+      case 'store': return { e: '🏪', t: 'Mercato: si scoprono ' + e.cards.length + ' carte' };
+      case 'pick': return { e: '🏪', t: Who(s, P, p) + ' ' + v(P, p, 'prendi', 'prende') + ' ' + esc(cfull(e.c)) };
+      case 'steal': return { e: '👛', t: Who(s, P, p) + ' ' + v(P, p, 'prendi', 'prende') + ' ' + (e.c ? esc(cname(e.c)) : 'una carta dalla mano') + ' a ' + whom(s, P, e.from) };
+      case 'lazo': return { e: '➰', t: Who(s, P, p) + ' ' + v(P, p, 'fai', 'fa') + ' scartare ' + esc(cname(e.c)) + ' a ' + whom(s, P, e.from) };
+      case 'bisok': return { e: '🐃', t: Who(s, P, p) + ' ' + v(P, p, 'scarti', 'scarta') + ' uno Sparo! e ' + v(P, p, 'scansi', 'scansa') + ' i bisonti' };
+      case 'duelShot': return { e: '⚔️', t: Who(s, P, p) + ' ' + v(P, p, 'rispondi', 'risponde') + ' con uno Sparo!' };
+      case 'duelLost': return { e: '⚔️', t: Who(s, P, p) + ' ' + v(P, p, 'perdi', 'perde') + ' la Sfida', bad: true };
+      case 'boom': return { e: '🧨', t: 'Il Candelotto esplode davanti a ' + whom(s, P, p) + '!', bad: true };
+      case 'dynpass': return { e: '🧨', t: 'Il Candelotto passa a ' + whom(s, P, e.to) };
+      case 'jailed': return { e: '⛓️', t: Who(s, P, p) + ' ' + v(P, p, 'salti', 'salta') + ' il turno in Galera' };
+      case 'escape': return { e: '🔓', t: Who(s, P, p) + ' ' + v(P, p, 'evadi', 'evade') + ' dalla Galera' };
+      case 'discard': return { e: '🗑️', t: Who(s, P, p) + ' ' + v(P, p, 'scarti', 'scarta') + ' ' + e.cards.length + ' ' + plural(e.cards.length, 'carta', 'carte') };
+      case 'reshuffle': return { e: '🔄', t: 'Gli scarti tornano nel mazzo' };
+      case 'end': return { e: '🏆', t: { S: 'Vincono lo Sceriffo e i Vice', F: 'Vincono i Fuorilegge', R: 'Vince il Rinnegato' }[e.team] };
+    }
+    return null;
+  }
+
+  /* ---------- tavolo ---------- */
+  function topbarHTML(s, P) {
+    var off = P.local || P.bot;
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (off ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (off ? 'Esci' : 'Partite') + '</span></button>' +
+      '<span class="round">Turno ' + s.turnNo + (off ? '' : netDot()) + '</span>' +
+      '<span class="right">' + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+  }
+  function bannersHTML(s, P) {
+    var h = '';
+    if (!P.local && !P.bot && (ui.online === 'down' || ui.online === 'off')) h += '<div class="banner">Connessione persa: le mosse ripartono appena torna la rete.</div>';
+    if (!P.local && !P.bot && !P.seated) h += '<div class="banner">Stai guardando la partita: non sei seduto a questo tavolo.</div>';
+    return h;
+  }
+  function askText(s, P, pr, me) {
+    switch (pr.kind) {
+      case 'dodge': return hn(s, pr.from) + ' ' + (me ? 'ti' : 'gli') + ' spara' + (pr.why === 'raffica' ? ' con la Raffica' : '') + '!';
+      case 'bisonti': return 'Arrivano i bisonti!';
+      case 'duel': return 'Sfida' + (me ? '' : ' a ' + hn(s, pr.s));
+      case 'dying': return me ? 'Stai per morire!' : hn(s, pr.s) + ' sta per morire!';
+      case 'store': return 'Mercato';
+      case 'discard': return 'Troppe carte in mano';
+      case 'lesta': case 'raccatta': case 'veggente': return 'Si pesca';
+    }
+    return '';
+  }
+  function statusHTML(s, P) {
+    var t, cls = '';
+    if (s.status === 'gameOver') t = { S: 'Vincono lo Sceriffo e i Vice!', F: 'Vincono i Fuorilegge!', R: 'Vince il Rinnegato!' }[s.result.team];
+    else if (s.prompt) {
+      var q = s.prompt.s;
+      if (P.local) { t = hn(s, q) + ': ' + askText(s, P, s.prompt, true); cls = 'is-ask'; }
+      else if (isMine(s, P)) { t = askText(s, P, s.prompt, true); cls = 'is-ask'; }
+      else t = hn(s, q) + (isBot(s, q) ? ' <span class="thinking">ci pensa…</span>' : ' decide…');
+    } else if (s.phase === 'play') {
+      if (P.local) { t = 'Tocca a ' + hn(s, s.turn); cls = 'is-turn'; }
+      else if (isMine(s, P)) { t = 'Tocca a te'; cls = 'is-turn'; }
+      else t = 'Tocca a ' + hn(s, s.turn) + (isBot(s, s.turn) ? ' <span class="thinking">🤖</span>' : '');
+    } else t = 'Turno di ' + hn(s, s.turn);
+    return '<h1 class="status ' + cls + '" aria-live="polite">' + t + '</h1>';
+  }
+  function oppHTML(s, p, P) {
+    var me = P.me, alive = s.alive[p], ch = K.CHAR[s.char[p]];
+    var d = alive && s.alive[me] && me !== p ? K.dist(s, me, p) : null, ok = d != null && d <= K.reach(s, me);
+    var turn = s.status === 'playing' && s.turn === p && !s.prompt, ask = s.prompt && s.prompt.s === p;
+    return '<button type="button" class="opp' + (turn ? ' turn' : '') + (ask ? ' ask' : '') + (alive ? '' : ' dead') + '" data-act="who" data-seat="' + p + '" aria-label="' + hn(s, p) + ', ' + esc(ch.name) + '">' +
+      '<span class="hd"><span class="av" aria-hidden="true">' + (alive ? ch.art : '☠️') + '</span><span class="nm">' + hn(s, p) + botTag(s, p) + '</span>' + (p === s.sheriff ? '<span class="star" title="Sceriffo">★</span>' : '') + '</span>' +
+      '<span class="line2">' + (alive ? hpHTML(s, p) + '<span>🂠 <b>' + s.hand[p].length + '</b></span>' + (d != null ? '<span class="dst' + (ok ? ' ok' : '') + '">a ' + d + (ok ? ' 🎯' : '') + '</span>' : '') : 'eliminato ' + roleHTML(s, P, p)) +
+      (alive && s.status === 'gameOver' ? roleHTML(s, P, p) : '') + '</span>' +
+      (s.table[p].length ? '<span class="chips">' + s.table[p].map(chipHTML).join('') + '</span>' : '') + '</button>';
+  }
+  function saloonHTML(s, P) {
+    var items = [], seen = 0;
+    for (var i = s.log.length - 1; i >= 0 && items.length < 4; i--) {
+      var l = line(s.log[i], s, P);
+      if (!l) continue;
+      var fresh = (s.log[i].i || 0) > (ui.cronSeen || 0);
+      items.push('<li class="' + (fresh ? 'new' : '') + (l.bad ? ' bad' : '') + '">' + l.e + ' ' + l.t + '</li>');
+      seen = Math.max(seen, s.log[i].i || 0);
+      if (l.sep) break;
+    }
+    ui.cronNext = Math.max(ui.cronNext || 0, seen);
+    var topD = s.discard.length ? cardHTML(s.discard[s.discard.length - 1], { w: 46 }) : '<span class="pc" style="--w:46px;opacity:.15"></span>';
+    return '<section class="saloon" aria-label="Il saloon"><div class="piles">' + topD + '<span>scarti</span><span>' + s.deck.length + ' nel mazzo</span></div>' +
+      '<ul class="cron" aria-live="polite">' + items.join('') + '</ul></section>';
+  }
+  function mineHTML(s, P) {
+    var me = P.me;
+    if (me < 0) return '';
+    if (P.local && !P.open && s.status === 'playing') {
+      return '<section class="mine"><div class="pass"><span class="muted">Le carte e il ruolo sono segreti.</span><b>Passa il telefono a ' + hn(s, me) + '</b>' +
+        '<button type="button" class="btn primary wide" data-act="hand-open">Sono ' + hn(s, me) + ': mostra</button></div></section>';
+    }
+    var ch = K.CHAR[s.char[me]], alive = s.alive[me];
+    var sel = canAct(s, P) && (ui.mode === 'heal' || ui.mode === 'sid' || (s.prompt && s.prompt.kind === 'discard'));
+    var hand = s.hand[me].map(function (c) {
+      return cardHTML(c, { btn: sel ? 'pick' : 'card', pressed: sel ? ui.sel.indexOf(c) >= 0 : null });
+    }).join('');
+    return '<section class="mine' + (isMine(s, P) ? ' turn' : '') + '" aria-label="La tua zona"><div class="hd"><span class="av" aria-hidden="true">' + (alive ? ch.art : '☠️') + '</span>' +
+      '<span class="who"><b>' + (P.local ? hn(s, me) : 'Tu') + '</b>' + roleHTML(s, P, me) + '<span class="cn">' + esc(ch.name) + (alive ? '' : ' · eliminato') + '</span></span>' + hpHTML(s, me, true) + '</div>' +
+      '<p class="ab">' + esc(ch.text) + (alive ? ' Arma: portata ' + K.reach(s, me) + '.' : '') + '</p>' +
+      (s.table[me].length ? '<div class="zone"><h3>In gioco</h3><div class="chips">' + s.table[me].map(chipHTML).join('') + '</div></div>' : '') +
+      (alive ? '<div class="zone"><h3>In mano (' + s.hand[me].length + ')</h3><div class="hand">' + (hand || '<span class="muted small">Nessuna carta.</span>') + '</div></div>' : '') + '</section>';
+  }
+  function errHTML() { return ui.error ? '<p class="err small" role="alert">' + esc(ui.error) + '</p>' : ''; }
+  function selKey(s) { return gameKey(s) + ':' + s.createdAt + ':' + s.v + ':' + (s.prompt ? s.prompt.kind + s.prompt.s : '') + ':' + (ui.mode || ''); }
+  function actionsHTML(s, P) {
+    if (s.status === 'gameOver') return '<button type="button" class="btn primary wide" data-act="show-result">Com\'è finita</button>';
+    if (!isMine(s, P)) {
+      var w = K.nextActor(s);
+      if (w < 0) return '<p class="hint">…</p>';
+      var what = s.prompt ? (s.prompt.kind === 'dodge' ? 'decide se schivare' : s.prompt.kind === 'dying' ? 'cerca di restare in piedi' : 'sceglie') : 'gioca le sue carte';
+      return '<p class="hint"><b>' + hn(s, w) + '</b>' + (isBot(s, w) ? ' 🤖 ' + what + '<span class="thinking">…</span>' : ' ' + what + '…') + '</p>' + errHTML();
+    }
+    if (P.local && !P.open) return '<p class="hint">Tocca a <b>' + hn(s, P.me) + '</b>: passagli il telefono.</p>';
+    if (!canAct(s, P)) return '<p class="hint">Senza connessione: aspetta che torni la rete per giocare.</p>';
+    var me = P.me, pr = s.prompt, h = s.hand[me];
+    if (pr) {
+      switch (pr.kind) {
+        case 'dodge': {
+          var dc = K.dodgeCards(s, me);
+          return '<p class="hint"><b>' + hn(s, pr.from) + '</b> ti spara' + (pr.why === 'raffica' ? ' con la Raffica' : '') + '. ' + (pr.need > 1 ? 'Servono <b>' + pr.need + ' Schivata!</b>.' : '') + '</p>' +
+            '<div class="btnrow"><button type="button" class="btn primary" data-act="dodge">Schiva <small>' + (pr.need > 1 ? pr.need + ' carte' : esc(cname(dc[0]))) + '</small></button>' +
+            '<button type="button" class="btn danger" data-act="pass">Prendi il colpo</button></div>' + errHTML();
+        }
+        case 'bisonti': case 'duel':
+          return '<p class="hint">' + (pr.kind === 'bisonti' ? 'Scarta uno <b>Sparo!</b> per scansare la mandria, o perdi 1 punto vita.' : 'Sfida con <b>' + hn(s, me === pr.a ? pr.b : pr.a) + '</b>: scarta uno <b>Sparo!</b> o perdi 1 punto vita.') + '</p>' +
+            '<div class="btnrow"><button type="button" class="btn primary" data-act="bang">Scarta Sparo!</button><button type="button" class="btn danger" data-act="pass">Perdi 1 punto vita</button></div>' + errHTML();
+        case 'dying': {
+          var beers = K.aliveCount(s) > 2 ? h.filter(function (c) { return K.kindOf(c) === 'borraccia'; }) : [];
+          var doc = s.char[me] === 'erbetta';
+          if (ui.mode === 'sid') return '<p class="hint">Scegli ' + (pr.need - Math.min(beers.length, pr.need)) * 2 + ' carte da scartare.</p><div class="btnrow"><button type="button" class="btn primary" data-act="sid-go">Scarta e resta in piedi</button><button type="button" class="btn" data-act="mode-off">Indietro</button></div>' + errHTML();
+          return '<p class="hint">' + plural(pr.need, 'Ti serve', 'Ti servono') + ' <b>' + pr.need + '</b> ' + plural(pr.need, 'punto', 'punti') + ' vita per restare in gioco.</p><div class="btnrow">' +
+            (beers.length >= pr.need ? '<button type="button" class="btn primary" data-act="beer">Bevi ' + (pr.need > 1 ? pr.need + ' Borracce' : 'la Borraccia') + '</button>' : '') +
+            (doc ? '<button type="button" class="btn" data-act="mode" data-mode="sid">Scarta carte (Doc Erbetta)</button>' : '') +
+            '<button type="button" class="btn danger" data-act="pass">Arrenditi</button></div>' + errHTML();
+        }
+        case 'store':
+          return '<p class="hint"><b>Mercato</b>: prendi una carta.</p><div class="opts">' + pr.opts.map(function (c) { return cardHTML(c, { btn: 'store' }); }).join('') + '</div>' + errHTML();
+        case 'discard':
+          return '<p class="hint">Hai più carte che punti vita: scegli <b>' + pr.n + '</b> ' + plural(pr.n, 'carta', 'carte') + ' da scartare (' + ui.sel.length + '/' + pr.n + ').</p>' +
+            '<button type="button" class="btn primary wide" data-act="discard-go"' + (ui.sel.length === pr.n ? '' : ' disabled') + '>Scarta e passa il turno</button>' + errHTML();
+        case 'lesta':
+          return '<p class="hint"><b>Mano Lesta</b>: da chi prendi la prima carta?</p><div class="btnrow">' + pr.opts.map(function (q) { return '<button type="button" class="btn sm" data-act="lesta" data-seat="' + q + '">' + hn(s, q) + ' <small>🂠 ' + s.hand[q].length + '</small></button>'; }).join('') +
+            '<button type="button" class="btn sm" data-act="lesta" data-seat="-1">Dal mazzo</button></div>' + errHTML();
+        case 'raccatta':
+          return '<p class="hint"><b>Zio Raccatta</b>: prendi ' + esc(cfull(pr.c)) + ' dagli scarti?</p><div class="opts">' + cardHTML(pr.c) + '</div>' +
+            '<div class="btnrow"><button type="button" class="btn primary" data-act="yes" data-v="1">Sì, la prendo</button><button type="button" class="btn" data-act="yes" data-v="0">No, dal mazzo</button></div>' + errHTML();
+        case 'veggente':
+          return '<p class="hint"><b>Lina Veggente</b>: tieni 2 carte. Tocca quella da rimettere in cima al mazzo.</p><div class="opts">' + pr.opts.map(function (c) { return cardHTML(c, { btn: 'putback' }); }).join('') + '</div>' + errHTML();
+      }
+    }
+    if (ui.mode === 'heal') return '<p class="hint"><b>Doc Erbetta</b>: scegli 2 carte da scartare per recuperare 1 punto vita (' + ui.sel.length + '/2).</p>' +
+      '<div class="btnrow"><button type="button" class="btn primary" data-act="heal-go"' + (ui.sel.length === 2 ? '' : ' disabled') + '>Scarta e curati</button><button type="button" class="btn" data-act="mode-off">Indietro</button></div>' + errHTML();
+    var healBtn = s.char[me] === 'erbetta' && s.hp[me] < s.max[me] && h.length >= 2 ? '<button type="button" class="btn" data-act="mode" data-mode="heal">Curati</button>' : '';
+    return '<p class="hint">Tocca una carta per giocarla. ' + (K.unlimited(s, me) ? 'Puoi sparare quanto vuoi.' : s.bangs ? 'Hai già sparato.' : 'Uno Sparo! per turno.') + '</p>' +
+      '<div class="btnrow">' + healBtn + '<button type="button" class="btn primary" data-act="end">Fine turno' + (h.length > s.hp[me] ? ' <small>(scarti ' + (h.length - s.hp[me]) + ')</small>' : '') + '</button></div>' + errHTML();
+  }
+  function boardHTML(s) {
+    var P = persp(s);
+    var k = selKey(s);
+    if (ui.selKey !== k) { ui.selKey = k; ui.sel = []; }
+    // punti vita che scendono: un lampo sul pallino
+    var bump = {};
+    if (ui.prevHp && ui.prevHp.key === gameKey(s) + s.createdAt) s.hp.forEach(function (x, i) { if (x < ui.prevHp.hp[i]) bump[i] = 1; });
+    ui.hpBump = bump; ui.prevHp = { key: gameKey(s) + s.createdAt, hp: s.hp.slice() };
+    var others = [];
+    for (var i = 1; i < s.seats.length; i++) others.push(((P.me < 0 ? 0 : P.me) + i) % s.seats.length);
+    if (P.me < 0) others.unshift(0);
+    var opps = '<div class="opps">' + others.map(function (p) { return oppHTML(s, p, P); }).join('') + '</div>', html;
+    if (isWide()) html = topbarHTML(s, P) + bannersHTML(s, P) + '<div class="desk"><div class="col-l">' + opps + saloonHTML(s, P) + '</div>' +
+      '<div class="col-r">' + statusHTML(s, P) + mineHTML(s, P) + '<div id="actions" class="actions">' + actionsHTML(s, P) + '</div></div></div>';
+    else html = topbarHTML(s, P) + bannersHTML(s, P) + statusHTML(s, P) + opps +
+      saloonHTML(s, P) + mineHTML(s, P) + '<div class="spacer"></div><div id="actions" class="actions">' + actionsHTML(s, P) + '</div>';
+    ui.cronSeen = ui.cronNext;
+    return html;
+  }
+
+  /* ---------- lobby ---------- */
+  function netChipHTML() {
+    var t = { up: 'collegato', connecting: 'mi collego…', down: 'senza connessione', off: 'non disponibile' }[ui.online] || '';
+    return '<span class="net ' + ui.online + '" role="status"><i></i>' + t + '</span>';
+  }
+  function netDot() { return '<i class="netdot ' + ui.online + '" title="' + (ui.online === 'up' ? 'Collegato' : 'Non collegato') + '"></i>'; }
+  function shareUrl(id) { return location.href.split('#')[0] + '#partita-' + id; }
+  function fanHTML() {
+    var cards = ['schivata.1', 'botte.1', 'sparo.1', 'galera.1', 'borraccia.1'];
+    return '<div class="fan" aria-hidden="true">' + cards.map(function (c, i) {
+      return cardHTML(c, { w: 62, style: '--r:' + ((i - 2) * 9) + 'deg;--y:' + (Math.abs(i - 2) * 7) + 'px' });
+    }).join('') + '</div>';
+  }
+  function gameItemHTML(g) {
+    var seat = K.seatOf(g, ui.myKey), st, cta = 'Apri', hot = false;
+    if (g.status === 'waiting') {
+      st = g.seats.length + ' ' + plural(g.seats.length, 'giocatore', 'giocatori') + ' al tavolo';
+      if (seat < 0) { cta = 'Siediti'; hot = true; } else if (seat === g.host) cta = 'Inizia';
+    } else if (g.status === 'playing') {
+      var a = K.nextActor(g);
+      if (seat >= 0 && a === seat) { st = 'Turno ' + g.turnNo + ' · tocca a te'; cta = 'Gioca'; hot = true; }
+      else st = 'Turno ' + g.turnNo + (a >= 0 ? ' · tocca a ' + hn(g, a) : '');
+    } else st = { S: 'Hanno vinto Sceriffo e Vice', F: 'Hanno vinto i Fuorilegge', R: 'Ha vinto il Rinnegato' }[g.result && g.result.team] || 'Partita finita';
+    var names = g.seats.map(function (x, i) { return hn(g, i); }).join(', ');
+    return '<li class="gitem' + (hot ? ' hot' : '') + '"><button type="button" class="gopen" data-act="open" data-id="' + esc(g.id) + '">' +
+      '<span class="gnames">' + names + '</span><span class="gstate">' + st + '</span><span class="gcta">' + cta + '</span></button>' +
+      '<button type="button" class="icon-btn" data-act="ask-del" data-id="' + esc(g.id) + '" aria-label="Togli dalla lista"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button></li>';
+  }
+  function roomsListHTML() {
+    if (!net) return '<p class="muted">Il gioco online non è disponibile in questo browser.</p>';
+    var rooms = net.elenco().map(function (id) { var s = net.carica(id); if (!s) return null; var o = K.clone(s); o.id = id; return o; }).filter(Boolean);
+    if (!rooms.length) return '<p class="muted">Nessuna partita ancora: creane una e manda il link ai tuoi amici.</p>';
+    rooms.sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+    return '<ul class="games">' + rooms.map(gameItemHTML).join('') + '</ul>';
+  }
+  function segHTML(act, curV, list, label) {
+    return '<div class="seg" role="group" aria-label="' + label + '">' + list.map(function (x) {
+      return '<button type="button" data-act="' + act + '" data-v="' + x[0] + '" aria-pressed="' + (String(curV) === String(x[0])) + '">' + x[1] + '</button>';
+    }).join('') + '</div>';
+  }
+  var LEVELS = [['facile', 'Facile'], ['medio', 'Medio'], ['difficile', 'Difficile']];
+  function botPanelHTML() {
+    var saved = ui.bot && ui.bot.status === 'playing';
+    return '<section class="panel"><h2 class="h2">Contro il computer</h2>' +
+      '<div class="row-between"><span class="lab">Avversari</span>' + segHTML('bot-n', ui.botN, [[3, '3'], [4, '4'], [5, '5'], [6, '6']], 'Numero di avversari') + '</div>' +
+      '<div class="row-between"><span class="lab">Livello</span>' + segHTML('bot-lv', ui.botLv, LEVELS, 'Livello') + '</div>' +
+      '<div class="row-between"><span class="lab">Velocità dei bot</span>' + segHTML('bot-fast', ui.botFast ? 1 : 0, [[0, 'Normale'], [1, 'Veloce']], 'Velocità') + '</div>' +
+      '<button type="button" class="btn primary wide" data-act="bot-start">Gioca contro ' + ui.botN + ' bot</button>' +
+      (saved ? '<button type="button" class="btn wide" data-act="bot-resume">Riprendi la partita (turno ' + ui.bot.turnNo + ')</button>' : '') + '</section>';
+  }
+  function lobbyHTML() {
+    var saved = ui.local && ui.local.status !== 'gameOver';
+    var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + S.bottone() + '</nav>' +
+      (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Polvere e <span>Piombo</span></h1>' +
+      '<p class="tag">Duelli nel vecchio West con ruoli segreti: lo Sceriffo e i Vice contro i Fuorilegge, e un Rinnegato che vuole restare l\'ultimo. Da 4 a 7 giocatori.</p></header>' +
+      '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
+      '<input id="nm" class="field" maxlength="20" autocomplete="nickname" placeholder="Come ti chiamano?" value="' + esc(ui.name) + '">' +
+      '<button type="button" class="btn primary wide" data-act="new"' + (ui.online === 'up' ? '' : ' disabled') + '>' + label + '</button>' +
+      (ui.online === 'down' || ui.online === 'off' ? '<p class="muted small" style="margin:0">Non riesco a raggiungere i server di gioco. Controlla la connessione: riprovo da solo.</p>' : '') +
+      '</section>' + botPanelHTML() +
+      (isWide() ? '</div><div class="col-r">' : '') + '<section class="panel"><h2 class="h2">Le tue partite</h2>' + roomsListHTML() + '</section>' +
+      '<section class="panel"><h2 class="h2">Sullo stesso telefono</h2><p class="muted small" style="margin:0">Ruoli e carte in mano sono segreti: il telefono vi dice a chi passarlo, e ognuno guarda le sue carte con un tocco.</p>' +
+      '<button type="button" class="btn wide" data-act="go-local">' + (saved ? 'Riprendi la partita sul telefono' : 'Gioca qui con gli amici') + '</button>' +
+      (saved ? '<button type="button" class="linkbtn" data-act="local-reset">Ricomincia da capo</button>' : '') + '</section>' +
+      '<section class="panel howto"><h2 class="h2">Per giocare online</h2><ol>' +
+      '<li>Scrivi il tuo nome e tocca <b>Nuova partita online</b>.</li>' +
+      '<li>Manda il link agli amici, per esempio su WhatsApp. Servono almeno 4 giocatori: se siete meno, aggiungi dei bot.</li>' +
+      '<li>Quando ci siete tutti, chi ha creato la partita tocca <b>Inizia</b>. Ognuno vede il suo ruolo e le sue carte sul proprio telefono.</li></ol></section>' +
+      '<p class="note">Le mosse passano da due server pubblici gratuiti (HiveMQ ed EMQX), senza account: viaggiano solo i nomi e le carte. Ogni partita resta salvata anche sui vostri telefoni.</p>' +
+      '<p class="foot"><button type="button" class="linkbtn accent" data-act="rules">Regole, carte e personaggi</button></p>' + (isWide() ? '</div></div>' : '');
+  }
+  function localSetupHTML() {
+    var rows = ui.localNames.map(function (nm, i) {
+      return '<div class="row"><input id="ln-' + i + '" class="field" maxlength="20" placeholder="Giocatore ' + (i + 1) + '" value="' + esc(nm) + '" aria-label="Nome del giocatore ' + (i + 1) + '">' +
+        (ui.localNames.length > K.MIN_PLAYERS ? '<button type="button" class="icon-btn" data-act="ln-del" data-i="' + i + '" aria-label="Togli il giocatore ' + (i + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</div>';
+    }).join('');
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span>' + S.bottone() + '</header>' +
+      '<section class="panel"><h2 class="h2">Chi gioca?</h2><p class="muted small" style="margin:0">Da 4 a 7 giocatori, nell\'ordine in cui siete seduti.</p><div class="names">' + rows + '</div>' +
+      (ui.localNames.length < K.MAX_PLAYERS ? '<button type="button" class="btn sm" data-act="ln-add">+ Aggiungi un giocatore</button>' : '') +
+      '<button type="button" class="btn primary wide" data-act="local-start">Distribuisci ruoli e carte</button>' +
+      '<p class="muted small" style="margin:0">Ruoli e personaggi li decide il caso. Lo Sceriffo si scopre subito e comincia lui.</p></section>';
+  }
+  function shellHTML(msg, back) {
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span></span><span></span></header>' +
+      '<section class="panel"><p style="margin:0">' + msg + '</p>' + (back ? '<button type="button" class="btn wide" data-act="lobby">Torna alle partite</button>' : '') + '</section>';
+  }
+  function waitingHTML(s) {
+    var seat = K.seatOf(s, ui.myKey), host = seat === s.host;
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
+    var list = '<ul class="seated">' + s.seats.map(function (x, i) {
+      var tag = isBot(s, i) ? 'bot ' + esc(s.bots[i]) : (i === s.host ? 'ha creato la partita' : '') + (i === seat ? (i === s.host ? ' · tu' : 'tu') : '');
+      return '<li><span class="n">' + (i + 1) + '</span><span>' + hn(s, i) + botTag(s, i) + '</span><span class="tag">' + tag + '</span>' +
+        (host && isBot(s, i) ? '<button type="button" class="icon-btn" data-act="bot-del" data-seat="' + i + '" aria-label="Togli ' + hn(s, i) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</li>';
+    }).join('') + '</ul>';
+    var url = shareUrl(ui.gameId), canShare = typeof navigator.share === 'function';
+    var share = '<input id="share-url" class="field share" readonly value="' + esc(url) + '" aria-label="Link della partita">' +
+      '<div class="btnrow">' + (canShare ? '<button type="button" class="btn primary" data-act="share">Condividi…</button>' : '') +
+      '<button type="button" class="btn' + (canShare ? '' : ' primary') + '" data-act="copy">' + (ui.copied ? 'Copiato!' : 'Copia link') + '</button></div>';
+    var body, full = s.seats.length >= K.MAX_PLAYERS, enough = s.seats.length >= K.MIN_PLAYERS;
+    if (seat < 0) {
+      body = full ? '<p style="margin:0">Il tavolo è pieno.</p>' :
+        '<label class="lab" for="nm">Il tuo nome</label><input id="nm" class="field" maxlength="20" autocomplete="nickname" placeholder="Come ti chiamano?" value="' + esc(ui.name) + '">' +
+        '<button type="button" class="btn primary wide" data-act="join"' + (ui.online === 'up' ? '' : ' disabled') + '>' + (ui.online === 'up' ? 'Siediti al tavolo' : 'Mi collego…') + '</button>';
+    } else if (host) {
+      body = '<p style="margin:0">Manda il link agli amici. Servono almeno 4 giocatori: se siete meno, aggiungi dei bot.</p>' + share +
+        (full ? '' : '<div class="row-between"><span class="lab">Bot</span>' + segHTML('bot-lv', ui.botLv, LEVELS, 'Livello del bot') + '</div>' +
+          '<button type="button" class="btn wide" data-act="bot-add"' + (ui.online === 'up' ? '' : ' disabled') + '>+ Aggiungi un bot</button>') +
+        '<button type="button" class="btn primary wide" data-act="start"' + (enough && ui.online === 'up' ? '' : ' disabled') + '>' +
+        (enough ? 'Inizia con ' + s.seats.length + ' giocatori' : 'Servono almeno ' + K.MIN_PLAYERS + ' giocatori') + '</button>';
+    } else {
+      body = '<p style="margin:0">Sei seduto. Aspetta che ' + hn(s, s.host) + ' inizi la partita; intanto puoi invitare altri amici.</p>' + share;
+    }
+    return top + '<section class="panel">' + fanHTML() + '<h2 class="h2">' + s.seats.length + ' di ' + K.MAX_PLAYERS + ' al tavolo</h2>' + list + body + errHTML() + '</section>';
+  }
+  function onlineGameHTML() {
+    if (!ui.game) {
+      if (!net || ui.online === 'off') return shellHTML('Il gioco online non riesce a partire in questo browser: prova ad aprire il link con Chrome o Safari.', true);
+      return ui.gameMissing ? shellHTML('Non trovo ancora questa partita. Si carica appena qualcuno del tavolo apre la pagina; controlla anche che il link sia completo.', true) : shellHTML('Cerco la partita…');
+    }
+    if (ui.game.status === 'waiting') return waitingHTML(ui.game);
+    return boardHTML(ui.game);
+  }
+
+  /* ---------- fogli ---------- */
+  function sheetWrap(title, body, noClose) {
+    return '<div class="overlay" data-act="close" data-self="1"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t">' +
+      '<h2 id="sh-t">' + title + '</h2>' + body + (noClose ? '' : '<button type="button" class="btn wide" data-act="close">Chiudi</button>') + '</div></div>';
+  }
+  // La carta toccata: cosa fa e, se è il tuo turno, su chi giocarla.
+  function cardSheetHTML(s) {
+    var P = persp(s), me = P.me, c = ui.card;
+    if (!c || me < 0 || s.hand[me].indexOf(c) < 0) return '';
+    var T = K.typeOf(c), k = K.kindOf(c);
+    var body = '<div class="detail">' + cardHTML(c, { w: 104 }) + '<div><p class="eyebrow">' + (T.blue ? 'Carta blu: resta in gioco' : 'Si gioca e si scarta') + '</p><p class="txt">' + esc(T.text) + '</p>' +
+      (s.char[me] === 'rovescio' && (k === 'sparo' || k === 'schivata') ? '<p class="muted small">Gina Rovescio può usarla anche come ' + (k === 'sparo' ? 'Schivata!' : 'Sparo!') + '.</p>' : '') + '</div></div>';
+    var myTurn = canAct(s, P) && !s.prompt && s.phase === 'play' && s.turn === me;
+    if (!myTurn) return sheetWrap(esc(cfull(c)), body + '<p class="muted small">' + (k === 'schivata' ? 'La usi quando ti sparano.' : 'La potrai giocare nel tuo turno.') + '</p>');
+    var opts = K.playOptions(s, me, c), list = '';
+    var others = K.aliveList(s).filter(function (q) { return q !== me; });
+    var tgtBtn = function (q, extra, label, sub) {
+      var m = { type: 'play', c: c, target: q }; if (extra) m.pick = extra;
+      var err = K.playError(s, me, m), ch = K.CHAR[s.char[q]];
+      return '<button type="button" class="tgt' + (err ? '' : ' go') + '" data-act="play" data-c="' + c + '" data-t="' + q + '"' + (extra ? ' data-pick="' + extra + '"' : '') + (err ? ' disabled' : '') + '>' +
+        '<span class="av" aria-hidden="true">' + ch.art + '</span><span class="t"><b>' + label + '</b><small>' + (err ? esc(err) : sub) + '</small></span></button>';
+    };
+    if (K.asBang(s, me, c) || k === 'sfida' || k === 'galera') {
+      list = others.map(function (q) {
+        var d = K.dist(s, me, q);
+        return tgtBtn(q, null, (k === 'sfida' ? 'Sfida ' : k === 'galera' ? 'In Galera ' : 'Spara a ') + hn(s, q), 'a distanza ' + d + ' · ' + Math.max(0, s.hp[q]) + ' punti vita · ' + s.hand[q].length + ' carte in mano');
+      }).join('');
+      return sheetWrap(esc(K.asBang(s, me, c) ? 'Sparo!' : cname(c)), body + '<div class="tgts">' + list + '</div>' + errHTML());
+    }
+    if (k === 'borseggio' || k === 'lazo') {
+      list = others.map(function (q) {
+        var b = tgtBtn(q, 'hand', hn(s, q) + ': una carta a caso dalla mano', s.hand[q].length + ' carte in mano · a distanza ' + K.dist(s, me, q));
+        s.table[q].forEach(function (x) { b += tgtBtn(q, x, hn(s, q) + ': ' + esc(cname(x)), 'in gioco · a distanza ' + K.dist(s, me, q)); });
+        return b;
+      }).join('');
+      return sheetWrap(esc(cname(c)), body + '<div class="tgts">' + list + '</div>' + errHTML());
+    }
+    var err = K.playError(s, me, { type: 'play', c: c });
+    var label = T.blue ? (T.weapon && K.weaponOf(s, me) ? 'Metti in gioco (al posto di ' + esc(cname(K.weaponOf(s, me))) + ')' : 'Metti in gioco') : k === 'borraccia' ? 'Bevi' : 'Gioca';
+    return sheetWrap(esc(cname(c)), body + (err ? '<p class="err small">' + esc(err) + '</p>' : '') +
+      '<button type="button" class="btn primary wide" data-act="play" data-c="' + c + '"' + (err || !opts.length ? ' disabled' : '') + '>' + label + '</button>' + errHTML());
+  }
+  function whoSheetHTML(s) {
+    var P = persp(s), p = ui.who;
+    if (p < 0 || p >= s.seats.length) return '';
+    var ch = K.CHAR[s.char[p]], me = P.me;
+    var body = '<p>' + roleHTML(s, P, p) + ' ' + (s.alive[p] ? hpHTML(s, p, true) : '<b>eliminato</b>') + '</p>' +
+      '<p><b>' + ch.art + ' ' + esc(ch.name) + '</b> · ' + esc(ch.text) + '</p>' +
+      (s.alive[p] && me >= 0 && s.alive[me] && me !== p ? '<p class="muted">Lo vedi a distanza ' + K.dist(s, me, p) + '; la tua arma arriva a ' + K.reach(s, me) + '. Ha ' + s.hand[p].length + ' carte in mano.</p>' : '') +
+      (s.table[p].length ? '<h3>In gioco</h3><div class="catalog">' + s.table[p].map(function (c) { return '<div class="row">' + cardHTML(c, { w: 44 }) + '<div class="t"><b>' + esc(cname(c)) + '</b>' + esc(K.typeOf(c).text) + '</div></div>'; }).join('') + '</div>' : '');
+    return sheetWrap(hn(s, p) + botTag(s, p), body);
+  }
+  function resultKey(s) { return s ? s.v + '/' + s.status : null; }
+  function confettiHTML(team) {
+    var e = team === 'S' ? ['⭐', '🤠', '✨'] : team === 'F' ? ['💰', '💥', '🌵'] : ['🃏', '🌵', '✨'], h = '';
+    for (var i = 0; i < 24; i++) h += '<i style="left:' + K.randInt(100) + '%;--d:' + (K.randInt(120) / 100) + 's;--t:' + (2.4 + K.randInt(150) / 100) + 's">' + e[i % e.length] + '</i>';
+    return '<div class="confetti" aria-hidden="true">' + h + '</div>';
+  }
+  function resultHTML(s, P) {
+    var R = s.result, mine = P.me >= 0 && R.winners.indexOf(P.me) >= 0 && !P.local;
+    var title = { S: 'Vincono lo Sceriffo e i Vice!', F: 'Vincono i Fuorilegge!', R: 'Vince il Rinnegato!' }[R.team];
+    var rows = range(s.seats.length).map(function (p) {
+      return '<tr class="' + (R.winners.indexOf(p) >= 0 ? 'win' : '') + '"><td>' + (isMe(P, p) ? 'Tu' : hn(s, p)) + '</td><td>' + ROLE_TXT[s.role[p]] + '</td><td>' + K.CHAR[s.char[p]].art + ' ' + esc(K.CHAR[s.char[p]].name) + '</td><td>' + (s.alive[p] ? '❤️ ' + s.hp[p] : '☠️') + '</td></tr>';
+    }).join('');
+    var btns = (P.local || P.bot || P.seated ? '<button type="button" class="btn primary wide" data-act="rematch">Rivincita</button>' : '') +
+      (P.local ? '<button type="button" class="btn wide" data-act="local-reset">Nuovi giocatori</button>' : '') +
+      (P.bot ? '<button type="button" class="btn wide" data-act="lobby">Cambia avversari</button>' : '') +
+      '<button type="button" class="btn wide" data-act="hide-result">Guarda il tavolo</button>' + errHTML();
+    return confettiHTML(R.team) + '<div class="overlay" data-act="hide-result" data-self="1"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="res-t">' +
+      '<p class="eyebrow">Dopo ' + R.turns + ' turni</p><h2 id="res-t">' + title + '</h2>' +
+      (P.local || !P.seated ? '' : '<p class="muted">' + (mine ? 'Hai vinto anche tu!' : 'Questa volta hai perso.') + '</p>') +
+      '<table class="score"><thead><tr><th>Giocatore</th><th>Ruolo</th><th>Personaggio</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' + btns + '</div></div>';
+  }
+  function logHTML(s) {
+    var P = persp(s);
+    var items = (s.log || []).slice().reverse().map(function (e) {
+      var l = line(e, s, P);
+      return l ? '<li' + (l.sep ? ' class="sep"' : '') + '>' + l.e + ' ' + l.t + '</li>' : '';
+    }).join('');
+    return sheetWrap('Storico', items ? '<ul class="log">' + items + '</ul>' : '<p class="muted">Ancora nessuna mossa.</p>');
+  }
+  function rulesHTML() {
+    var counts = {};
+    K.ALL.forEach(function (c) { var k = K.kindOf(c); counts[k] = (counts[k] || 0) + 1; });
+    var firstOf = {}; K.ALL.forEach(function (c) { var k = K.kindOf(c); if (!firstOf[k]) firstOf[k] = c; });
+    var cards = Object.keys(K.TYPES).map(function (k) {
+      return '<div class="row">' + cardHTML(firstOf[k], { w: 44 }) + '<div class="t"><b>' + esc(K.TYPES[k].name) + ' ×' + counts[k] + '</b>' + esc(K.TYPES[k].text) + '</div></div>';
+    }).join('');
+    var chars = K.CHARS.map(function (c) { return '<div class="row"><span class="ch" aria-hidden="true">' + c.art + '</span><div class="t"><b>' + esc(c.name) + ' · ' + c.hp + ' punti vita</b>' + esc(c.text) + '</div></div>'; }).join('');
+    return sheetWrap('Come si gioca',
+      '<h3>I ruoli</h3><ul><li><b>Sceriffo</b> (scoperto, un punto vita in più): elimina Fuorilegge e Rinnegato. I <b>Vice</b> lo aiutano.</li>' +
+      '<li><b>Fuorilegge</b>: eliminano lo Sceriffo. Chi elimina un Fuorilegge pesca 3 carte.</li><li><b>Rinnegato</b>: vince solo se resta l\'ultimo in vita: deve eliminare tutti, lo Sceriffo per ultimo.</li>' +
+      '<li>In 4: Sceriffo, Rinnegato, 2 Fuorilegge. In 5 anche un Vice; in 6 un terzo Fuorilegge; in 7 un secondo Vice. Se lo Sceriffo elimina un Vice, scarta tutte le sue carte.</li></ul>' +
+      '<h3>Il turno</h3><ul><li><b>Pesca</b> 2 carte. <b>Gioca</b> le carte che vuoi: un solo Sparo! per turno, una sola arma, mai due carte blu uguali davanti. <b>Scarta</b> fino ad avere tante carte quanti punti vita.</li>' +
+      '<li>Si comincia dallo Sceriffo e si va in senso orario.</li></ul>' +
+      '<h3>Distanze</h3><ul><li>La distanza è il numero di posti fino all\'altro giocatore, dal lato più corto, contando solo i vivi. Il Cavallo ti allontana di 1, il Cannocchiale ti avvicina gli altri di 1.</li>' +
+      '<li>Senza armi spari a distanza 1; ogni arma dice fin dove arriva.</li></ul>' +
+      '<h3>Estrai!</h3><p>Si scopre la prima carta del mazzo e conta il seme: cuori per Botte e Galera, dal 2 al 9 di picche per far esplodere il Candelotto.</p>' +
+      '<h3>Morire</h3><p>Chi arriva a 0 punti vita può bere una Borraccia per restare in piedi (non quando restano in 2). Altrimenti è eliminato, scopre il ruolo e scarta tutte le carte.</p>' +
+      '<h3>Le carte (80)</h3><div class="catalog">' + cards + '</div>' +
+      '<h3>I personaggi</h3><div class="catalog">' + chars + '</div>');
+  }
+  function delHTML() {
+    var g = net ? net.carica(ui.sheetId) : null;
+    var label = g ? g.seats.map(function (x, i) { return hn(g, i); }).join(', ') : 'Questa partita';
+    return '<div class="overlay" data-act="close" data-self="1"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="del-t">' +
+      '<h2 id="del-t">Togliere la partita dalla lista?</h2><p>' + label + ': sparisce solo da questo telefono. Se riapri il link, la ritrovi.</p>' +
+      '<div class="btnrow"><button type="button" class="btn" data-act="close">Tienila</button><button type="button" class="btn primary" data-act="del">Togli</button></div></div></div>';
+  }
+  function layerHTML() {
+    var s = ui.route === 'lobby' ? null : cur();
+    if (ui.sheet === 'rules') return rulesHTML();
+    if (ui.sheet === 'del') return delHTML();
+    if (ui.sheet === 'log' && s) return logHTML(s);
+    if (ui.sheet === 'card' && s && s.status === 'playing') { var h = cardSheetHTML(s); if (h) return h; ui.sheet = null; }
+    if (ui.sheet === 'who' && s) return whoSheetHTML(s);
+    if (s && s.status === 'gameOver' && s.result && ui.hideResultKey !== resultKey(s)) return resultHTML(s, persp(s));
+    return '';
+  }
+
+  /* ---------- suoni ---------- */
+  function playSounds(s) {
+    var key = gameKey(s) + '/' + s.createdAt;
+    var lastI = s.log.length ? (s.log[s.log.length - 1].i || 0) : 0;
+    var P = persp(s), mine = isMine(s, P) && !P.local;
+    if (ui.seenKey !== key) { ui.seenKey = key; ui.seenI = lastI; ui.lastMine = mine; return; }
+    var names = [];
+    if (lastI > ui.seenI) {
+      s.log.forEach(function (e) {
+        if ((e.i || 0) <= ui.seenI) return;
+        var fx = null;
+        if (e.t === 'play') fx = e.as === 'sparo' || K.kindOf(e.c) === 'raffica' ? 'fuoco' : K.kindOf(e.c) === 'mercato' ? 'mescola' : 'carta';
+        else fx = { equip: 'compra', miss: 'scarta', hurt: 'errore', heal: 'anima', saved: 'anima', dead: 'evoca', boom: 'fuoco', steal: 'ruba', lazo: 'ruba', rancore: 'ruba', lesta: 'ruba',
+          pick: 'carta', reward: 'moneta', reshuffle: 'mescola', end: 'vittoria', estrai: 'carta', duelShot: 'fuoco', bisok: 'scarta' }[e.t] || null;
+        if (fx) names.push(fx);
+      });
+      ui.seenI = lastI;
+    }
+    if (mine && !ui.lastMine) names.push('turno');
+    ui.lastMine = mine;
+    if (names.length > 6) names = names.slice(-6);
+    if (names.length) S.sequenza(names, 0.17);
+  }
+
+  /* ---------- render ---------- */
+  function captureFocus() {
+    var a = document.activeElement;
+    if (!a || !a.id || a === document.body) return null;
+    return { id: a.id, start: a.selectionStart, end: a.selectionEnd, input: a.tagName === 'INPUT' };
+  }
+  function restoreFocus(f) {
+    if (!f) return;
+    var el = document.getElementById(f.id);
+    if (!el || el.disabled) return;
+    try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+    if (f.input && f.start != null) { try { el.setSelectionRange(f.start, f.end); } catch (e) { /* ok */ } }
+  }
+  function updateTitle() {
+    var mine = net && net.elenco().some(function (id) {
+      var s = net.carica(id);
+      if (!s || s.status !== 'playing') return false;
+      var seat = K.seatOf(s, ui.myKey);
+      return seat >= 0 && K.nextActor(s) === seat;
+    });
+    document.title = mine ? '● Tocca a te · Polvere e Piombo' : 'Polvere e Piombo';
+  }
+  function render() {
+    var f = captureFocus();
+    var html, s = ui.route === 'lobby' ? null : cur();
+    if (ui.route === 'lobby') html = lobbyHTML();
+    else if (ui.route === 'local') html = ui.local ? boardHTML(ui.local) : localSetupHTML();
+    else if (ui.route === 'bot') html = boardHTML(ui.bot);
+    else html = onlineGameHTML();
+    $app.innerHTML = html;
+    $app.classList.toggle('wide', html.indexOf('<div class="desk') >= 0);
+    var lh = layerHTML();
+    if (lh !== ui.layerHTML) {
+      var old = $layer.querySelector('.sheet'), top = old ? old.scrollTop : 0, same = ui.layerSheet === ui.sheet;
+      $layer.innerHTML = lh; ui.layerHTML = lh;
+      var nw = $layer.querySelector('.sheet');
+      if (nw && same && top) nw.scrollTop = top;
+    }
+    ui.layerSheet = ui.sheet;
+    restoreFocus(f);
+    updateTitle();
+    if (s && s.status !== 'waiting') playSounds(s);
+    autoBots();
+  }
+
+  /* ---------- rotte ---------- */
+  function route() {
+    var h = (location.hash || '').replace(/^#/, '');
+    clearTimeout(ui.botTimer); ui.botKey = null;
+    if (h === 'locale') { ui.route = 'local'; ui.gameId = null; }
+    else if (h === 'computer' && ui.bot) { ui.route = 'bot'; ui.gameId = null; }
+    else if (/^partita-[a-z0-9]{6,20}$/.test(h)) { ui.route = 'game'; openGame(h.slice(8)); }
+    else { ui.route = 'lobby'; ui.gameId = null; }
+    ui.sheet = null; ui.error = ''; ui.mode = null; ui.sel = []; ui.prevHp = null;
+    render();
+    window.scrollTo(0, 0);
+  }
+  function go(hash) {
+    if (('#' + (location.hash || '').replace(/^#/, '')) === hash || (hash === '' && !location.hash)) { route(); return; }
+    location.hash = hash;
+  }
+  window.addEventListener('hashchange', route);
+
+  /* ---------- online ---------- */
+  function openGame(id) {
+    ui.gameId = id;
+    ui.game = net ? net.carica(id) : null;
+    ui.gameMissing = false; ui.hideResultKey = null;
+    if (ui.missTimer) clearTimeout(ui.missTimer);
+    if (!ui.game) ui.missTimer = setTimeout(function () { if (ui.gameId === id && !ui.game) { ui.gameMissing = true; if (ui.route === 'game') render(); } }, 9000);
+    if (net) net.guarda(id);
+  }
+  function onRoom(id, prev, data) {
+    var seat = K.seatOf(data, ui.myKey);
+    var mineNow = seat >= 0 && data.status === 'playing' && K.nextActor(data) === seat;
+    var minePrev = !!prev && seat >= 0 && prev.status === 'playing' && K.nextActor(prev) === seat;
+    if (mineNow && !minePrev && prev) { try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) { /* ok */ } }
+    if (ui.route === 'game' && ui.gameId === id) {
+      var old = ui.game;
+      ui.game = data; ui.gameMissing = false;
+      if (old && (old.v !== data.v || old.nonce !== data.nonce)) { ui.error = ''; if (!mineNow) ui.mode = null; }
+      render();
+    } else if (ui.route === 'lobby') render();
+    else updateTitle();
+    checkJoin(id, data);
+  }
+  function checkJoin(id, s) {
+    var j = ui.pendingJoin;
+    if (!j || j.id !== id) return;
+    if (s.status !== 'waiting' || K.seatOf(s, ui.myKey) >= 0 || s.seats.length >= K.MAX_PLAYERS) { ui.pendingJoin = null; return; }
+    setTimeout(function () {
+      var c = net.carica(id);
+      if (ui.pendingJoin !== j || !c || c.status !== 'waiting' || K.seatOf(c, ui.myKey) >= 0) return;
+      var r = K.join(c, ui.myKey, j.name);
+      if (!r.ok) { ui.pendingJoin = null; return; }
+      r.state.nonce = net.nonce();
+      if (!net.pubblica(id, r.state)) return;
+      net.salva(id, r.state); net.aggiungi(id);
+      if (ui.route === 'game' && ui.gameId === id) { ui.game = r.state; render(); }
+    }, 250 + Math.floor(Math.random() * 650));
+  }
+  function writeGame(make, opts) {
+    opts = opts || {};
+    var id = ui.gameId;
+    var curS = id && net ? (net.carica(id) || ui.game) : null;
+    if (!curS) return false;
+    if (opts.expectV != null && curS.v !== opts.expectV) {
+      if (!opts.quiet) ui.error = 'Il tavolo era cambiato: ecco la situazione aggiornata.';
+      ui.game = curS; render(); return false;
+    }
+    var r = make(K.clone(curS));
+    if (!r.ok) { if (!opts.quiet) { ui.error = r.error; S.effetto('errore'); } ui.game = curS; render(); return false; }
+    var next = r.state;
+    next.nonce = net.nonce();
+    if (!net.pubblica(id, next)) { if (!opts.quiet) ui.error = 'Sei offline: la mossa non è partita. Riprova appena torna la connessione.'; render(); return false; }
+    net.salva(id, next); net.aggiungi(id);
+    ui.game = next; ui.error = '';
+    render();
+    return true;
+  }
+  function createGame() {
+    if (!net || ui.online !== 'up') return;
+    var name = (ui.name || '').trim() || 'Giocatore 1';
+    LS.set('pp-name', name);
+    var id = rnd36(10);
+    var s = K.newGame({ key: ui.myKey, name: name });
+    s.nonce = net.nonce();
+    net.aggiungi(id); net.salva(id, s); net.guarda(id); net.pubblica(id, s);
+    go('#partita-' + id);
+  }
+
+  /* ---------- sullo stesso telefono e contro il computer ---------- */
+  function loadLocal() { try { var s = JSON.parse(LS.get('pp-local') || 'null'); return s && s.mode === 'local' && validState(s) ? s : null; } catch (e) { return null; } }
+  function saveLocal() { if (ui.local) LS.set('pp-local', JSON.stringify(ui.local)); else LS.del('pp-local'); }
+  function loadBot() { try { var s = JSON.parse(LS.get('pp-bot') || 'null'); return s && s.mode === 'bot' && validState(s) ? s : null; } catch (e) { return null; } }
+  function saveBot() { if (ui.bot) LS.set('pp-bot', JSON.stringify(ui.bot)); else LS.del('pp-bot'); }
+  var BOT_NAMES = ['Jolanda', 'Tex Lupo', 'Calamaro', 'Rosa Spina', 'Gigi Colt', 'Nevada', 'Tumbleweed'];
+  function freeBotName(s) {
+    var used = s.seats.map(function (x) { return x.name; });
+    for (var i = 0; i < BOT_NAMES.length; i++) if (used.indexOf(BOT_NAMES[i]) < 0) return BOT_NAMES[i];
+    return 'Bot ' + (s.seats.length + 1);
+  }
+  // I bot giocano da soli, con una pausa per far vedere ogni mossa. Online li muove chi ha creato la partita;
+  // se non c'è, dopo un po' ci pensano gli altri giocatori seduti.
+  function botWait(s) {
+    var last = s.log[s.log.length - 1], w = 900;
+    if (last && (last.t === 'hurt' || last.t === 'dead' || last.t === 'boom' || last.t === 'estrai')) w = 1400;
+    else if (last && (last.t === 'turn' || last.t === 'draw')) w = 1000;
+    if (s.prompt) w = 800;
+    if (ui.route === 'bot' && !s.alive[0]) w = Math.round(w * 0.35); // se sei già fuori, la partita corre verso la fine
+    return ui.botFast ? Math.round(w * 0.4) : w;
+  }
+  function autoBots() {
+    var s = ui.route === 'bot' ? ui.bot : ui.route === 'game' ? ui.game : null;
+    if (!s || s.status !== 'playing' || !BOT) { clearTimeout(ui.botTimer); ui.botKey = null; return; }
+    var a = K.nextActor(s);
+    if (a < 0 || !isBot(s, a)) { clearTimeout(ui.botTimer); ui.botKey = null; return; }
+    var key = ui.route + ':' + s.createdAt + ':' + s.v + ':' + s.nonce;
+    if (ui.botKey === key) return;
+    clearTimeout(ui.botTimer); ui.botKey = key;
+    var wait = botWait(s);
+    if (ui.route === 'game') {
+      var me = K.seatOf(s, ui.myKey);
+      if (me < 0 || ui.online !== 'up') { ui.botKey = null; return; }
+      if (me !== s.host) wait = 7000 + 1500 * me;
+    }
+    ui.botTimer = setTimeout(function () {
+      ui.botKey = null;
+      var c = ui.route === 'bot' ? ui.bot : ui.route === 'game' ? (net.carica(ui.gameId) || ui.game) : null;
+      if (!c || ui.route + ':' + c.createdAt + ':' + c.v + ':' + c.nonce !== key) { render(); return; }
+      var mv = BOT.mossa(c, a, c.bots[a]);
+      if (!mv) return;
+      if (ui.route === 'bot') {
+        var r = K.act(c, a, mv);
+        if (r.ok) { ui.bot = r.state; saveBot(); }
+        render();
+      } else writeGame(function (x) { return K.act(x, a, mv); }, { expectV: c.v, quiet: true });
+    }, wait);
+  }
+
+  /* ---------- azioni ---------- */
+  function play(move) {
+    var s = cur(); if (!s) return false;
+    var P = persp(s), seat = P.me;
+    if (seat < 0) return false;
+    if (P.bot || P.local) {
+      var r = K.act(s, seat, move);
+      if (!r.ok) { ui.error = r.error; S.effetto('errore'); render(); return false; }
+      if (P.bot) { ui.bot = r.state; saveBot(); }
+      else { ui.local = r.state; saveLocal(); if (K.nextActor(ui.local) !== seat) ui.handOpen = -1; }
+      ui.error = ''; ui.mode = null; ui.sel = [];
+      render();
+      return true;
+    }
+    var ok = writeGame(function (c) { return K.act(c, seat, move); }, { expectV: s.v });
+    if (ok) { ui.mode = null; ui.sel = []; }
+    return ok;
+  }
+  function readNames() {
+    ui.localNames = ui.localNames.map(function (nm, i) { var el = document.getElementById('ln-' + i); return el ? el.value : nm; });
+    LS.set('pp-lnames', JSON.stringify(ui.localNames));
+  }
+  function meNow() { var s = cur(); return s ? persp(s).me : -1; }
+  var actions = {
+    lobby: function () { go(''); },
+    'go-local': function () { go('#locale'); },
+    open: function (el) { go('#partita-' + el.dataset.id); },
+    'new': createGame,
+    'ask-del': function (el) { ui.sheet = 'del'; ui.sheetId = el.dataset.id; render(); },
+    del: function () { var id = ui.sheetId; ui.sheet = null; if (net && id) net.togli(id); render(); },
+    close: function () { ui.sheet = null; ui.error = ''; render(); },
+    rules: function () { ui.sheet = 'rules'; render(); },
+    log: function () { ui.sheet = 'log'; render(); },
+    who: function (el) { ui.who = +el.dataset.seat; ui.sheet = 'who'; render(); },
+    card: function (el) { ui.card = el.dataset.c; ui.sheet = 'card'; ui.error = ''; S.effetto('click'); render(); },
+    'hide-result': function () { ui.hideResultKey = resultKey(cur()); ui.error = ''; render(); },
+    'show-result': function () { ui.hideResultKey = null; render(); },
+    share: function () {
+      var s = ui.game, text = (s ? nameOf(s, s.host) : 'Un amico') + ' ti invita a Polvere e Piombo: apri il link e siediti al tavolo.';
+      if (navigator.share) navigator.share({ title: 'Polvere e Piombo', text: text, url: shareUrl(ui.gameId) }).catch(function () { /* annullato */ });
+      else actions.copy();
+    },
+    copy: function () {
+      var done = function () { ui.copied = true; render(); setTimeout(function () { ui.copied = false; render(); }, 2200); };
+      var fallback = function () { var el = document.getElementById('share-url'); if (el) { el.focus(); el.select(); } };
+      try { navigator.clipboard.writeText(shareUrl(ui.gameId)).then(done, fallback); } catch (e) { fallback(); }
+    },
+    join: function () {
+      var name = (ui.name || '').trim() || 'Giocatore';
+      LS.set('pp-name', name);
+      var key = ui.myKey;
+      if (writeGame(function (c) { return K.join(c, key, name); })) ui.pendingJoin = { id: ui.gameId, name: name };
+    },
+    start: function () { var s = ui.game; if (s && writeGame(function (c) { return K.startGame(c); }, { expectV: s.v })) S.effetto('mescola'); },
+    'bot-add': function () { var s = ui.game; if (s) writeGame(function (c) { return K.addBot(c, ui.botLv, freeBotName(c)); }, { expectV: s.v }); },
+    'bot-del': function (el) { var s = ui.game, i = +el.dataset.seat; if (s) writeGame(function (c) { return K.removeBot(c, i); }, { expectV: s.v }); },
+    play: function (el) {
+      var m = { type: 'play', c: el.dataset.c };
+      if (el.dataset.t != null) m.target = +el.dataset.t;
+      if (el.dataset.pick) m.pick = el.dataset.pick;
+      if (play(m)) { ui.sheet = null; render(); }
+    },
+    end: function () { play({ type: 'end' }); },
+    dodge: function () {
+      var s = cur(), me = meNow(), pr = s && s.prompt;
+      if (!pr) return;
+      var dc = K.dodgeCards(s, me).sort(function (a, b) { return (K.kindOf(a) === 'schivata' ? 0 : 1) - (K.kindOf(b) === 'schivata' ? 0 : 1); });
+      play({ type: 'answer', cards: dc.slice(0, pr.need) });
+    },
+    bang: function () { var s = cur(), me = meNow(), bc = K.bangCards(s, me).sort(function (a, b) { return (K.kindOf(a) === 'sparo' ? 0 : 1) - (K.kindOf(b) === 'sparo' ? 0 : 1); }); play({ type: 'answer', cards: bc.slice(0, 1) }); },
+    pass: function () { play({ type: 'answer', pass: true }); },
+    beer: function () { var s = cur(), me = meNow(); play({ type: 'answer', beer: s.hand[me].filter(function (c) { return K.kindOf(c) === 'borraccia'; }).slice(0, s.prompt.need) }); },
+    store: function (el) { play({ type: 'answer', pick: el.dataset.c }); },
+    putback: function (el) { play({ type: 'answer', pick: el.dataset.c }); },
+    lesta: function (el) { play({ type: 'answer', target: +el.dataset.seat }); },
+    yes: function (el) { play({ type: 'answer', yes: el.dataset.v === '1' }); },
+    mode: function (el) { ui.mode = el.dataset.mode; ui.sel = []; ui.selKey = null; render(); },
+    'mode-off': function () { ui.mode = null; ui.sel = []; render(); },
+    pick: function (el) {
+      var c = el.dataset.c, i = ui.sel.indexOf(c), s = cur();
+      var max = ui.mode === 'heal' ? 2 : s && s.prompt && s.prompt.kind === 'discard' ? s.prompt.n : 99;
+      if (i >= 0) ui.sel.splice(i, 1); else { ui.sel.push(c); if (ui.sel.length > max) ui.sel.shift(); }
+      render();
+    },
+    'heal-go': function () { play({ type: 'heal', cards: ui.sel.slice() }); },
+    'discard-go': function () { play({ type: 'answer', cards: ui.sel.slice() }); },
+    'sid-go': function () {
+      var s = cur(), me = meNow(), pr = s.prompt;
+      var beers = K.aliveCount(s) > 2 ? s.hand[me].filter(function (c) { return K.kindOf(c) === 'borraccia' && ui.sel.indexOf(c) < 0; }).slice(0, pr.need) : [];
+      play({ type: 'answer', beer: beers.slice(0, Math.max(0, pr.need - Math.floor(ui.sel.length / 2))), sid: ui.sel.slice() });
+    },
+    'hand-open': function () { var s = cur(); if (s) { ui.handOpen = persp(s).me; render(); } },
+    rematch: function () {
+      if (ui.route === 'bot') { var rb = K.rematch(ui.bot); if (rb.ok) { ui.bot = rb.state; ui.hideResultKey = null; saveBot(); S.effetto('mescola'); render(); } return; }
+      if (ui.route === 'local') { var r = K.rematch(ui.local); if (r.ok) { ui.local = r.state; ui.hideResultKey = null; ui.handOpen = -1; saveLocal(); S.effetto('mescola'); render(); } return; }
+      var s = ui.game; if (s && writeGame(function (c) { return K.rematch(c); }, { expectV: s.v })) S.effetto('mescola');
+    },
+    'ln-add': function () { readNames(); if (ui.localNames.length < K.MAX_PLAYERS) ui.localNames.push(''); LS.set('pp-lnames', JSON.stringify(ui.localNames)); render(); },
+    'ln-del': function (el) { readNames(); ui.localNames.splice(+el.dataset.i, 1); LS.set('pp-lnames', JSON.stringify(ui.localNames)); render(); },
+    'bot-n': function (el) { ui.botN = +el.dataset.v; LS.set('pp-botn', String(ui.botN)); render(); },
+    'bot-lv': function (el) { ui.botLv = el.dataset.v; LS.set('pp-botlv', ui.botLv); render(); },
+    'bot-fast': function (el) { ui.botFast = el.dataset.v === '1'; LS.set('pp-botfast', ui.botFast ? '1' : '0'); render(); },
+    'bot-start': function () {
+      var me = (ui.name || '').trim() || 'Tu';
+      ui.bot = K.startBots([me].concat(BOT_NAMES.slice(0, ui.botN)), ui.botLv);
+      ui.hideResultKey = null; saveBot(); S.effetto('mescola');
+      go('#computer');
+    },
+    'bot-resume': function () { go('#computer'); },
+    'local-start': function () {
+      readNames();
+      var names = ui.localNames.map(function (nm, i) { return (nm || '').trim() || 'Giocatore ' + (i + 1); });
+      ui.local = K.startLocal(names); ui.hideResultKey = null; ui.handOpen = -1; saveLocal(); S.effetto('mescola'); render();
+    },
+    'local-reset': function () { ui.local = null; ui.handOpen = -1; saveLocal(); ui.hideResultKey = null; if (ui.route === 'local') render(); else go('#locale'); }
+  };
+
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-act]');
+    if (!el || el.disabled) return;
+    if (el.dataset.self && ev.target !== el) return;
+    var fn = actions[el.dataset.act];
+    if (fn) { ev.preventDefault(); fn(el, ev); }
+  });
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (t.id === 'nm') { ui.name = t.value; LS.set('pp-name', t.value); }
+    else if (/^ln-\d+$/.test(t.id)) { ui.localNames[+t.id.slice(3)] = t.value; LS.set('pp-lnames', JSON.stringify(ui.localNames)); }
+  });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && ui.sheet) { ui.sheet = null; render(); } });
+
+  /* ---------- avvio ---------- */
+  ui.local = loadLocal();
+  ui.bot = loadBot();
+  if (WIDE_MQ) {
+    var onWide = function () { render(); };
+    if (WIDE_MQ.addEventListener) WIDE_MQ.addEventListener('change', onWide); else if (WIDE_MQ.addListener) WIDE_MQ.addListener(onWide);
+  }
+  route();
+  if (net) net.avvia(); else { ui.online = 'off'; render(); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sala giochi</title>
+<meta name="description" content="Giochi da tavolo da fare online con gli amici: crei la partita, mandi il link e si gioca.">
+<meta name="theme-color" content="#131833">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='12' y='4' width='40' height='56' rx='7' fill='%23f5aa3e'/%3E%3Ccircle cx='32' cy='32' r='9' fill='none' stroke='%232a1903' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<style>
+:root {
+  /* Sala giochi: la stessa notte indaco dei giochi, copertine in griglia, accento zafferano solo sui pulsanti. */
+  /* Layout: intestazione breve, poi una scheda per gioco (una colonna sul telefono, due sul computer). */
+  --table: #131833;
+  --panel: #1b2246;
+  --raise: #283161;
+  --line: #3b4784;
+  --text: #f6eedd;
+  --muted: #b3b5d4;
+  --saffron: #f5aa3e;
+  --on-saffron: #2a1903;
+  --font-display: "Rozha One", Georgia, "Times New Roman", serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background-color: var(--table);
+  background-image:
+    radial-gradient(circle, rgba(245, 170, 62, .09) 1.6px, transparent 2.2px),
+    radial-gradient(circle, rgba(255, 255, 255, .045) 1px, transparent 1.6px);
+  background-size: 24px 24px, 24px 24px;
+  background-position: 0 0, 12px 12px;
+  color: var(--text);
+  font: 16px/1.45 var(--font-body);
+}
+main { max-width: 780px; margin: 0 auto; padding: 40px 16px 48px; }
+@media (min-width: 1100px) { main { max-width: 1140px; padding: 48px 24px 56px; } } /* sul computer tre giochi per riga */
+header h1 { font: 56px/1 var(--font-display); margin: 0; text-wrap: balance; }
+header .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+header h1 span { color: var(--saffron); }
+header p { color: var(--muted); margin: 12px 0 0; max-width: 42ch; font-size: 17px; }
+.list { list-style: none; padding: 0; margin: 30px 0 0; display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.game { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+.game img { display: block; width: 100%; height: auto; aspect-ratio: 5 / 3; background: #0e1228; }
+.game .body { padding: 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.game h2 { font: 28px/1.1 var(--font-display); margin: 0; text-wrap: balance; }
+.game p { margin: 0; color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+.tags li { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--raise); border: 1px solid var(--line); }
+.play {
+  margin-top: auto; display: flex; justify-content: center; align-items: center; min-height: 48px; border-radius: 12px;
+  background: var(--saffron); color: var(--on-saffron); font-weight: 700; font-size: 16px; text-decoration: none;
+}
+.play:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .play:hover { filter: brightness(1.1); } .game:hover { border-color: #56639f; } }
+footer { margin-top: 30px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="top"><h1>Sala <span>giochi</span></h1><span id="snd"></span></div>
+    <p>Giochi da tavolo da fare online con gli amici: crei la partita, mandi il link e si gioca.</p>
+  </header>
+  <ul class="list" id="list">
+    <li class="game"><div class="body"><h2>Gran Bazar</h2><a class="play" href="gran-bazar/">Gioca</a></div></li>
+  </ul>
+  <footer>Altri giochi in arrivo.</footer>
+</main>
+<script src="lib/ambiente.js"></script>
+<script src="lib/suoni.js"></script>
+<script>
+// Per aggiungere un gioco: crea la sua cartella (con index.html e copertina.svg) e aggiungi una voce qui.
+var GIOCHI = [
+  {
+    cartella: 'gran-bazar/',
+    nome: 'Gran Bazar',
+    descrizione: 'Compra, scambia e vendi merci contro un altro mercante. Vince chi conquista due manche.',
+    etichette: ['2 giocatori', '20–30 minuti', 'Online o sullo stesso telefono'],
+    copertina: 'gran-bazar/copertina.svg'
+  },
+  {
+    cartella: 'sottozero/',
+    nome: 'Sottozero',
+    descrizione: 'Scambia le carte della tua griglia, elimina le colonne abbinate e chiudi ogni round con meno punti possibile.',
+    etichette: ['2–8 giocatori', '15–30 minuti', 'Online o sullo stesso telefono'],
+    copertina: 'sottozero/copertina.svg'
+  },
+  {
+    cartella: 'piccante/',
+    nome: 'Piccante',
+    descrizione: 'Scommetti quante prese farai: ogni presa di troppo o di meno è un peperoncino. Ogni round una missione cambia le regole.',
+    etichette: ['2–8 giocatori', '20–40 minuti', 'Online o sullo stesso telefono'],
+    copertina: 'piccante/copertina.svg'
+  },
+  {
+    cartella: 'diavolerie/',
+    nome: 'Diavolerie',
+    descrizione: 'Tira i dadi, raccogli anime e compra amici nel Quartiere; poi spegnili per evocare demoni. Vince chi ne ha 3 e 10 anime.',
+    etichette: ['2–5 giocatori', '30–45 minuti', 'Online o sullo stesso telefono', 'Anche contro il computer'],
+    copertina: 'diavolerie/copertina.svg'
+  },
+  {
+    cartella: 'sette-stelle/',
+    nome: 'Sette Stelle',
+    descrizione: 'Pesca stelle numerate e fermati in tempo: con un doppione sballi, con sette numeri diversi prendi 15 punti in più. Vince chi arriva a 200.',
+    etichette: ['2–8 giocatori', '20 minuti', 'Online o sullo stesso telefono', 'Anche contro il computer'],
+    copertina: 'sette-stelle/copertina.svg'
+  },
+  {
+    cartella: 'polvere-e-piombo/',
+    nome: 'Polvere e Piombo',
+    descrizione: 'Duelli nel vecchio West con ruoli segreti: lo Sceriffo e i Vice contro i Fuorilegge, e un Rinnegato che vuole restare l\'ultimo.',
+    etichette: ['4–7 giocatori', '30–45 minuti', 'Online o sullo stesso telefono', 'Anche contro il computer'],
+    copertina: 'polvere-e-piombo/copertina.svg'
+  }
+];
+
+// Musica di sottofondo della sala e pulsante audio (la scelta vale per tutti i giochi).
+if (window.Suoni) { Suoni.tema('sala'); document.getElementById('snd').innerHTML = Suoni.bottone(); }
+
+(function () {
+  var list = document.getElementById('list');
+  list.textContent = '';
+  GIOCHI.forEach(function (g) {
+    var li = document.createElement('li');
+    li.className = 'game';
+    var cover = document.createElement('a');
+    cover.href = g.cartella;
+    cover.tabIndex = -1;
+    cover.setAttribute('aria-hidden', 'true');
+    var img = document.createElement('img');
+    img.src = g.copertina; img.alt = ''; img.width = 600; img.height = 360;
+    cover.appendChild(img);
+    var body = document.createElement('div');
+    body.className = 'body';
+    var h2 = document.createElement('h2');
+    h2.textContent = g.nome;
+    var p = document.createElement('p');
+    p.textContent = g.descrizione;
+    var tags = document.createElement('ul');
+    tags.className = 'tags';
+    (g.etichette || []).forEach(function (t) { var e = document.createElement('li'); e.textContent = t; tags.appendChild(e); });
+    var play = document.createElement('a');
+    play.className = 'play'; play.href = g.cartella; play.textContent = 'Gioca a ' + g.nome;
+    body.append(h2, p, tags, play);
+    li.append(cover, body);
+    list.appendChild(li);
+  });
+})();
+</script>
+</body>
+</html>
