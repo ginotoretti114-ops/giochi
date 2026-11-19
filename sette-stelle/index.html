@@ -230,6 +230,43 @@ table.score td.z { color: var(--bad); }
 
 @media (prefers-reduced-motion: reduce) { .sc.new, .sc.flip, .confetti i, .thinking { animation: none !important; } }
 @media (max-width: 400px) { .topbar .bk { display: none; } .lc .sc { --w: 27px; } .lane.me .lc .sc { --w: 31px; } .bar { width: 60px; } }
+
+/* ---------- computer e schermi larghi: lobby e tavolo su due colonne, fogli al centro ---------- */
+@media (min-width: 1000px) {
+  #app.wide { max-width: 1240px; padding: 0 28px; }
+  #app.wide > .hubnav { width: 100%; max-width: 1040px; margin: 0 auto; }
+  .desk { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 440px); gap: 0 28px; align-items: start; }
+  .desk > div { min-width: 0; }
+  .desk .col-r { position: sticky; top: 10px; max-height: calc(100vh - 20px); overflow: auto; padding: 0 4px 12px; margin: 0 -4px; scrollbar-width: thin; }
+  .desk .col-r > :first-child { margin-top: 8px; }
+  .desk .actions { position: static; margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); max-height: none; overflow: visible; }
+  .desk.lobby { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); width: 100%; max-width: 1040px; margin: 0 auto 28px; gap: 0 24px; }
+  .desk.lobby .col-r { position: static; max-height: none; overflow: visible; padding: 0; margin: 0; }
+  .desk.lobby .col-r > .panel:first-child { margin-top: 14px; }
+  .desk.lobby .note { margin-top: 16px; }
+}
+@media (min-width: 700px) and (min-height: 520px) {
+  .overlay { align-items: center; padding: 24px; }
+  .sheet { border-radius: 20px; border-bottom: 1px solid var(--line); max-height: 86vh; padding-bottom: 22px; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled):hover, .chip-btn:hover, .gopen:hover { filter: brightness(1.12); }
+  .seg button:not([aria-pressed="true"]):hover { color: var(--text); }
+  .linkbtn:hover { color: var(--text); }
+}
+@media (min-width: 1000px) {
+  .desk .lc .sc { --w: 42px; }
+  .desk .lane.me .lc .sc { --w: 46px; }
+  .desk .lc { min-height: 60px; }
+  .desk .reveal .sc { --w: 92px; }
+  .desk .reveal .slot { width: 92px; }
+  .desk .pile .sc { --w: 62px; }
+}
+@media (min-width: 1200px) {
+  .desk .lanes.two { grid-template-columns: 1fr 1fr; }
+  .desk .lanes.two .lc .sc, .desk .lanes.two .lane.me .lc .sc { --w: 33px; }
+  .desk .lanes.two .lc { min-height: 48px; }
+}
 </style>
 </head>
 <body>
@@ -251,6 +288,10 @@ table.score td.z { color: var(--bad); }
   var S = window.Suoni || { tema: function () {}, effetto: function () {}, sequenza: function () {}, bottone: function () { return ''; } };
   var $app = document.getElementById('app');
   var $layer = document.getElementById('layer');
+
+  // Su schermi larghi (computer, tablet in orizzontale) lobby e tavolo si dividono in due colonne.
+  var WIDE_MQ = window.matchMedia ? window.matchMedia('(min-width: 1000px)') : null;
+  function isWide() { return !!(WIDE_MQ && WIDE_MQ.matches); }
   var LS = {
     get: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* niente memoria */ } },
@@ -453,6 +494,8 @@ table.score td.z { color: var(--bad); }
     var fresh = key && ui.seenCard !== key ? e : null;
     if (key) ui.seenCard = key;
     var lanes = range(s.seats.length).map(function (p) { return laneHTML(s, p, P, fresh); }).join('');
+    if (isWide()) return topbarHTML(s, P) + bannersHTML(s, P) + '<div class="desk"><div class="col-l"><div class="lanes' + (s.seats.length > 4 ? ' two' : '') + '">' + lanes + '</div></div>' +
+      '<div class="col-r">' + statusHTML(s, P) + skyHTML(s, P, !!fresh) + '<div id="actions" class="actions">' + actionsHTML(s, P) + '</div></div></div>';
     return topbarHTML(s, P) + bannersHTML(s, P) + statusHTML(s, P) + skyHTML(s, P, !!fresh) +
       '<div class="lanes">' + lanes + '</div><div class="spacer"></div><div id="actions" class="actions">' + actionsHTML(s, P) + '</div>';
   }
@@ -512,14 +555,14 @@ table.score td.z { color: var(--bad); }
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
     return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + S.bottone() + '</nav>' +
-      '<header class="brand">' + fanHTML() + '<h1>Sette <span>Stelle</span></h1>' +
+      (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Sette <span>Stelle</span></h1>' +
       '<p class="tag">Pesca stelle numerate e fermati in tempo: con un doppione sballi e perdi il round. Sette numeri diversi valgono 15 punti in più. Vince chi arriva a 200. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
       '<input id="nm" class="field" maxlength="20" autocomplete="nickname" placeholder="Come ti chiamano?" value="' + esc(ui.name) + '">' +
       '<button type="button" class="btn primary wide" data-act="new"' + (ui.online === 'up' ? '' : ' disabled') + '>' + label + '</button>' +
       (ui.online === 'down' || ui.online === 'off' ? '<p class="muted small" style="margin:0">Non riesco a raggiungere i server di gioco. Controlla la connessione: riprovo da solo.</p>' : '') +
       '</section>' + botPanelHTML() +
-      '<section class="panel"><h2 class="h2">Le tue partite</h2>' + roomsListHTML() + '</section>' +
+      (isWide() ? '</div><div class="col-r">' : '') + '<section class="panel"><h2 class="h2">Le tue partite</h2>' + roomsListHTML() + '</section>' +
       '<section class="panel"><h2 class="h2">Sullo stesso telefono</h2><p class="muted small" style="margin:0">Le carte sono tutte scoperte: basta passarsi il telefono quando tocca a un altro.</p>' +
       '<button type="button" class="btn wide" data-act="go-local">' + (saved ? 'Riprendi la partita sul telefono' : 'Gioca qui con gli amici') + '</button>' +
       (saved ? '<button type="button" class="linkbtn" data-act="local-reset">Ricomincia da capo</button>' : '') + '</section>' +
@@ -528,7 +571,7 @@ table.score td.z { color: var(--bad); }
       '<li>Manda il link della partita agli amici, per esempio su WhatsApp. Se siete pochi, aggiungi qualche bot.</li>' +
       '<li>Quando ci siete tutti, chi ha creato la partita tocca <b>Inizia</b>. Le carte si aggiornano da sole su tutti i telefoni.</li></ol></section>' +
       '<p class="note">Le mosse passano da due server pubblici gratuiti (HiveMQ ed EMQX), senza account: viaggiano solo i nomi e le carte. Ogni partita resta salvata anche sui vostri telefoni.</p>' +
-      '<p class="foot"><button type="button" class="linkbtn accent" data-act="rules">Regole e carte</button></p>';
+      '<p class="foot"><button type="button" class="linkbtn accent" data-act="rules">Regole e carte</button></p>' + (isWide() ? '</div></div>' : '');
   }
   function localSetupHTML() {
     var rows = ui.localNames.map(function (nm, i) {
@@ -722,6 +765,7 @@ table.score td.z { color: var(--bad); }
     else if (ui.route === 'bot') html = boardHTML(ui.bot);
     else html = onlineGameHTML();
     $app.innerHTML = html;
+    $app.classList.toggle('wide', html.indexOf('<div class="desk') >= 0);
     var lh = layerHTML();
     if (lh !== ui.layerHTML) {
       var old = $layer.querySelector('.sheet'), top = old ? old.scrollTop : 0, same = ui.layerSheet === ui.sheet;
@@ -969,6 +1013,10 @@ table.score td.z { color: var(--bad); }
   /* ---------- avvio ---------- */
   ui.local = loadLocal();
   ui.bot = loadBot();
+  if (WIDE_MQ) {
+    var onWide = function () { render(); };
+    if (WIDE_MQ.addEventListener) WIDE_MQ.addEventListener('change', onWide); else if (WIDE_MQ.addListener) WIDE_MQ.addListener(onWide);
+  }
   route();
   if (net) net.avvia(); else { ui.online = 'off'; render(); }
 })();

@@ -27,6 +27,13 @@ https://ginotoretti114-ops.github.io/giochi/
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
 effetti, solo effetti o niente (la scelta vale per tutti i giochi).
 
+Le pagine si adattano allo schermo. Sul telefono (sotto i 1000 pixel di larghezza) tutto sta in una colonna, con le
+mosse in basso a portata di pollice. Sul computer (o su un tablet in orizzontale) la lobby e il tavolo si dividono
+in due colonne: a sinistra quello che è di tutti (avversari, mercato, dadi, carte in tavola, cronaca), a destra lo
+stato del turno, la tua zona e le mosse, che restano ferme mentre scorri; i fogli (regole, punti, dettagli delle
+carte) si aprono come finestre al centro e il passaggio del mouse evidenzia i pulsanti. Se cambi la larghezza della
+finestra la pagina passa da una disposizione all'altra senza ricaricare.
+
 ## Com'è fatto
 
 - `index.html`: la pagina iniziale con l'elenco dei giochi (array `GIOCHI` in fondo alla pagina).
@@ -34,6 +41,9 @@ effetti, solo effetti o niente (la scelta vale per tutti i giochi).
   che gestisce le partite online (stato condiviso, server, salvataggio nel browser), e `suoni.js`, la musica
   (generata al momento con Web Audio, nessun file audio) e gli effetti sonori.
 - una cartella per ogni gioco, con dentro il suo `index.html`, una `copertina.svg` (600×360) e i suoi file.
+- disposizione per computer: in ogni gioco `isWide()` (media query `min-width: 1000px`) fa costruire a `lobbyHTML` e
+  `boardHTML` un `<div class="desk">` con `.col-l` e `.col-r`; le regole CSS stanno nei blocchi
+  `@media (min-width: 1000px)` in fondo allo stile. Le due disposizioni usano gli stessi id e gli stessi `data-act`.
 
 Non c'è niente da compilare: quello che finisce sul ramo `main` va online da solo in un paio di minuti.
 

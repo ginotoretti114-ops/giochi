@@ -270,6 +270,34 @@ table.vals-t td, table.vals-t th { text-align: left; }
 .hubnav { padding-top: 6px; display: flex; justify-content: space-between; align-items: center; }
 .hubnav a { text-decoration: none; display: inline-block; }
 @media (max-width: 400px) { .topbar .bk { display: none; } }
+
+/* ---------- computer e schermi larghi: lobby e tavolo su due colonne, fogli al centro ---------- */
+@media (min-width: 1000px) {
+  #app.wide { max-width: 1240px; padding: 0 28px; }
+  #app.wide > .hubnav { width: 100%; max-width: 1040px; margin: 0 auto; }
+  .desk { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 440px); gap: 0 28px; align-items: start; }
+  .desk > div { min-width: 0; }
+  .desk .col-r { position: sticky; top: 10px; max-height: calc(100vh - 20px); overflow: auto; padding: 0 4px 12px; margin: 0 -4px; scrollbar-width: thin; }
+  .desk .col-r > :first-child { margin-top: 8px; }
+  .desk .actions { position: static; margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); max-height: none; overflow: visible; }
+  .desk.lobby { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); width: 100%; max-width: 1040px; margin: 0 auto 28px; gap: 0 24px; }
+  .desk.lobby .col-r { position: static; max-height: none; overflow: visible; padding: 0; margin: 0; }
+  .desk.lobby .col-r > .panel:first-child { margin-top: 14px; }
+  .desk.lobby .note { margin-top: 16px; }
+}
+@media (min-width: 700px) and (min-height: 520px) {
+  .overlay { align-items: center; padding: 24px; }
+  .sheet { border-radius: 20px; border-bottom: 1px solid var(--line); max-height: 86vh; padding-bottom: 22px; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled):hover, .chip-btn:hover, .gopen:hover { filter: brightness(1.12); }
+  .seg button:not([aria-pressed="true"]):hover { color: var(--text); }
+  .linkbtn:hover { color: var(--text); }
+}
+@media (min-width: 1000px) {
+  .desk .market { max-width: 640px; margin: 0 auto; }
+  .desk .col-l > .seat:first-child { margin-top: 8px; }
+}
 </style>
 </head>
 <body>
@@ -348,6 +376,10 @@ table.vals-t td, table.vals-t th { text-align: left; }
   var E = window.GranBazar;
   var $app = document.getElementById('app');
   var $layer = document.getElementById('layer');
+
+  // Su schermi larghi (computer, tablet in orizzontale) lobby e tavolo si dividono in due colonne.
+  var WIDE_MQ = window.matchMedia ? window.matchMedia('(min-width: 1000px)') : null;
+  function isWide() { return !!(WIDE_MQ && WIDE_MQ.matches); }
   var LABEL = { dia: 'Diamanti', gol: 'Oro', sil: 'Argento', clo: 'Tessuti', spi: 'Spezie', lea: 'Cuoio', cam: 'Cammello' };
   // Due server MQTT pubblici e gratuiti: la partita viaggia su entrambi, così basta che uno risponda.
   var DEFAULT_BROKERS = ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt'];
@@ -643,6 +675,9 @@ table.vals-t td, table.vals-t th { text-align: left; }
       anim = s.last ? (s.last.slots || []) : (s.status === 'playing' ? [0, 1, 2, 3, 4] : []);
       ui.pendingAnimKey = key;
     }
+    if (isWide()) return topbarHTML(s, P) + bannersHTML(s, P) +
+      '<div class="desk"><div class="col-l">' + oppHTML(s, 1 - P.me) + marketHTML(s, P, myTurn, anim) + bankHTML(s) + '</div>' +
+      '<div class="col-r">' + statusHTML(s, P) + meHTML(s, P, myTurn, showHand) + '<div id="actions" class="actions">' + actionsHTML(s, P) + '</div></div></div>';
     return topbarHTML(s, P) + bannersHTML(s, P) +
       oppHTML(s, 1 - P.me) + statusHTML(s, P) + marketHTML(s, P, myTurn, anim) +
       meHTML(s, P, myTurn, showHand) + bankHTML(s) +
@@ -699,14 +734,14 @@ table.vals-t td, table.vals-t th { text-align: left; }
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
     var hub = typeof window.GB_HUB_URL === 'string' ? '<nav class="hubnav"><a class="linkbtn" href="' + esc(window.GB_HUB_URL) + '">‹ Tutti i giochi</a>' + snd() + '</nav>' : '';
-    return hub + '<header class="brand">' + fanHTML() + '<h1>Gran <span>Bazar</span></h1>' +
+    return hub + (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Gran <span>Bazar</span></h1>' +
       '<p class="tag">Compra, scambia e vendi merci contro un altro mercante. Vince chi conquista due manche.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
       '<input id="nm" class="field" maxlength="24" autocomplete="nickname" placeholder="Come ti chiamano?" value="' + esc(ui.name) + '">' +
       '<button type="button" class="btn primary wide" data-act="new"' + (ui.online === 'up' ? '' : ' disabled') + '>' + label + '</button>' +
       (ui.online === 'down' || ui.online === 'off' ? '<p class="muted small" style="margin:0">Non riesco a raggiungere i server di gioco. Controlla la connessione: riprovo da solo.</p>' : '') +
       '</section>' +
-      '<section class="panel"><h2 class="h2">Le tue partite</h2>' + roomsListHTML() + '</section>' +
+      (isWide() ? '</div><div class="col-r">' : '') + '<section class="panel"><h2 class="h2">Le tue partite</h2>' + roomsListHTML() + '</section>' +
       '<section class="panel"><h2 class="h2">Sullo stesso telefono</h2><p class="muted small" style="margin:0">Vi passate il telefono a ogni turno: la mano dell\'altro resta coperta.</p>' +
       '<button type="button" class="btn wide" data-act="go-local">' + (saved ? 'Riprendi la partita sul telefono' : 'Gioca in due qui') + '</button>' +
       (saved ? '<button type="button" class="linkbtn" data-act="local-reset">Ricomincia da capo</button>' : '') + '</section>' +
@@ -716,7 +751,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
       '<li>Lui lo apre, scrive il suo nome e si siede. Il tavolo si aggiorna da solo a ogni mossa, anche se giocate a ore di distanza.</li>' +
       '</ol></section>' +
       '<p class="note">Le mosse passano da due server pubblici gratuiti (HiveMQ ed EMQX), senza account: viaggiano solo i nomi e le carte. Ogni partita resta salvata anche sui vostri telefoni.</p>' +
-      '<p class="foot"><button type="button" class="linkbtn accent" data-act="rules">Regole in breve</button></p>';
+      '<p class="foot"><button type="button" class="linkbtn accent" data-act="rules">Regole in breve</button></p>' + (isWide() ? '</div></div>' : '');
   }
   function localSetupHTML() {
     return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span></span></header>' +
@@ -913,6 +948,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
     else if (ui.route === 'local') html = ui.local ? boardHTML(ui.local) : localSetupHTML();
     else html = onlineGameHTML();
     $app.innerHTML = html;
+    $app.classList.toggle('wide', html.indexOf('<div class="desk') >= 0);
     $layer.innerHTML = layerHTML();
     if (ui.pendingAnimKey) ui.animKey = ui.pendingAnimKey;
     restoreFocus(f);
@@ -1300,6 +1336,10 @@ table.vals-t td, table.vals-t th { text-align: left; }
   /* ---------- avvio ---------- */
   ui.local = loadLocal();
   ui.curtain = !!ui.local;
+  if (WIDE_MQ) {
+    var onWide = function () { render(); };
+    if (WIDE_MQ.addEventListener) WIDE_MQ.addEventListener('change', onWide); else if (WIDE_MQ.addListener) WIDE_MQ.addListener(onWide);
+  }
   route();
   initNet();
 })();

@@ -40,6 +40,7 @@ body {
   font: 16px/1.45 var(--font-body);
 }
 main { max-width: 780px; margin: 0 auto; padding: 40px 16px 48px; }
+@media (min-width: 1100px) { main { max-width: 1140px; padding: 48px 24px 56px; } } /* sul computer tre giochi per riga */
 header h1 { font: 56px/1 var(--font-display); margin: 0; text-wrap: balance; }
 header .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 header h1 span { color: var(--saffron); }
@@ -47,16 +48,17 @@ header p { color: var(--muted); margin: 12px 0 0; max-width: 42ch; font-size: 17
 .list { list-style: none; padding: 0; margin: 30px 0 0; display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .game { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
 .game img { display: block; width: 100%; height: auto; aspect-ratio: 5 / 3; background: #0e1228; }
-.game .body { padding: 16px; display: grid; gap: 10px; flex: 1; align-content: start; }
+.game .body { padding: 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .game h2 { font: 28px/1.1 var(--font-display); margin: 0; text-wrap: balance; }
 .game p { margin: 0; color: var(--muted); }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
 .tags li { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--raise); border: 1px solid var(--line); }
 .play {
-  margin-top: 4px; display: flex; justify-content: center; align-items: center; min-height: 48px; border-radius: 12px;
+  margin-top: auto; display: flex; justify-content: center; align-items: center; min-height: 48px; border-radius: 12px;
   background: var(--saffron); color: var(--on-saffron); font-weight: 700; font-size: 16px; text-decoration: none;
 }
 .play:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .play:hover { filter: brightness(1.1); } .game:hover { border-color: #56639f; } }
 footer { margin-top: 30px; color: var(--muted); font-size: 14px; }
 </style>
 </head>
