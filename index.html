@@ -76,6 +76,7 @@ footer { margin-top: 30px; color: var(--muted); font-size: 14px; }
 </main>
 <script src="lib/ambiente.js"></script>
 <script src="lib/profilo.js"></script>
+<script src="lib/conti.js"></script>
 <script src="lib/suoni.js"></script>
 <script>
 // Per aggiungere un gioco: crea la sua cartella (con index.html e copertina.svg) e aggiungi una voce qui.
@@ -128,8 +129,16 @@ var GIOCHI = [
 // (la pagina può arrivare dalla cache del browser) o quando un'altra scheda gioca una partita.
 (function () {
   var el = document.getElementById('profilo');
-  function aggiorna() { if (window.Profilo) Profilo.disegna(el); }
+  function aggiorna() {
+    if (!window.Profilo) return;
+    var vecchio = el.querySelector('.cn-email input'), scritto = vecchio ? vecchio.value : '', fuoco = vecchio && document.activeElement === vecchio;
+    Profilo.disegna(el);
+    if (window.Conti) Conti.disegna(el.querySelector('.pf-conto'));   // accesso all'account (lib/conti.js)
+    var nuovo = el.querySelector('.cn-email input');
+    if (nuovo && scritto) { nuovo.value = scritto; if (fuoco) nuovo.focus(); }
+  }
   aggiorna();
+  if (window.Conti) Conti.ascolta(aggiorna);
   window.addEventListener('pageshow', function (e) { if (e.persisted) aggiorna(); });
   window.addEventListener('storage', function (e) { if (!e.key || /sala-profilo$/.test(e.key)) aggiorna(); });
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') aggiorna(); });

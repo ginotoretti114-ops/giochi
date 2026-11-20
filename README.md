@@ -30,7 +30,9 @@ effetti, solo effetti o niente (la scelta vale per tutti i giochi).
 Ogni giocatore ha un profilo nella pagina iniziale: le partite finite danno esperienza e fanno salire di livello
 (di più se si vince, contro persone o contro il computer al livello difficile), ci sono 31 medaglie da sbloccare e
 ogni giorno tre sfide nuove, uguali per tutti. Alla fine di una partita un avviso mostra cosa si è guadagnato.
-Per ora i progressi restano nel browser (`lib/profilo.js`); con l'account arriveranno su tutti i dispositivi.
+Senza account i progressi restano nel browser (`lib/profilo.js`). Con un account (accesso con Google o con un
+link via email, `lib/conti.js` su Supabase) sono salvati nell'account e uguali su tutti i dispositivi; si possono
+eliminare in ogni momento. Cosa viene salvato e dove è spiegato in `privacy.html`.
 
 C'è anche un sito di prova, https://ginotoretti114-ops.github.io/giochi/prova/, dove le novità arrivano prima che
 sul sito vero: ha una striscia rosa con la scritta PROVA, le sue partite online e la sua memoria del browser, così
