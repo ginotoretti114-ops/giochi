@@ -22,11 +22,13 @@
     { id: 'piccante', nome: 'Piccante', bot: false },
     { id: 'diavolerie', nome: 'Diavolerie', bot: true },
     { id: 'sette-stelle', nome: 'Sette Stelle', bot: true },
-    { id: 'polvere-e-piombo', nome: 'Polvere e Piombo', bot: true }
+    { id: 'polvere-e-piombo', nome: 'Polvere e Piombo', bot: true },
+    { id: 'stalla-matta', nome: 'Stalla Matta', bot: true }
   ];
   var ICONE = {
     'gran-bazar': ['🐪', '💎'], 'sottozero': ['❄️', '🧊'], 'piccante': ['🌶️', '🌋'],
-    'diavolerie': ['😈', '🔮'], 'sette-stelle': ['🌠', '🌌'], 'polvere-e-piombo': ['🐎', '🏜️']
+    'diavolerie': ['😈', '🔮'], 'sette-stelle': ['🌠', '🌌'], 'polvere-e-piombo': ['🐎', '🏜️'],
+    'stalla-matta': ['🦄', '🌈']
   };
   var XP_LOCALE = 10, XP_FINITA = 20, XP_VITTORIA = 30, XP_SFIDA = 40, XP_TUTTE = 60;
   var MOLT = { facile: 0.5, medio: 0.75, difficile: 1 }, RANGO = { facile: 1, medio: 2, difficile: 3 };
@@ -156,7 +158,7 @@
     M('partite-50', 'Veterano', 'Finisci 50 partite', '🎖️', function (c) { return c.T.partite >= 50; }),
     M('vittorie-10', 'Dieci vittorie', 'Vinci 10 partite', '🥇', function (c) { return c.T.vittorie >= 10; }),
     M('vittorie-50', 'Cinquanta vittorie', 'Vinci 50 partite', '👑', function (c) { return c.T.vittorie >= 50; }),
-    M('giramondo', 'Giramondo', 'Gioca a tutti e sei i giochi', '🧭', function (c) { return GIOCHI.every(function (g) { return ((c.T.giochi[g.id] || {}).partite || 0) > 0; }); }),
+    M('giramondo', 'Giramondo', 'Gioca a tutti i giochi della sala', '🧭', function (c) { return GIOCHI.every(function (g) { return ((c.T.giochi[g.id] || {}).partite || 0) > 0; }); }),
     M('computer', 'Più forte del computer', 'Batti il computer al livello difficile', '🤖', function (c) { return (c.T.eventi.difficile || 0) >= 1; }),
     M('compagnia', 'In compagnia', 'Finisci una partita online con altre persone', '🤝', function (c) { return c.T.umani >= 1; }),
     M('prima-sfida', 'Prima sfida', 'Completa una sfida del giorno', '🎯', function (c) { return c.sfide >= 1; }),
