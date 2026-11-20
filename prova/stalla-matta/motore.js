@@ -8,24 +8,25 @@
    chi ha più unicorni; a pari merito chi ha più lettere nei nomi dei suoi unicorni; se sono ancora pari perdono tutti.
 
    Le carte: id come mela.2 (tipo.copia). t: cucciolo, semplice, magico (gli unicorni), magia, bonus, malus, istante.
-   o: 2 = testo e numero di copie come nell'originale. exp: l'espansione (per ora c'è il mazzo base).
+   o: 2 = testo e numero di copie come nell'originale. exp: l'espansione (il mazzo base c'è sempre; le espansioni
+   si aggiungono qui con exp e si accendono in ESPANSIONI con pronta: true, una alla volta).
    Gli effetti passano da una pila di passi (stack). Un passo può chiedere una scelta (prompt) a un giocatore, oppure
    a più giocatori insieme (prompt.wait): così il Nitrito e gli effetti «ogni giocatore». Le carte nella stalla che si
    attivano (entrando, uscendo, Recinto) si accodano in s.queue e partono quando l'effetto in corso è finito.
-   La cima del mazzo è l'ultima carta dell'array. */
+   La cima del mazzo è l'ultima carta dell'array. s.box: le carte tolte dal gioco (Brutti sogni). */
 (function (root) {
   'use strict';
 
   var MIN_PLAYERS = 2, MAX_PLAYERS = 8, MANO_INIZIO = 5, MANO_MAX = 7, LOG_MAX = 260;
 
-  // Le espansioni: per ora solo il mazzo base; le altre arrivano una alla volta.
+  // Le espansioni: il mazzo base c'è sempre; le altre arrivano una alla volta.
   var ESPANSIONI = [
     { id: 'base', name: 'Mazzo base', pronta: true, text: '114 carte e 13 cuccioli: il gioco completo.' },
+    { id: 'incubi', name: 'Brutti sogni', pronta: true, text: '50 carte e 3 cuccioli da brivido: Incubi, fantasmi e carte che escono dal gioco.' },
     { id: 'diluvio', name: 'Diluvio arcobaleno', pronta: false },
     { id: 'leggende', name: 'Miti e leggende', pronta: false },
     { id: 'draghi', name: 'Draghi', pronta: false },
-    { id: 'avventure', name: 'Avventure', pronta: false },
-    { id: 'incubi', name: 'Brutti sogni', pronta: false }
+    { id: 'avventure', name: 'Avventure', pronta: false }
   ];
 
   var CUCCIOLO = 'Se sta per essere sacrificato, distrutto o rimandato in mano, torna invece nel Nido.';
@@ -122,11 +123,56 @@
     { id: 'raffreddore', name: 'Raffreddore', t: 'malus', e: '🤧', text: 'Non puoi giocare carte Nitrito.' },
     { id: 'monolocale', name: 'Monolocale', t: 'malus', e: '📦', text: 'Se nella tua stalla ci sono più di 5 unicorni, SACRIFICANE uno.' },
 
-    { id: 'nitrito', name: 'Nitrito', t: 'istante', n: 14, e: '🐴', text: 'Giocalo quando un altro giocatore prova a giocare una carta: la fermi e finisce negli scarti.' },
-    { id: 'supernitrito', name: 'Supernitrito', t: 'istante', e: '📣', text: 'Giocalo quando un altro giocatore prova a giocare una carta: la fermi e finisce negli scarti. A questa carta non si risponde con un Nitrito.' }
+    { id: 'nitrito', name: 'Nitrito', t: 'istante', n: 14, e: '🐴', neigh: true, text: 'Giocalo quando un altro giocatore prova a giocare una carta: la fermi e finisce negli scarti.' },
+    { id: 'supernitrito', name: 'Supernitrito', t: 'istante', e: '📣', neigh: true, text: 'Giocalo quando un altro giocatore prova a giocare una carta: la fermi e finisce negli scarti. A questa carta non si risponde con un Nitrito.' },
+
+    /* ---- Brutti sogni (53 carte: 3 cuccioli, 12 semplici, 11 magici, 10 Magie, 4 istantanee, 9 Bonus, 4 Incubi) ---- */
+    { id: 'cucciolo_lenzuolo', name: 'Cucciolo Lenzuolo', t: 'cucciolo', e: '👻', col: '#e9e6f2', exp: 'incubi' },
+    { id: 'cucciolo_brivido', name: 'Cucciolo Brivido', t: 'cucciolo', e: '😱', col: '#7a5bb0', exp: 'incubi' },
+    { id: 'cucciolo_sbirciatina', name: 'Cucciolo Sbirciatina', t: 'cucciolo', e: '👀', col: '#4f8a84', exp: 'incubi' },
+
+    { id: 'impermeabile', name: 'Unicorno Impermeabile', t: 'semplice', n: 3, e: '🌧️', col: '#f2cf4a', exp: 'incubi' },
+    { id: 'fifone', name: 'Unicorno Fifone', t: 'semplice', n: 3, e: '😨', col: '#9fb7d8', exp: 'incubi' },
+    { id: 'gitante', name: 'Unicorno Gitante', t: 'semplice', n: 3, e: '🎒', col: '#e58fb0', exp: 'incubi' },
+    { id: 'guardiano', name: 'Unicorno Guardiano', t: 'semplice', n: 3, e: '🔦', col: '#5a6f9e', exp: 'incubi' },
+
+    { id: 'mascherato', name: 'Unicorno Mascherato', t: 'magico', e: '🪚', exp: 'incubi', text: 'Quando entra nella tua stalla, puoi PESCARE una carta per ogni unicorno semplice nella tua stalla.' },
+    { id: 'sensitivo', name: 'Unicorno Sensitivo', t: 'magico', e: '🔮', exp: 'incubi', text: 'Tutti vedono le carte che hai in mano. ' + INIZIO_TXT + 'puoi PESCARE una carta.' },
+    { id: 'pagliaccio', name: 'Pagliaccio Ballerino', t: 'magico', e: '🤡', exp: 'incubi', text: 'Quando entra nella tua stalla, puoi SCARTARE 2 carte, poi rimandare in mano a ogni altro giocatore una carta della sua stalla.' },
+    { id: 'diavolicorno', name: 'Diavolicorno', t: 'magico', e: '😈', exp: 'incubi', text: 'Se viene distrutto, puoi TOGLIERE DAL GIOCO una carta della stalla di un giocatore qualsiasi.' },
+    { id: 'mietitore', name: 'Unicorno Mietitore', t: 'magico', e: '🪦', exp: 'incubi', text: 'Quando entra nella tua stalla, puoi PESCARE una carta. Se è un Nitrito, puoi mostrarlo a tutti e PESCARNE un\'altra.' },
+    { id: 'spettrale', name: 'Unicorno Spettrale', t: 'magico', e: '🌫️', exp: 'incubi', text: 'Non può essere sacrificato né distrutto.' },
+    { id: 'burattino', name: 'Unicorno Burattino', t: 'magico', e: '🎭', exp: 'incubi', text: 'Quando entra nella tua stalla, puoi spostare un Malus della tua stalla in quella di un altro giocatore.' },
+    { id: 'nonnina', name: 'Nonna Zuccherina', t: 'magico', e: '👵', exp: 'incubi', text: 'Conta come 2 unicorni. Se viene sacrificata o distrutta, SACRIFICA una carta.' },
+    { id: 'uncinocorno', name: 'Uncinocorno', t: 'magico', e: '🪝', exp: 'incubi', text: 'Quando entra nella tua stalla, puoi SCARTARE una carta, poi TOGLIERE DAL GIOCO una carta della stalla di un giocatore qualsiasi.' },
+    { id: 'rancoroso', name: 'Unicorno Rancoroso', t: 'magico', e: '😤', exp: 'incubi', text: 'Quando entra nella tua stalla, puoi SACRIFICARE un unicorno semplice, poi PESCARE 3 carte.' },
+    { id: 'pipistrellicorno', name: 'Pipistrellicorno', t: 'magico', e: '🦇', exp: 'incubi', text: 'Se viene sacrificato o distrutto, puoi guardare la mano di un altro giocatore: scegli una carta e prendila.' },
+
+    { id: 'toc_toc', name: 'Toc toc, chi è?', t: 'magia', n: 3, e: '🚪', exp: 'incubi', text: 'TOGLI DAL GIOCO una carta della stalla di un giocatore qualsiasi.' },
+    { id: 'possessione', name: 'Possessione', t: 'magia', e: '👹', exp: 'incubi', text: 'SCARTA una carta, poi RUBA una carta.' },
+    { id: 'fuori_dalla_tomba', name: 'Fuori dalla tomba', t: 'magia', n: 2, e: '🧟', exp: 'incubi', text: 'Porta nella tua stalla un unicorno semplice dagli scarti, poi PESCA una carta.' },
+    { id: 'piu_spettro', name: 'La legge del più spettro', t: 'magia', n: 2, e: '⚖️', exp: 'incubi', text: 'Scegli un giocatore qualsiasi: DISTRUGGI tutti gli unicorni semplici della sua stalla.' },
+    { id: 'seduta_spiritica', name: 'Seduta spiritica', t: 'magia', n: 2, e: '🌒', exp: 'incubi', text: 'Cerca nel mazzo un Incubo e mettilo nella stalla di un giocatore qualsiasi. Poi mescoli il mazzo.' },
+
+    { id: 'spirito_guida', name: 'Spirito guida', t: 'bonus', e: '🏮', exp: 'incubi', text: INIZIO_TXT + 'puoi PESCARE una carta e mostrarla a tutti: se è un Bonus o un Malus, mettila nella tua stalla.' },
+    { id: 'elisir', name: 'Elisir di lunga vita', t: 'bonus', n: 2, e: '🧪', exp: 'incubi', text: 'Se una carta della tua stalla sta per essere sacrificata o distrutta, puoi invece SCARTARE una carta.' },
+    { id: 'cuore_stregato', name: 'Cuore stregato', t: 'bonus', n: 2, e: '🖤', exp: 'incubi', text: 'Quando entra nella tua stalla, puoi PESCARE 2 carte. I Bonus della tua stalla non possono essere distrutti.' },
+    { id: 'poltergeist', name: 'Dispetto del poltergeist', t: 'bonus', e: '🪑', exp: 'incubi', text: INIZIO_TXT + 'puoi saltare la pesca: se lo fai, prendi a caso una carta dalla mano di un altro giocatore.' },
+    { id: 'cerchio_di_sale', name: 'Cerchio di sale', t: 'bonus', n: 2, e: '🧂', exp: 'incubi', text: 'Nella tua stalla non possono entrare Malus. Questa carta non può essere sacrificata né distrutta.' },
+    { id: 'lavoretto', name: 'Lavoretto inquietante', t: 'bonus', e: '🧵', exp: 'incubi', text: INIZIO_TXT + 'puoi SCARTARE 3 carte, poi TOGLIERE DAL GIOCO una carta della stalla di un giocatore qualsiasi.' },
+
+    { id: 'incubo_sepolto', name: 'Incubo: sepolto vivo', t: 'malus', e: '⚰️', inc: true, exp: 'incubi', text: INIZIO_TXT + 'SACRIFICA un unicorno. Se nella tua stalla non ci sono unicorni, riprendi in mano questa carta.' },
+    { id: 'incubo_occupato', name: 'Incubo: occupato!', t: 'malus', e: '🚽', inc: true, exp: 'incubi', text: 'Quando entra nella tua stalla, SACRIFICA un unicorno. Finché è nella tua stalla non puoi vincere.' },
+    { id: 'incubo_vuoto', name: 'Incubo: il vuoto cosmico', t: 'malus', e: '🕳️', inc: true, exp: 'incubi', text: INIZIO_TXT + 'RUBA un Malus.' },
+    { id: 'incubo_palestra', name: 'Incubo: palestra infernale', t: 'malus', e: '🏋️', inc: true, exp: 'incubi', text: 'Quando entra nella tua stalla, SCARTA tutta la mano, poi PESCA una carta. Puoi tenere in mano 3 carte in meno.' },
+
+    { id: 'nitrito_maledetto', name: 'Nitrito maledetto', t: 'istante', n: 4, e: '🧿', neigh: true, exp: 'incubi', text: 'Giocalo quando un altro giocatore prova a giocare una carta: la fermi e la TOGLI DAL GIOCO.' }
   ];
   // Nella partita in due si tolgono tutti gli unicorni semplici e queste carte (e ognuno parte con un Nitrito in mano).
-  var VIA_IN_DUE = ['reginetta', 'rubacuori', 'pifferaio', 'chioccia', 'evocatore', 'occhio', 'rito_oscuro', 'raffreddore', 'urra'];
+  // Brutti sogni: il Rancoroso è nell'elenco ufficiale; le altre tre seguono la sua regola (via le carte che parlano
+  // di unicorni semplici, che in due non ci sono).
+  var VIA_IN_DUE = ['reginetta', 'rubacuori', 'pifferaio', 'chioccia', 'evocatore', 'occhio', 'rito_oscuro', 'raffreddore', 'urra',
+    'rancoroso', 'mascherato', 'fuori_dalla_tomba', 'piu_spettro'];
   var TIPI = { cucciolo: 'Cucciolo', semplice: 'Unicorno semplice', magico: 'Unicorno magico', magia: 'Magia', bonus: 'Bonus', malus: 'Malus', istante: 'Istantanea' };
 
   var TYPES = {}, META = {}, ALL = [];
@@ -141,7 +187,7 @@
   function def(c) { return TYPES[keyOf(c)] || null; }
   function kind(c) { var d = def(c); return d ? d.t : null; }
   function isUni(c) { var t = kind(c); return t === 'cucciolo' || t === 'semplice' || t === 'magico'; }
-  function isNeigh(c) { var k = keyOf(c); return k === 'nitrito' || k === 'supernitrito'; }
+  function isNeigh(c) { var d = def(c); return !!(d && d.neigh); }
   function filtra(c, fl) {
     switch (fl) {
       case 'unicorno': return isUni(c);
@@ -149,6 +195,7 @@
       case 'nitrito': return isNeigh(c);
       case 'narvalo': return /narvalo/i.test(def(c).name);
       case 'bm': return kind(c) === 'bonus' || kind(c) === 'malus';
+      case 'incubo': return !!def(c).inc;
     }
     return true;
   }
@@ -204,25 +251,42 @@
   function panda(s, p) { return has(s, p, 'pandastrofe'); }
   // I panda non li tocca niente: né effetti, né sacrifici, né furti.
   function tocca(s, p, c) { return !(isUni(c) && panda(s, p)); }
+  // Unicornone e Nonna Zuccherina contano 2 (se non sono accecati dal Flash).
+  var DOPPI = { unicornone: 1, nonnina: 1 };
   function conta(s, p) {
     if (panda(s, p)) return 0;
     var k = 0;
-    stalla(s, p).forEach(function (c) { if (isUni(c)) k += (keyOf(c) === 'unicornone' && attivo(s, p, c)) ? 2 : 1; });
+    stalla(s, p).forEach(function (c) { if (isUni(c)) k += (DOPPI[keyOf(c)] && attivo(s, p, c)) ? 2 : 1; });
     return k;
   }
+  // Con «Incubo: occupato!» nella stalla non si vince (né con gli unicorni né a mazzo finito).
+  function puoVincere(s, p) { return !stalla(s, p).some(function (c) { return keyOf(c) === 'incubo_occupato'; }); }
+  // Quante carte si possono tenere a fine turno.
+  function limite(s, p) { return Math.max(0, MANO_MAX - (has(s, p, 'incubo_palestra') ? 3 : 0)); }
   function lettere(s, p) {
     if (panda(s, p)) return 0;
     var k = 0;
     stalla(s, p).forEach(function (c) { if (isUni(c)) k += (def(c).name.match(/[a-zà-ÿ]/gi) || []).length; });
     return k;
   }
-  // La Reginetta: gli unicorni semplici entrano solo nella stalla di chi ce l'ha.
+  // Può entrare nella stalla di q? La Reginetta tiene fuori gli unicorni semplici degli altri, il Cerchio di sale i Malus.
   function entra(s, c, q) {
-    if (kind(c) !== 'semplice') return true;
+    var t = kind(c);
+    if (t === 'malus') return !has(s, q, 'cerchio_di_sale');
+    if (t !== 'semplice') return true;
     for (var r = 0; r < n(s); r++) if (r !== q && has(s, r, 'reginetta')) return false;
     return true;
   }
+  // Le carte che non si possono sacrificare o distruggere (modo: 'sacrifica' o 'distruggi'): l'Unicorno Spettrale,
+  // il Cerchio di sale; col Cuore stregato i Bonus non si distruggono.
+  function salda(s, q, c, modo) {
+    var k = keyOf(c);
+    if (k === 'cerchio_di_sale' || (k === 'spettrale' && attivo(s, q, c))) return true;
+    return modo === 'distruggi' && kind(c) === 'bonus' && has(s, q, 'cuore_stregato');
+  }
+  function sacrificabile(s, q, c) { return tocca(s, q, c) && !salda(s, q, c, 'sacrifica'); }
   function distruggibile(s, q, c, magia) {
+    if (salda(s, q, c, 'distruggi')) return false;
     if (!isUni(c)) return true;
     if (panda(s, q) || has(s, q, 'scudo_arcobaleno')) return false;
     return !(magia && keyOf(c) === 'miciocorno' && attivo(s, q, c));
@@ -234,7 +298,8 @@
     if (!it || !fermabile(s, it)) return [];
     return altri(s, it.p).filter(function (q) { return nitrisce(s, q); });
   }
-  function vedeMano(s, q) { return has(s, q, 'occhio'); }
+  // La mano scoperta: Occhio indiscreto, Unicorno Sensitivo.
+  function vedeMano(s, q) { return has(s, q, 'occhio') || has(s, q, 'sensitivo'); }
 
   /* ---------- spostare carte ---------- */
   function accoda(s, t) { s.queue.push(t); }
@@ -247,10 +312,16 @@
   }
   function metti(s, q, c) {
     s.stable[q].push(c);
-    if (!isUni(c)) return;
-    var r = cartaAttiva(s, q, 'recinto');
-    if (r) accoda(s, { k: 'recinto', p: q, c: r });
-    if (kind(c) === 'magico' && attivo(s, q, c) && ENTRA[keyOf(c)]) accoda(s, { k: 'entra', p: q, c: c });
+    var t = kind(c);
+    if (isUni(c)) { var r = cartaAttiva(s, q, 'recinto'); if (r) accoda(s, { k: 'recinto', p: q, c: r }); }
+    // «Quando entra nella tua stalla»: unicorni magici (se non accecati), Bonus e Malus; lo risolve chi ha la stalla
+    if (ENTRA[keyOf(c)] && (t === 'magico' ? attivo(s, q, c) : t === 'bonus' || t === 'malus')) accoda(s, { k: 'entra', p: q, c: c });
+  }
+  // Fuori dal gioco: la carta non torna più (i cuccioli però tornano sempre nel Nido).
+  function fuori(s, c) {
+    if (kind(c) === 'cucciolo') { s.nursery.push(c); return 'nido'; }
+    (s.box = s.box || []).push(c);
+    return 'fuori';
   }
   function aMano(s, q, c) { if (kind(c) === 'cucciolo') s.nursery.push(c); else s.hand[q].push(c); }
   function dallaMano(s, p, c) { var h = mano(s, p), i = h.indexOf(c); if (i >= 0) h.splice(i, 1); return i >= 0; }
@@ -270,7 +341,8 @@
     else if (d.vola && vivo) { s.hand[q].push(c); dove = 'mano'; }
     else { s.discard.push(c); dove = 'scarti'; }
     pushLog(s, { t: modo === 'distruggi' ? 'distrutta' : 'sacrificata', s: da, q: q, c: c, dove: dove });
-    if (d.id === 'vendicativo' && vivo) accoda(s, { k: 'vendicativo', p: q, c: c });
+    // «Se viene sacrificato o distrutto…» (il Diavolicorno solo se distrutto)
+    if (vivo && USCITA[d.id] && (d.id !== 'diavolicorno' || modo === 'distruggi')) accoda(s, { k: 'esce', p: q, c: c });
   }
 
   /* ---------- effetti ---------- */
@@ -300,9 +372,30 @@
     volante_svelto: function () { return [{ k: 'recupera', filtro: 'nitrito', may: true }]; },
     narvalo_supremo: function () { return [{ k: 'cerca', filtro: 'narvalo', may: true }]; },
     popcorno: function () { return [{ k: 'pesca', n: 2 }, { k: 'scarta', n: 1 }]; },
-    indovino: function () { return [{ k: 'indovino' }]; }
+    indovino: function () { return [{ k: 'indovino' }]; },
+    // Brutti sogni
+    mascherato: function () { return [{ k: 'pesca', per: 'semplice', may: true }]; },
+    pagliaccio: function (s, p) {
+      return [{ k: 'scarta', n: 2, may: true, cost: true, lab: 'a', need: { k: 'rimanda', da: 'altri' } }]
+        .concat(altri(s, p).map(function (q) { return { k: 'rimanda', da: q, dep: 'a', zitto: true }; }));
+    },
+    mietitore: function () { return [{ k: 'mietitore' }]; },
+    burattino: function () { return [{ k: 'sposta', filtro: 'malus', mio: true, may: true }]; },
+    uncinocorno: function () { return [{ k: 'scarta', n: 1, may: true, cost: true, lab: 'a', need: { k: 'esilia' } }, { k: 'esilia', dep: 'a' }]; },
+    rancoroso: function () { return [{ k: 'sacrifica', filtro: 'semplice', may: true, lab: 'a' }, { k: 'pesca', n: 3, dep: 'a' }]; },
+    cuore_stregato: function () { return [{ k: 'pesca', n: 2, may: true }]; },
+    incubo_occupato: function () { return [{ k: 'sacrifica', filtro: 'unicorno' }]; },
+    incubo_palestra: function () { return [{ k: 'scarta_mano' }, { k: 'pesca', n: 1 }]; }
   };
-  // Inizio del turno: si scelgono da un elenco, in qualsiasi ordine, prima di pescare (il Rito oscuro è obbligatorio).
+  // «Se viene sacrificato o distrutto…»: lo risolve chi lo aveva nella stalla.
+  var USCITA = {
+    vendicativo: function () { return [{ k: 'distruggi', filtro: 'unicorno', may: true }]; },
+    pipistrellicorno: function () { return [{ k: 'giocatore', filtro: 'mano', may: true, lab: 'g' }, { k: 'arraffa', dep: 'g' }]; },
+    nonnina: function () { return [{ k: 'sacrifica', filtro: 'carta' }]; },
+    diavolicorno: function () { return [{ k: 'esilia', may: true }]; }
+  };
+  // Inizio del turno: si scelgono da un elenco, in qualsiasi ordine, prima di pescare (quelli in OBBLIGO non si saltano).
+  var OBBLIGO = { rito_oscuro: 1, incubo_sepolto: 1, incubo_vuoto: 1 };
   var INIZIO = {
     espresso: function () { return [{ k: 'sacrifica', filtro: 'carta', may: true, lab: 'a' }, { k: 'pesca', n: 2, dep: 'a' }]; },
     acchiappapeluche: function () { return [{ k: 'scarta', n: 1, may: true, cost: true, lab: 'a' }, { k: 'pesca', n: 1, dep: 'a' }]; },
@@ -310,7 +403,14 @@
     retino: function () { return [{ k: 'scarta', n: 3, may: true, cost: true, lab: 'a' }, { k: 'ruba', filtro: 'unicorno', dep: 'a' }]; },
     cannoncino: function () { return [{ k: 'scarta', n: 2, may: true, cost: true, lab: 'a' }, { k: 'distruggi', filtro: 'unicorno', dep: 'a' }]; },
     rito_oscuro: function () { return [{ k: 'sacrifica', filtro: 'unicorno', lab: 'a' }, { k: 'pesca', n: 1, dep: 'a' }]; },
-    ariete: function () { return [{ k: 'distruggi', filtro: 'unicorno', may: true, lab: 'a' }, { k: 'salta_turno', dep: 'a' }]; }
+    ariete: function () { return [{ k: 'distruggi', filtro: 'unicorno', may: true, lab: 'a' }, { k: 'salta_turno', dep: 'a' }]; },
+    // Brutti sogni
+    sensitivo: function () { return [{ k: 'pesca', n: 1, may: true }]; },
+    spirito_guida: function () { return [{ k: 'guida' }]; },
+    poltergeist: function () { return [{ k: 'giocatore', filtro: 'mano', lab: 'g' }, { k: 'salta_pesca', dep: 'g' }, { k: 'pesca_mano', dep: 'g' }]; },
+    lavoretto: function () { return [{ k: 'scarta', n: 3, may: true, cost: true, lab: 'a' }, { k: 'esilia', dep: 'a' }]; },
+    incubo_sepolto: function () { return [{ k: 'sacrifica', filtro: 'unicorno' }, { k: 'sepolto' }]; },
+    incubo_vuoto: function () { return [{ k: 'ruba', filtro: 'malus' }]; }
   };
   function puoi(s, op, p, x) { var f = { k: op, p: p, e: 0 }; Object.keys(x || {}).forEach(function (k) { f[k] = x[k]; }); return opzioni(s, f).length > 0; }
   var USABILE = {
@@ -320,7 +420,13 @@
     retino: function (s, p) { return mano(s, p).length >= 3 && puoi(s, 'ruba', p, { filtro: 'unicorno' }); },
     cannoncino: function (s, p) { return mano(s, p).length >= 2 && puoi(s, 'distruggi', p, { filtro: 'unicorno' }); },
     rito_oscuro: function (s, p) { return puoi(s, 'sacrifica', p, { filtro: 'unicorno' }); },
-    ariete: function (s, p) { return puoi(s, 'distruggi', p, { filtro: 'unicorno' }); }
+    ariete: function (s, p) { return puoi(s, 'distruggi', p, { filtro: 'unicorno' }); },
+    sensitivo: function (s) { return s.deck.length > 0; },
+    spirito_guida: function (s) { return s.deck.length > 0; },
+    poltergeist: function (s, p) { return puoi(s, 'giocatore', p, { filtro: 'mano' }); },
+    lavoretto: function (s, p) { return mano(s, p).length >= 3 && puoi(s, 'esilia', p); },
+    incubo_sepolto: function () { return true; },
+    incubo_vuoto: function (s, p) { return puoi(s, 'ruba', p, { filtro: 'malus' }); }
   };
   var MAGIA = {
     zoccolata: function () { return [{ k: 'rimanda', da: 'altri', lab: 'a' }, { k: 'scarta', n: 1, chi: 'vittima', dep: 'a' }]; },
@@ -340,7 +446,13 @@
     },
     baratto: function () { return [{ k: 'giocatore', lab: 'g' }, { k: 'scambia_mani', dep: 'g' }]; },
     mela: function () { return [{ k: 'distruggi', filtro: 'unicorno', magia: true }]; },
-    scambio_stalla: function () { return [{ k: 'scambio', lab: 'a' }, { k: 'ruba', filtro: 'unicorno', da: 'g', dep: 'a' }]; }
+    scambio_stalla: function () { return [{ k: 'scambio', lab: 'a' }, { k: 'ruba', filtro: 'unicorno', da: 'g', dep: 'a' }]; },
+    // Brutti sogni
+    toc_toc: function () { return [{ k: 'esilia' }]; },
+    possessione: function () { return [{ k: 'scarta', n: 1, lab: 'a' }, { k: 'ruba', filtro: 'carta', dep: 'a' }]; },
+    fuori_dalla_tomba: function () { return [{ k: 'rianima', filtro: 'semplice', lab: 'a' }, { k: 'pesca', n: 1, dep: 'a' }]; },
+    piu_spettro: function () { return [{ k: 'giocatore', tutti: true, lab: 'g' }, { k: 'strage', filtro: 'semplice', dep: 'g' }]; },
+    seduta_spiritica: function () { return [{ k: 'evoca' }]; }
   };
   // Le Magie che non si possono giocare se manca un bersaglio per la prima cosa che fanno.
   var REQ = {
@@ -349,16 +461,19 @@
     bocca_a_muso: function (s, p) { return puoi(s, 'rianima', p) ? null : 'Negli scarti non c\'è un unicorno che possa entrare nella tua stalla.'; },
     mulinello: function (s, p) { return mano(s, p).length >= 2 ? null : 'Ti serve un\'altra carta in mano da scartare.'; },
     cambio_di_rotta: function (s, p) { return puoi(s, 'sposta', p) ? null : 'Non ci sono Bonus o Malus da spostare.'; },
-    tabula_rasa: function (s, p) { return puoi(s, 'sposta', p) ? null : 'Non ci sono Bonus o Malus nelle stalle.'; },
+    tabula_rasa: function (s, p) { return giro(s, p).some(function (q) { return stalla(s, q).some(function (c) { return filtra(c, 'bm'); }); }) ? null : 'Non ci sono Bonus o Malus nelle stalle.'; },
     colpo_mirato: function (s, p) { return puoi(s, 'colpo', p) ? null : 'Non ci sono Bonus da distruggere né Malus tuoi da sacrificare.'; },
     due_per_uno: function (s, p) { return puoi(s, 'sacrifica', p, { filtro: 'carta' }) ? null : 'Nella tua stalla dev\'esserci una carta da sacrificare.'; },
     mela: function (s, p) { return puoi(s, 'distruggi', p, { filtro: 'unicorno', magia: true }) ? null : 'Non c\'è un unicorno che si possa distruggere.'; },
-    scambio_stalla: function (s, p) { return puoi(s, 'scambio', p) ? null : 'Nella tua stalla non c\'è un unicorno che si possa spostare.'; }
+    scambio_stalla: function (s, p) { return puoi(s, 'scambio', p) ? null : 'Nella tua stalla non c\'è un unicorno che si possa spostare.'; },
+    toc_toc: function (s, p) { return puoi(s, 'esilia', p) ? null : 'Nelle stalle non c\'è niente da togliere dal gioco.'; },
+    possessione: function (s, p) { return mano(s, p).length >= 2 ? null : 'Ti serve un\'altra carta in mano da scartare.'; },
+    fuori_dalla_tomba: function (s, p) { return puoi(s, 'rianima', p, { filtro: 'semplice' }) ? null : 'Negli scarti non c\'è un unicorno semplice che possa entrare nella tua stalla.'; }
   };
   function innesco(s, t) {
     if (t.k === 'entra') return ENTRA[keyOf(t.c)](s, t.p, t.c);
     if (t.k === 'recinto') return [{ k: 'scarta', n: 1 }];
-    if (t.k === 'vendicativo') return [{ k: 'distruggi', filtro: 'unicorno', may: true }];
+    if (t.k === 'esce' || t.k === 'vendicativo') return USCITA[keyOf(t.c)](s, t.p, t.c);
     return [];
   }
 
@@ -417,8 +532,8 @@
     function da(qs, ok) { qs.forEach(function (q) { if (q >= 0) stalla(s, q).forEach(function (c) { if (ok(q, c)) out.push(c); }); }); return out; }
     switch (f.k) {
       case 'sacrifica':
-        if (f.c) return (stalla(s, p).indexOf(f.c) >= 0 && tocca(s, p, f.c)) ? [f.c] : [];
-        return da([p], function (q, c) { return filtra(c, fl) && tocca(s, q, c); });
+        if (f.c) return (stalla(s, p).indexOf(f.c) >= 0 && sacrificabile(s, p, f.c)) ? [f.c] : [];
+        return da([p], function (q, c) { return filtra(c, fl) && sacrificabile(s, q, c); });
       case 'distruggi':
         return da(altri(s, p), function (q, c) { return filtra(c, fl) && distruggibile(s, q, c, f.magia); });
       case 'ruba':
@@ -426,12 +541,14 @@
           function (q, c) { return filtra(c, fl) && tocca(s, q, c) && entra(s, c, p); });
       case 'rimanda':
         return da(f.da === 'altri' ? altri(s, p) : [chi(s, f, f.da)], function (q, c) { return tocca(s, q, c); });
+      case 'esilia':
+        return da(giro(s, p), function (q, c) { return tocca(s, q, c); });
       case 'colpo':
-        da(altri(s, p), function (q, c) { return kind(c) === 'bonus'; });
+        da(altri(s, p), function (q, c) { return kind(c) === 'bonus' && !salda(s, q, c, 'distruggi'); });
         return da([p], function (q, c) { return kind(c) === 'malus'; });
       case 'sposta':
         if (n(s) < 2) return [];
-        return da(giro(s, p), function (q, c) { return filtra(c, 'bm'); });
+        return da(f.mio ? [p] : giro(s, p), function (q, c) { return filtra(c, fl || 'bm') && arrivi(s, f, q, c).length > 0; });
       case 'scambio':
         return da([p], function (q, c) {
           return isUni(c) && tocca(s, p, c) && altri(s, p).some(function (r) { return entra(s, c, r); });
@@ -439,13 +556,15 @@
       case 'scarta': return mano(s, chi(s, f, f.chi)).filter(function (c) { return filtra(c, fl); });
       case 'cerca': return s.deck.filter(function (c) { return filtra(c, fl); });
       case 'recupera': return s.discard.filter(function (c) { return filtra(c, fl); });
-      case 'rianima': return s.discard.filter(function (c) { return isUni(c) && c !== f.escludi && entra(s, c, p); });
+      case 'rianima': return s.discard.filter(function (c) { return isUni(c) && (!fl || filtra(c, fl)) && c !== f.escludi && entra(s, c, p); });
       case 'dalla_mano': return mano(s, p).filter(function (c) { return kind(c) === 'semplice' && entra(s, c, p); });
       case 'nido': return s.nursery.slice();
-      case 'giocatore': return altri(s, p).filter(function (q) { return fl !== 'mano' || mano(s, q).length > 0; });
+      case 'giocatore': return (f.tutti ? giro(s, p) : altri(s, p)).filter(function (q) { return fl !== 'mano' || mano(s, q).length > 0; });
     }
     return out;
   }
+  // Dove può andare la carta c che sta nella stalla di q, quando la si sposta (Cambio di rotta, Unicorno Burattino).
+  function arrivi(s, f, q, c) { return giro(s, f.p).filter(function (r) { return r !== q && entra(s, c, r); }); }
   function bisogno(s, f) {
     if (!f.need) return true;
     var g = clone(f.need); g.p = f.p; g.e = f.e; g.src = f.src;
@@ -454,7 +573,7 @@
   // Scelta di una carta: senza alternative (e se è obbligatoria) si sceglie da sola.
   function scegli1(s, f, opts, zona, fatto) {
     if (f.ans) { var a = f.ans; delete f.ans; return fatto(a.skip ? null : a.cards[0]); }
-    if (!opts.length) { if (!f.may) nulla(s, f); return ko(s, f); }
+    if (!opts.length) { if (!f.may && !f.zitto) nulla(s, f); return ko(s, f); }
     if (f.may && !bisogno(s, f)) return ko(s, f);
     if (!f.may && opts.length === 1) return fatto(opts[0]);
     chiedi(s, f, { kind: 'carte', opts: opts, n: 1, min: 1, may: !!f.may, zona: zona, filtro: f.filtro || null });
@@ -489,17 +608,18 @@
     // La carta c lascia la stalla di q; prima chi la possiede può salvarla (Paladino, Unicorno Cenere).
     via: function (s, f) {
       var q = f.q, c = f.c;
-      if (q < 0 || stalla(s, q).indexOf(c) < 0) return ko(s, f);
+      if (q < 0 || stalla(s, q).indexOf(c) < 0 || !tocca(s, q, c) || salda(s, q, c, f.modo)) return ko(s, f);
       if (f.ans) {
         var pk = f.ans.pick; delete f.ans; f.deciso = true;
         if (pk === 'paladino') {
           var b = paladino(s, q, c);
           if (b) { pushLog(s, { t: 'salvata', s: q, c: c, da: b }); lascia(s, 'sacrifica', q, b, q); return ko(s, f); }
         } else if (pk === 'scarta' && mano(s, q).length) {
-          pushLog(s, { t: 'salvata', s: q, c: c, da: c });
+          var el = keyOf(c) === 'cenere' && attivo(s, q, c) ? null : cartaAttiva(s, q, 'elisir');
+          pushLog(s, { t: 'salvata', s: q, c: c, da: c, el: el ? 1 : 0 });
           ko(s, f);
           // col Monolocale si aspetta lo scarto prima di controllare di nuovo
-          s.stack.push({ k: 'scarta', p: q, chi: q, n: 1, e: f.e, src: c, mono: f.mono });
+          s.stack.push({ k: 'scarta', p: q, chi: q, n: 1, e: f.e, src: el || c, mono: f.mono });
           return;
         }
       }
@@ -544,9 +664,12 @@
       if (!f.may && o.length <= k) return scarta(s, w, o.slice());
       chiedi(s, f, { kind: 'carte', s: w, opts: o, n: k, min: k, may: !!f.may, zona: 'mano', filtro: f.filtro || null });
     },
+    // per: una carta per ogni carta così nella stalla; may: «puoi pescare» non fa finire il mazzo.
     pesca: function (s, f) {
-      var w = chi(s, f, f.chi), got = pescaN(s, w, f.n || 1);
-      pushLog(s, { t: 'pesca', s: w, n: got });
+      var w = chi(s, f, f.chi), k = f.per ? stalla(s, w).filter(function (c) { return filtra(c, f.per); }).length : (f.n || 1);
+      if (f.may) k = Math.min(k, s.deck.length);
+      if (!k) { if (f.per) nulla(s, f); return ok(s); }
+      pushLog(s, { t: 'pesca', s: w, n: pescaN(s, w, k) });
       ok(s);
     },
     giocatore: function (s, f) {
@@ -643,16 +766,95 @@
       } else if (f.tre.length === 1) s.deck.push(f.tre[0]);
       ok(s);
     },
+    // Sacrifici in blocco: ogni carta passa da 'via' (chi non si sacrifica resta, l'Elisir può salvare un Bonus).
     tutti_malus: function (s, f) {
+      s.stack.pop();
       var m = stalla(s, f.p).filter(function (c) { return kind(c) === 'malus'; });
-      m.forEach(function (c) { lascia(s, 'sacrifica', f.p, c, f.p); });
-      ok(s);
+      for (var i = m.length - 1; i >= 0; i--) s.stack.push({ k: 'via', modo: 'sacrifica', q: f.p, c: m[i], p: f.p, e: f.e, src: f.src });
     },
     tabula: function (s, f) {
+      s.stack.pop();
+      s.stack.push({ k: 'mescola', p: f.p, e: f.e, src: f.src });
+      var vs = [];
       giro(s, f.p).forEach(function (q) {
-        stalla(s, q).filter(function (c) { return filtra(c, 'bm'); }).forEach(function (c) { lascia(s, 'sacrifica', q, c, q); });
+        stalla(s, q).forEach(function (c) { if (filtra(c, 'bm')) vs.push({ k: 'via', modo: 'sacrifica', q: q, c: c, p: q, e: f.e, src: f.src }); });
       });
-      mescolaScarti(s);
+      for (var i = vs.length - 1; i >= 0; i--) s.stack.push(vs[i]);
+    },
+    // Toglie dal gioco una carta di una stalla qualsiasi (i cuccioli tornano nel Nido).
+    esilia: function (s, f) {
+      scegli1(s, f, opzioni(s, f), 'stalle', function (c) {
+        if (!c) return ko(s, f);
+        var q = padrone(s, c);
+        togli(s, q, c);
+        pushLog(s, { t: 'esiliata', s: f.p, q: q, c: c, dove: fuori(s, c) });
+        ok(s);
+      });
+    },
+    // Unicorno Mietitore: pesca; se è un Nitrito puoi mostrarlo e pescarne un altro.
+    mietitore: function (s, f) {
+      if (f.ans) {
+        var y = f.ans.yes; delete f.ans;
+        if (y && s.deck.length) { pushLog(s, { t: 'mostra', s: f.p, c: f.c }); pushLog(s, { t: 'pesca', s: f.p, n: pescaN(s, f.p, 1) }); }
+        return ok(s);
+      }
+      if (!s.deck.length) return ok(s);
+      var c = pesca1(s, f.p);
+      pushLog(s, { t: 'pesca', s: f.p, n: 1 });
+      if (!isNeigh(c) || !s.deck.length) return ok(s);
+      f.c = c;
+      chiedi(s, f, { kind: 'si', q: 'mietitore', c: c });
+    },
+    // Spirito guida: la carta pescata si mostra; un Bonus o un Malus va nella tua stalla.
+    guida: function (s, f) {
+      if (!s.deck.length) return ok(s);
+      var c = pesca1(s, f.p), t = kind(c), dentro = (t === 'bonus' || t === 'malus') && entra(s, c, f.p);
+      pushLog(s, { t: 'mostra', s: f.p, c: c, pesca: 1, dentro: dentro ? 1 : 0 });
+      if (dentro) { dallaMano(s, f.p, c); metti(s, f.p, c); }
+      ok(s);
+    },
+    salta_pesca: function (s, f) {
+      s.stack = s.stack.filter(function (g) { return !(g.k === 'pesca_fase' && g.turno); });
+      pushLog(s, { t: 'saltapesca', s: f.p });
+      ok(s);
+    },
+    // Incubo: sepolto vivo — senza unicorni nella stalla torna in mano a chi ce l'ha.
+    sepolto: function (s, f) {
+      var c = f.src, t = stalla(s, f.p);
+      if (t.indexOf(c) >= 0 && !t.some(function (x) { return isUni(x) && tocca(s, f.p, x); })) {
+        togli(s, f.p, c); s.hand[f.p].push(c);
+        pushLog(s, { t: 'tornata', s: f.p, c: c });
+      }
+      ok(s);
+    },
+    scarta_mano: function (s, f) {
+      var h = mano(s, f.p).slice();
+      if (h.length) { s.discard = s.discard.concat(h); s.hand[f.p] = []; pushLog(s, { t: 'scartate', s: f.p, cards: h }); }
+      ok(s);
+    },
+    // La legge del più spettro: distrugge tutte le carte così nella stalla del giocatore scelto.
+    strage: function (s, f) {
+      var t = chi(s, f, 'g');
+      s.stack.pop();
+      if (t < 0) return;
+      var vs = stalla(s, t).filter(function (c) { return filtra(c, f.filtro) && distruggibile(s, t, c, true); });
+      if (!vs.length) return pushLog(s, { t: 'nulla', s: f.p, src: f.src, op: 'strage', q: t });
+      for (var i = vs.length - 1; i >= 0; i--) s.stack.push({ k: 'via', modo: 'distruggi', q: t, c: vs[i], p: f.p, e: f.e, src: f.src });
+    },
+    // Seduta spiritica: un Incubo dal mazzo nella stalla di un giocatore qualsiasi, poi si mescola.
+    evoca: function (s, f) {
+      var a = f.ans; delete f.ans;
+      if (!f.c) {
+        var o = s.deck.filter(function (c) { return filtra(c, 'incubo') && giro(s, f.p).some(function (q) { return entra(s, c, q); }); });
+        if (!o.length) { shuffle(s.deck); pushLog(s, { t: 'nulla', s: f.p, src: f.src, op: 'cerca' }); return ko(s, f); }
+        if (!a && o.length > 1) return chiedi(s, f, { kind: 'carte', opts: o, n: 1, min: 1, zona: 'mazzo', filtro: 'incubo' });
+        f.c = a ? a.cards[0] : o[0]; a = null;
+      }
+      var dest = giro(s, f.p).filter(function (q) { return entra(s, f.c, q); }), t = -1;
+      if (a) t = a.target; else if (dest.length === 1) t = dest[0];
+      if (t < 0) return chiedi(s, f, { kind: 'giocatore', opts: dest, c: f.c });
+      s.deck.splice(s.deck.indexOf(f.c), 1); metti(s, t, f.c); shuffle(s.deck);
+      pushLog(s, { t: 'evocata', s: f.p, c: f.c, to: t });
       ok(s);
     },
     mescola: function (s) { mescolaScarti(s); ok(s); },
@@ -672,13 +874,16 @@
     sposta: function (s, f) {
       if (!f.c) return scegli1(s, f, opzioni(s, f), 'stalle', function (c) { if (!c) return ko(s, f); f.c = c; f.da = padrone(s, c); });
       if (padrone(s, f.c) !== f.da) return ko(s, f);
+      var dest = arrivi(s, f, f.da, f.c);
       if (f.ans) {
         var t = f.ans.target; delete f.ans;
+        if (dest.indexOf(t) < 0) return ko(s, f);
         togli(s, f.da, f.c); metti(s, t, f.c);
         pushLog(s, { t: 'spostata', s: f.p, c: f.c, q: f.da, to: t });
         return ok(s);
       }
-      chiedi(s, f, { kind: 'giocatore', opts: giro(s, f.p).filter(function (q) { return q !== f.da; }), c: f.c });
+      if (!dest.length) return ko(s, f);
+      chiedi(s, f, { kind: 'giocatore', opts: dest, c: f.c });
     },
     // Scambio di stalla: un tuo unicorno va da un altro giocatore, poi gli rubi un unicorno.
     scambio: function (s, f) {
@@ -700,7 +905,7 @@
         f.got = {};
         var wait = [], opts = {};
         giro(s, f.p).forEach(function (q) {
-          var o = f.op === 'scarta' ? mano(s, q).slice() : stalla(s, q).filter(function (c) { return isUni(c) && tocca(s, q, c); });
+          var o = f.op === 'scarta' ? mano(s, q).slice() : stalla(s, q).filter(function (c) { return isUni(c) && sacrificabile(s, q, c); });
           if (!o.length) return;
           if (o.length === 1) f.got[q] = o[0]; else { wait.push(q); opts[q] = o; }
         });
@@ -723,9 +928,11 @@
       }
       f.aperta = false;
       if (ch.length === 1) return ok(s);
-      var nn = ch.pop(), x = ch.pop();
-      s.discard.push(x.c, nn.c);
-      pushLog(s, { t: 'fermata', s: nn.p, c: x.c, by: x.p, con: nn.c });
+      // il Nitrito maledetto toglie dal gioco la carta che ferma
+      var nn = ch.pop(), x = ch.pop(), via = keyOf(nn.c) === 'nitrito_maledetto';
+      if (via) fuori(s, x.c); else s.discard.push(x.c);
+      s.discard.push(nn.c);
+      pushLog(s, { t: 'fermata', s: nn.p, c: x.c, by: x.p, con: nn.c, fuori: via ? 1 : 0 });
       if (!ch.length) ok(s);
     },
     risolvi: function (s) {
@@ -738,7 +945,7 @@
         pushLog(s, { t: 'magia', s: it.p, c: c });
         return avvia(s, it.p, c, MAGIA[keyOf(c)](s, it.p, c).concat([{ k: 'agli_scarti' }]));
       }
-      if (isUni(c) && !entra(s, c, it.to)) { s.discard.push(c); return; }
+      if (!entra(s, c, it.to)) { s.discard.push(c); return; }
       metti(s, it.to, c);
       pushLog(s, { t: 'entrata', s: it.p, c: c, q: it.to });
     },
@@ -772,7 +979,7 @@
     },
     fine_fase: function (s, f) {
       s.phase = 'fine';
-      var p = s.turn, h = mano(s, p), k = h.length - MANO_MAX;
+      var p = s.turn, h = mano(s, p), k = h.length - limite(s, p);
       if (f.ans) {
         var cs = f.ans.cards; delete f.ans;
         cs.forEach(function (c) { if (dallaMano(s, p, c)) s.discard.push(c); });
@@ -794,10 +1001,13 @@
     for (var i = 0; i < t.length; i++) if (keyOf(t[i]) === 'paladino' && t[i] !== c && attivo(s, q, t[i])) return t[i];
     return null;
   }
+  // Come si può salvare la carta: il Paladino si sacrifica al posto di un unicorno distrutto; l'Unicorno Cenere e
+  // l'Elisir di lunga vita fanno scartare una carta al suo posto (per un Malus non lo chiediamo: non conviene mai).
   function salvezze(s, f) {
     var o = [];
     if (f.modo === 'distruggi' && paladino(s, f.q, f.c)) o.push('paladino');
-    if (keyOf(f.c) === 'cenere' && attivo(s, f.q, f.c) && mano(s, f.q).length) o.push('scarta');
+    var cenere = keyOf(f.c) === 'cenere' && attivo(s, f.q, f.c), elisir = kind(f.c) !== 'malus' && has(s, f.q, 'elisir');
+    if ((cenere || elisir) && mano(s, f.q).length) o.push('scarta');
     return o;
   }
   function scarta(s, w, cards) {
@@ -816,7 +1026,7 @@
       var k = keyOf(c);
       if (!INIZIO[k] || s.usati.indexOf(c) >= 0 || !attivo(s, p, c)) return;
       var u = USABILE[k](s, p, c);
-      if (k === 'rito_oscuro') {
+      if (OBBLIGO[k]) {
         if (u) { opts.push(c); must.push(c); } else { s.usati.push(c); pushLog(s, { t: 'nulla', s: p, src: c }); }
         return;
       }
@@ -840,6 +1050,7 @@
       var p = (s.turn + i) % n(s), m = cartaAttiva(s, p, 'monolocale');
       if (!m || conta(s, p) <= 5) continue;
       if (s.stack.some(function (g) { return g.mono === p; })) continue;
+      if (!opzioni(s, { k: 'sacrifica', p: p, e: 0, filtro: 'unicorno' }).length) continue;
       pushLog(s, { t: 'monolocale', s: p });
       avvia(s, p, m, [{ k: 'sacrifica', filtro: 'unicorno', mono: p }]);
       return true;
@@ -850,7 +1061,7 @@
     if (s.chain.length) return false;
     for (var i = 0; i < n(s); i++) {
       var p = (s.turn + i) % n(s);
-      if (conta(s, p) >= s.goal) { fine(s, [p], 'unicorni'); return true; }
+      if (conta(s, p) >= s.goal && puoVincere(s, p)) { fine(s, [p], 'unicorni'); return true; }
     }
     if (s.vuoto) { fineMazzo(s); return true; }
     return false;
@@ -864,8 +1075,9 @@
   }
   function fineMazzo(s) {
     var c = [], p;
-    for (p = 0; p < n(s); p++) c.push(conta(s, p));
+    for (p = 0; p < n(s); p++) c.push(puoVincere(s, p) ? conta(s, p) : -1);
     var max = Math.max.apply(null, c), best = [];
+    if (max < 0) return fine(s, [], 'pari');
     for (p = 0; p < n(s); p++) if (c[p] === max) best.push(p);
     if (best.length === 1) return fine(s, best, 'mazzo');
     var l = best.map(function (q) { return lettere(s, q); }), ml = Math.max.apply(null, l);
@@ -906,7 +1118,7 @@
       mode: opts.local ? 'local' : 'online', status: 'waiting',
       seats: names.map(function (nm, i) { return { keys: (i === 0 && opts.key) ? [opts.key] : [], name: String(nm || '').slice(0, 20) }; }),
       host: 0, bots: {}, exp: espansioni(opts.exp), goal: 7,
-      deck: [], discard: [], nursery: [], hand: {}, stable: {},
+      deck: [], discard: [], nursery: [], box: [], hand: {}, stable: {},
       turn: 0, turnNo: 0, phase: 'wait', giocate: 0, maxGiocate: 1, usati: [], salta: false, extra: 0, vuoto: false,
       chain: [], inGioco: null, stack: [], queue: [], ctx: {}, eid: 0, pid: 0, prompt: null,
       log: [], logN: 0, result: null
@@ -918,7 +1130,7 @@
     s.goal = k >= 6 ? 6 : 7;
     s.nursery = shuffle(nidoPer(s.exp));
     s.deck = shuffle(mazzoPer(s.exp, k));
-    s.discard = []; s.hand = {}; s.stable = {};
+    s.discard = []; s.box = []; s.hand = {}; s.stable = {};
     for (p = 0; p < k; p++) { s.hand[p] = []; s.stable[p] = [s.nursery.pop()]; }
     if (k === 2) {
       for (p = 0; p < k; p++) {
@@ -1013,7 +1225,7 @@
     var t = kind(c), out = [];
     if (t !== 'bonus' && t !== 'malus') return out;
     if (t === 'bonus' && has(s, p, 'pericolante')) return out;
-    for (var q = 0; q < n(s); q++) out.push(q);
+    for (var q = 0; q < n(s); q++) if (entra(s, c, q)) out.push(q);
     return out;
   }
   // Perché questa carta non si può giocare adesso (null se si può).
@@ -1027,7 +1239,7 @@
     if (t === 'bonus' && has(s, p, 'pericolante')) return 'Con la Stalla pericolante non puoi giocare Bonus.';
     if (t === 'bonus' || t === 'malus') {
       if (typeof m.to !== 'number' || m.to < 0 || m.to >= n(s) || m.to !== Math.floor(m.to)) return 'Scegli in quale stalla metterla.';
-      return null;
+      return entra(s, c, m.to) ? null : 'Il Cerchio di sale non lascia entrare Malus in quella stalla.';
     }
     if (t === 'magia') return REQ[key] ? REQ[key](s, p) : null;
     return 'Questa carta non si può giocare.';
@@ -1194,6 +1406,7 @@
     MIN_PLAYERS: MIN_PLAYERS, MAX_PLAYERS: MAX_PLAYERS, MANO_MAX: MANO_MAX,
     keyOf: keyOf, def: def, kind: kind, isUni: isUni, isNeigh: isNeigh, attivo: attivo, has: has, panda: panda,
     conta: conta, lettere: lettere, entra: entra, distruggibile: distruggibile, nitrisce: nitrisce, reattivi: reattivi,
+    salda: salda, sacrificabile: sacrificabile, puoVincere: puoVincere, limite: limite, filtra: filtra,
     vedeMano: vedeMano, padrone: padrone, bersagli: bersagli, opzioni: opzioni, mazzoPer: mazzoPer, nidoPer: nidoPer,
     newGame: newGame, startGame: startGame, startLocal: startLocal, startBots: startBots, rematch: rematch, setExp: setExp,
     join: join, addBot: addBot, removeBot: removeBot, seatOf: seatOf, addSeatKey: addSeatKey,

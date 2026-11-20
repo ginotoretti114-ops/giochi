@@ -217,6 +217,7 @@ button.ch:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .sheet { width: 100%; max-width: 560px; max-height: 90%; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-bottom: 0; border-radius: 20px 20px 0 0; padding: 20px 18px calc(22px + env(safe-area-inset-bottom)); display: grid; gap: 12px; }
 .sheet h2 { font: 28px/1.1 var(--font-display); margin: 0; }
 .sheet h3 { font-size: 15px; margin: 6px 0 0; color: var(--saffron); text-transform: uppercase; letter-spacing: .07em; }
+.sheet h3.exp-t { font: 24px/1.15 var(--font-display); color: var(--text); text-transform: none; letter-spacing: 0; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .sheet p, .sheet ul { margin: 0; }
 .sheet ul { padding-left: 20px; display: grid; gap: 6px; }
 .eyebrow { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
@@ -408,7 +409,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       '<i aria-hidden="true">' + d.e + '</i>' + esc(sname(c)) + '</button>';
   }
   function sortStable(a) { return a.slice().sort(function (x, y) { return ORDER[K.kind(x)] - ORDER[K.kind(y)]; }); }
-  var FILTRO = { unicorno: 'un unicorno', bonus: 'un Bonus', malus: 'un Malus', magia: 'una Magia', nitrito: 'un Nitrito', narvalo: 'una carta con «Narvalo» nel nome', semplice: 'un unicorno semplice', carta: 'una carta' };
+  var FILTRO = { unicorno: 'un unicorno', bonus: 'un Bonus', malus: 'un Malus', magia: 'una Magia', nitrito: 'un Nitrito', narvalo: 'una carta con «Narvalo» nel nome', semplice: 'un unicorno semplice', carta: 'una carta', incubo: 'un Incubo' };
   function cosa(f, n) {
     if (n > 1) return n + ' ' + (f === 'unicorno' ? 'unicorni' : 'carte');
     return FILTRO[f || 'carta'] || 'una carta';
@@ -434,6 +435,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   function Who(s, P, p) { return isMe(P, p) ? 'Tu' : hn(s, p); }
   function whom(s, P, p) { return isMe(P, p) ? 'te' : hn(s, p); }
   function dio(s, P, p) { return isMe(P, p) ? 'tua' : 'di ' + hn(s, p); }
+  function laStalla(s, P, p) { return isMe(P, p) ? 'la tua stalla' : 'la stalla di ' + hn(s, p); }
   function v(P, p, tu, lui) { return isMe(P, p) ? tu : lui; }
   function isMine(s, P) { return P.seated && s.status === 'playing' && P.me >= 0 && K.waitingFor(s).indexOf(P.me) >= 0; }
   function canAct(s, P) { return isMine(s, P) && P.open && (P.local || P.bot || ui.online === 'up'); }
@@ -449,20 +451,20 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     switch (e.t) {
       case 'turno': return { e: '🔔', t: (isMe(P, p) ? 'Tocca a te' : 'Turno di ' + hn(s, p)) + (e.ancora ? ' (un altro turno)' : ''), sep: true };
       case 'gioca': {
-        var t = K.kind(e.c), to = (t === 'bonus' || t === 'malus') ? (e.to === p ? ' nella ' + v(P, p, 'tua', 'sua') + ' stalla' : ' nella stalla ' + dio(s, P, e.to)) : '';
+        var t = K.kind(e.c), to = (t === 'bonus' || t === 'malus') ? (e.to === p ? ' nella ' + v(P, p, 'tua', 'sua') + ' stalla' : ' nel' + laStalla(s, P, e.to)) : '';
         return { e: K.def(e.c).e, t: Who(s, P, p) + ' ' + v(P, p, 'giochi', 'gioca') + ' ' + cb(e.c) + to };
       }
       case 'nitrito': return { e: '🐴', t: Who(s, P, p) + ' ' + v(P, p, 'rispondi', 'risponde') + ' con ' + cb(e.c) + '!' };
-      case 'fermata': return { e: '✋', t: cb(e.c) + ' ' + dio(s, P, e.by) + ' è fermata', bad: true };
-      case 'entrata': return K.isUni(e.c) ? { e: '🦄', t: cb(e.c) + ' entra nella stalla ' + dio(s, P, e.q) } : null;
+      case 'fermata': return { e: e.fuori ? '🧿' : '✋', t: cb(e.c) + ' ' + dio(s, P, e.by) + ' è fermata' + (e.fuori ? ' e finisce fuori dal gioco' : ''), bad: true };
+      case 'entrata': return K.isUni(e.c) ? { e: '🦄', t: cb(e.c) + ' entra nel' + laStalla(s, P, e.q) } : null;
       case 'usa': return { e: K.def(e.c).e, t: Who(s, P, p) + ' ' + v(P, p, 'usi', 'usa') + ' ' + cb(e.c) };
       case 'pesca': return e.n ? { e: '🂠', t: Who(s, P, p) + ' ' + v(P, p, 'peschi', 'pesca') + ' ' + e.n + ' ' + plural(e.n, 'carta', 'carte') } : { e: '🂠', t: 'Il mazzo è finito', bad: true };
       case 'scartate':
-        if (e.limite) return { e: '🗑️', t: Who(s, P, p) + ' ' + v(P, p, 'scarti', 'scarta') + ' ' + e.cards.length + ' ' + plural(e.cards.length, 'carta', 'carte') + ' (più di 7 in mano)' };
+        if (e.limite) return { e: '🗑️', t: Who(s, P, p) + ' ' + v(P, p, 'scarti', 'scarta') + ' ' + e.cards.length + ' ' + plural(e.cards.length, 'carta', 'carte') + ' (troppe in mano)' };
         return { e: '🗑️', t: Who(s, P, p) + ' ' + v(P, p, 'scarti', 'scarta') + ' ' + e.cards.map(cb).join(', ') };
       case 'distrutta': return { e: '💥', t: Who(s, P, p) + ' ' + v(P, p, 'distruggi', 'distrugge') + ' ' + cb(e.c) + ' ' + dio(s, P, e.q) + dove(e), bad: true };
       case 'sacrificata': return { e: '🔥', t: Who(s, P, p) + ' ' + v(P, p, 'sacrifichi', 'sacrifica') + ' ' + cb(e.c) + dove(e), bad: K.isUni(e.c) };
-      case 'salvata': return e.da === e.c ? { e: '🔥', t: Who(s, P, p) + ' ' + v(P, p, 'salvi', 'salva') + ' ' + cb(e.c) + ' scartando una carta' } : { e: '🛡️', t: cb(e.da) + ' si sacrifica al posto di ' + cb(e.c) };
+      case 'salvata': return e.da === e.c ? { e: e.el ? '🧪' : '🔥', t: Who(s, P, p) + ' ' + v(P, p, 'salvi', 'salva') + ' ' + cb(e.c) + ' scartando una carta' + (e.el ? ' (Elisir di lunga vita)' : '') } : { e: '🛡️', t: cb(e.da) + ' si sacrifica al posto di ' + cb(e.c) };
       case 'rubata': return { e: '🫳', t: Who(s, P, p) + ' ' + v(P, p, 'rubi', 'ruba') + ' ' + cb(e.c) + ' a ' + whom(s, P, e.q) };
       case 'rimandata': return { e: '↩️', t: Who(s, P, p) + ' ' + v(P, p, 'rimandi', 'rimanda') + ' ' + cb(e.c) + (e.dove === 'nido' ? ' nel Nido' : ' in mano a ' + whom(s, P, e.q)) };
       case 'presa': {
@@ -476,8 +478,13 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       case 'rianimata': return { e: '✨', t: Who(s, P, p) + ' ' + v(P, p, 'riporti', 'riporta') + ' ' + cb(e.c) + ' nella ' + v(P, p, 'tua', 'sua') + ' stalla' };
       case 'portata': return { e: '✨', t: Who(s, P, p) + ' ' + v(P, p, 'porti', 'porta') + ' ' + cb(e.c) + ' nella ' + v(P, p, 'tua', 'sua') + ' stalla' + (e.dal === 'nido' ? ' dal Nido' : '') };
       case 'indovino': return { e: '👁️', t: Who(s, P, p) + ' ' + v(P, p, 'guardi', 'guarda') + ' le prime carte del mazzo e ne ' + v(P, p, 'prendi', 'prende') + ' una' };
-      case 'spostata': return { e: '🧭', t: Who(s, P, p) + ' ' + v(P, p, 'sposti', 'sposta') + ' ' + cb(e.c) + ' nella stalla ' + dio(s, P, e.to) };
+      case 'spostata': return { e: '🧭', t: Who(s, P, p) + ' ' + v(P, p, 'sposti', 'sposta') + ' ' + cb(e.c) + ' nel' + laStalla(s, P, e.to) };
       case 'mescola': return { e: '🔄', t: 'Gli scarti tornano nel mazzo' };
+      case 'esiliata': return { e: '🚪', t: Who(s, P, p) + ' ' + v(P, p, 'togli', 'toglie') + ' dal gioco ' + cb(e.c) + (e.q === p ? '' : ' ' + dio(s, P, e.q)) + (e.dove === 'nido' ? ' (torna nel Nido)' : ''), bad: K.isUni(e.c) };
+      case 'mostra': return { e: '👀', t: Who(s, P, p) + ' ' + v(P, p, 'mostri', 'mostra') + ' ' + cb(e.c) + (e.pesca ? (e.dentro ? ' e la ' + v(P, p, 'metti', 'mette') + ' nella stalla' : ' e la ' + v(P, p, 'tieni', 'tiene') + ' in mano') : '') };
+      case 'saltapesca': return { e: '🪑', t: Who(s, P, p) + ' ' + v(P, p, 'salti', 'salta') + ' la pesca' };
+      case 'tornata': return { e: '↩️', t: cb(e.c) + ' torna in mano ' + (isMe(P, p) ? 'a te' : 'a ' + hn(s, p)) };
+      case 'evocata': return { e: '🌒', t: Who(s, P, p) + ' ' + v(P, p, 'evochi', 'evoca') + ' ' + cb(e.c) + ' nel' + laStalla(s, P, e.to), bad: true };
       case 'rimescolone': return { e: '🃏', t: Who(s, P, p) + ' ' + v(P, p, 'rimescoli', 'rimescola') + ' tutto e ' + v(P, p, 'peschi', 'pesca') + ' ' + e.n + ' carte' };
       case 'extra': return { e: '🎡', t: Who(s, P, p) + ' ' + v(P, p, 'farai', 'farà') + ' un altro turno' };
       case 'salta': return { e: '🐏', t: 'Il turno ' + dio(s, P, p) + ' finisce subito' };
@@ -522,7 +529,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   function countHTML(s, p) {
     var c = K.conta(s, p), pc = Math.min(100, Math.round(100 * c / s.goal));
     return '<span class="cnt"><span class="uni" title="Unicorni">🦄 <b>' + c + '</b>/' + s.goal + '</span><span title="Carte in mano">🂠 <b>' + s.hand[p].length + '</b></span>' +
-      (K.vedeMano(s, p) ? '<span title="Mano scoperta">📹</span>' : '') + '</span>';
+      (K.vedeMano(s, p) ? '<span title="Mano scoperta">📹</span>' : '') + (K.puoVincere(s, p) ? '' : '<span title="Non può vincere">🚽</span>') + '</span>';
   }
   function oppHTML(s, p, P) {
     var playing = s.status === 'playing', ask = playing && s.prompt && K.waitingFor(s).indexOf(p) >= 0, turn = playing && s.turn === p && !s.prompt;
@@ -536,7 +543,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     if (s.chain.length) {
       return '<div class="chain" aria-label="Carte in gioco">' + s.chain.map(function (it, i) {
         return (i ? '<span class="arrow" aria-hidden="true">←</span>' : '') + cardHTML(it.c, { btn: 'card' }) +
-          '<span class="lbl"><b>' + Who(s, P, it.p) + '</b>' + (i ? 'risponde' : (K.kind(it.c) === 'bonus' || K.kind(it.c) === 'malus') ? 'per la stalla ' + dio(s, P, it.to) : 'gioca') + '</span>';
+          '<span class="lbl"><b>' + Who(s, P, it.p) + '</b>' + (i ? 'risponde' : (K.kind(it.c) === 'bonus' || K.kind(it.c) === 'malus') ? 'per ' + laStalla(s, P, it.to) : 'gioca') + '</span>';
       }).join('') + '</div>';
     }
     if (s.inGioco) return '<div class="chain">' + cardHTML(s.inGioco, { btn: 'card' }) + '<span class="lbl"><b>' + esc(cname(s.inGioco)) + '</b>sta facendo effetto</span></div>';
@@ -557,7 +564,8 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     return '<section class="tavolo" aria-label="Il tavolo"><div class="piles">' +
       '<span class="pile">' + backHTML(44) + '<span>' + s.deck.length + ' nel mazzo</span></span>' +
       '<button type="button" class="pile" data-act="pile" data-p="scarti">' + topD + '<span>' + s.discard.length + ' scarti</span></button>' +
-      '<button type="button" class="pile" data-act="pile" data-p="nido"><span class="nido" aria-hidden="true">🍼</span><span>' + s.nursery.length + ' nel Nido</span></button></div>' +
+      '<button type="button" class="pile" data-act="pile" data-p="nido"><span class="nido" aria-hidden="true">🍼</span><span>' + s.nursery.length + ' nel Nido</span></button>' +
+      ((s.box || []).length ? '<button type="button" class="pile" data-act="pile" data-p="fuori"><span class="nido" aria-hidden="true">🚪</span><span>' + s.box.length + ' fuori dal gioco</span></button>' : '') + '</div>' +
       chainHTML(s, P) + '<ul class="cron" aria-live="polite">' + items.join('') + '</ul></section>';
   }
   // Le carte della mano si possono scegliere direttamente quando la domanda riguarda la tua mano.
@@ -583,7 +591,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     return '<section class="mine' + (isMine(s, P) ? ' turn' : '') + '" aria-label="La tua zona"><div class="hd"><b>' + (P.local ? hn(s, me) : 'Tu') + '</b>' + countHTML(s, me) + '</div>' +
       '<div class="bar" aria-hidden="true"><i style="width:' + Math.min(100, Math.round(100 * K.conta(s, me) / s.goal)) + '%"></i></div>' +
       '<div class="zone"><h3>La tua stalla</h3>' + (st.length ? '<div class="chips">' + st.map(function (x) { return chipHTML(s, me, x); }).join('') + '</div>' : '<span class="empty">Stalla vuota</span>') + '</div>' +
-      '<div class="zone"><h3>In mano (' + s.hand[me].length + ')</h3><div class="hand">' + (hand || '<span class="empty">Nessuna carta.</span>') + '</div></div></section>';
+      '<div class="zone"><h3>In mano (' + s.hand[me].length + (K.limite(s, me) < K.MANO_MAX ? ' · ne tieni al massimo ' + K.limite(s, me) : '') + ')</h3><div class="hand">' + (hand || '<span class="empty">Nessuna carta.</span>') + '</div></div></section>';
   }
   function errHTML() { return ui.error ? '<p class="err small" role="alert">' + esc(ui.error) + '</p>' : ''; }
 
@@ -592,18 +600,20 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     var src = pr.src ? cb(pr.src) + ': ' : '', f = pr.filtro, n = pr.n || 1;
     switch (pr.op) {
       case 'inizio': return 'Inizio del turno: puoi usare queste carte della tua stalla, una alla volta, prima di pescare.' + (pr.must && pr.must.length ? ' Il ' + cb(pr.must[0]) + ' è obbligatorio.' : '');
-      case 'limite': return 'Hai più di 7 carte: scegline <b>' + n + '</b> da scartare (' + ui.sel.length + '/' + n + ').';
+      case 'limite': return 'Hai più di ' + K.limite(s, pr.s) + ' carte: scegline <b>' + n + '</b> da scartare (' + ui.sel.length + '/' + n + ').';
       case 'scarta': return src + 'scegli ' + cosa(f, n) + ' da scartare' + (n > 1 ? ' (' + ui.sel.length + '/' + n + ')' : '') + (pr.may ? ', oppure lascia stare.' : '.');
       case 'sacrifica': return src + 'scegli ' + cosa(f) + ' della tua stalla da sacrificare' + (pr.may ? ', oppure lascia stare.' : '.');
       case 'distruggi': return src + 'scegli ' + cosa(f) + ' da distruggere' + (pr.may ? ', oppure lascia stare.' : '.');
       case 'ruba': return src + 'scegli ' + cosa(f) + ' da rubare' + (pr.may ? ', oppure lascia stare.' : '.');
       case 'rimanda': return src + 'scegli una carta da rimandare in mano a chi la possiede.';
       case 'colpo': return src + 'distruggi un Bonus di un altro giocatore o sacrifica un tuo Malus' + (pr.may ? ', oppure lascia stare.' : '.');
-      case 'sposta': return src + 'scegli il Bonus o Malus da spostare.';
+      case 'sposta': return src + (f === 'malus' ? 'scegli il Malus da spostare' + (pr.may ? ', oppure lascia stare.' : '.') : 'scegli il Bonus o Malus da spostare.');
+      case 'esilia': return src + 'scegli una carta da togliere dal gioco' + (pr.may ? ', oppure lascia stare.' : '.');
+      case 'evoca': return src + 'ecco gli Incubi nel mazzo: scegli quale evocare.';
       case 'scambio': return src + 'scegli il tuo unicorno da mandare in un\'altra stalla.';
       case 'cerca': return src + 'ecco ' + (f === 'narvalo' ? 'le carte con «Narvalo» nel nome' : f === 'bonus' ? 'i Bonus' : 'i Malus') + ' nel mazzo: prendine uno (poi il mazzo si mescola).';
       case 'recupera': return src + 'prendi in mano ' + cosa(f) + ' dagli scarti' + (pr.may ? ', oppure lascia stare.' : '.');
-      case 'rianima': return src + 'porta nella tua stalla un unicorno dagli scarti.';
+      case 'rianima': return src + 'porta nella tua stalla ' + (f === 'semplice' ? 'un unicorno semplice' : 'un unicorno') + ' dagli scarti.';
       case 'dalla_mano': return src + 'porta nella tua stalla un unicorno semplice dalla tua mano.';
       case 'nido': return src + 'scegli un cucciolo dal Nido.';
       case 'indovino': return pr.fase === 'cima' ? src + 'quale rimetti in cima al mazzo? L\'altra va subito sotto.' : src + 'le prime carte del mazzo: prendine una.';
@@ -616,7 +626,9 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     var k = pr.src ? K.keyOf(pr.src) : '', src = pr.src ? cb(pr.src) + ': ' : '';
     if (pr.op === 'sposta') return src + 'in quale stalla sposti ' + cb(pr.c) + '?';
     if (pr.op === 'scambio') return src + 'in quale stalla mandi ' + cb(pr.c) + '? Poi rubi un unicorno da lì.';
-    return src + ({ mano_lesta: 'da chi prendi una carta a caso?', volante_dispettoso: 'chi deve scartare una carta?', arraffa: 'di chi guardi la mano?', baratto: 'con chi scambi la mano?' }[k] || 'scegli un giocatore.');
+    if (pr.op === 'evoca') return src + 'in quale stalla metti ' + cb(pr.c) + '?';
+    return src + ({ mano_lesta: 'da chi prendi una carta a caso?', volante_dispettoso: 'chi deve scartare una carta?', arraffa: 'di chi guardi la mano?', baratto: 'con chi scambi la mano?',
+      pipistrellicorno: 'di chi guardi la mano?', poltergeist: 'da chi prendi una carta a caso? (salti la pesca)', piu_spettro: 'di chi distruggi gli unicorni semplici?' }[k] || 'scegli un giocatore.');
   }
   function optsHTML(s, P, pr) {
     var sel = function (c) { return ui.sel.indexOf(c) >= 0; };
@@ -639,7 +651,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   function nitritoHTML(s, P, pr) {
     var top = s.chain[s.chain.length - 1], by = top ? top.p : pr.by;
     var what = !top ? '' : s.chain.length > 1 ? Who(s, P, by) + ' ' + v(P, by, 'rispondi', 'risponde') + ' con ' + cb(top.c) + ' a ' + cb(s.chain[s.chain.length - 2].c) + '.' :
-      Who(s, P, by) + ' ' + v(P, by, 'giochi', 'gioca') + ' ' + cb(top.c) + ((K.kind(top.c) === 'bonus' || K.kind(top.c) === 'malus') ? ' nella stalla ' + dio(s, P, top.to) : '') + '.';
+      Who(s, P, by) + ' ' + v(P, by, 'giochi', 'gioca') + ' ' + cb(top.c) + ((K.kind(top.c) === 'bonus' || K.kind(top.c) === 'malus') ? ' nel' + laStalla(s, P, top.to) : '') + '.';
     if (P.shared) {
       // sullo stesso telefono: chi vuole rispondere lo dice, poi prende il telefono
       return '<p class="hint">' + what + ' Qualcuno risponde con un <b>Nitrito</b>?</p><div class="btnrow">' +
@@ -649,7 +661,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     var me = P.me, mine = (s.hand[me] || []).filter(K.isNeigh);
     if (!K.nitrisce(s, me) || !mine.length) return '<p class="hint">' + what + ' Non hai Nitriti da giocare: lasci passare…</p>' + errHTML();
     var seen = {}, btns = '';
-    mine.forEach(function (c) { var k = K.keyOf(c); if (seen[k]) return; seen[k] = 1; btns += '<button type="button" class="btn neigh" data-act="neigh" data-c="' + c + '">' + (k === 'supernitrito' ? '📣 Supernitrito!' : '🐴 Nitrito!') + '</button>'; });
+    mine.forEach(function (c) { var k = K.keyOf(c); if (seen[k]) return; seen[k] = 1; btns += '<button type="button" class="btn neigh" data-act="neigh" data-c="' + c + '">' + ({ supernitrito: '📣 Supernitrito!', nitrito_maledetto: '🧿 Nitrito maledetto!' }[k] || '🐴 Nitrito!') + '</button>'; });
     return '<p class="hint">' + what + ' La fermi?</p><div class="btnrow">' + btns + '<button type="button" class="btn" data-act="neigh-pass">Lascia passare</button></div>' + errHTML();
   }
   function actionsHTML(s, P) {
@@ -682,17 +694,19 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
           return '<p class="hint">' + askHint(s, P, pr) + '</p>' + (hp ? '' : optsHTML(s, P, pr)) + confirmHTML(pr, n, pr.op === 'limite' ? 'Scarta e passa il turno' : null) + errHTML();
         }
         case 'giocatore':
-          return '<p class="hint">' + giocatoreHint(s, pr) + '</p><div class="tgts">' + pr.opts.map(function (q) {
-            return '<button type="button" class="tgt go" data-act="target" data-seat="' + q + '"><span class="av" aria-hidden="true">' + (isBot(s, q) ? '🤖' : '🧑') + '</span><span class="t"><b>' + hn(s, q) + '</b><small>' +
+          // un Incubo nella propria stalla si può mettere, ma lo proponiamo per ultimo
+          var gOpts = pr.op === 'evoca' ? pr.opts.filter(function (q) { return q !== me; }).concat(pr.opts.filter(function (q) { return q === me; })) : pr.opts;
+          return '<p class="hint">' + giocatoreHint(s, pr) + '</p><div class="tgts">' + gOpts.map(function (q) {
+            return '<button type="button" class="tgt go" data-act="target" data-seat="' + q + '"><span class="av" aria-hidden="true">' + (q === me ? '🏠' : isBot(s, q) ? '🤖' : '🧑') + '</span><span class="t"><b>' + (q === me && !P.local ? 'Tu' : hn(s, q)) + '</b><small>' +
               unicorni(K.conta(s, q)) + ' · ' + s.hand[q].length + ' ' + plural(s.hand[q].length, 'carta', 'carte') + ' in mano</small></span></button>';
           }).join('') + '</div>' + (pr.may ? '<button type="button" class="btn wide" data-act="skip">Lascia stare</button>' : '') + errHTML();
         case 'scelta': {
-          var lbl = { paladino: 'Sacrifica il Paladino al suo posto', scarta: 'Scarta una carta per salvarlo', no: 'Lascialo andare' };
-          return '<p class="hint">' + cb(pr.c) + ' sta per essere ' + (pr.modo === 'distruggi' ? 'distrutto' : 'sacrificato') + '.</p><div class="btnrow">' +
+          var lbl = { paladino: 'Sacrifica il Paladino al suo posto', scarta: 'Scarta una carta al suo posto' + (K.keyOf(pr.c) === 'cenere' ? '' : ' (Elisir)'), no: 'Non la salvo' };
+          return '<p class="hint">' + (pr.modo === 'distruggi' ? 'Stanno per distruggere ' : 'Stai per sacrificare ') + cb(pr.c) + '.</p><div class="btnrow">' +
             pr.opts.map(function (x) { return '<button type="button" class="btn' + (x === 'no' ? '' : ' primary') + '" data-act="save" data-v="' + x + '">' + lbl[x] + '</button>'; }).join('') + '</div>' + errHTML();
         }
         case 'si':
-          return '<p class="hint">' + (pr.src ? cb(pr.src) + ': ' : '') + 'lo sacrifichi per distruggere un unicorno?</p><div class="btnrow">' +
+          return '<p class="hint">' + (pr.src ? cb(pr.src) + ': ' : '') + (pr.q === 'mietitore' ? 'hai pescato ' + cb(pr.c) + '. Lo mostri a tutti e peschi un\'altra carta?' : 'lo sacrifichi per distruggere un unicorno?') + '</p><div class="btnrow">' +
             '<button type="button" class="btn primary" data-act="yes" data-v="1">Sì</button><button type="button" class="btn" data-act="yes" data-v="0">No</button></div>' + errHTML();
         case 'ogni': {
           var mineO = pr.opts[me] || [], others = pr.wait.filter(function (x) { return x !== me; });
@@ -706,7 +720,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     var hint = s.giocate ? 'Puoi giocare un\'altra carta (Doppietta), oppure finire il turno.' : 'Tocca una carta per giocarla' + (many ? ' (oggi puoi giocarne 2)' : '') + ', oppure pesca.';
     return '<p class="hint">' + hint + '</p><div class="btnrow">' +
       (!s.giocate ? '<button type="button" class="btn primary" data-act="draw">Pesca una carta</button>' : '') +
-      '<button type="button" class="btn' + (s.giocate ? ' primary' : '') + '" data-act="end">' + (s.giocate ? 'Fine turno' : 'Passa') + (h.length > K.MANO_MAX ? ' <small>(scarti ' + (h.length - K.MANO_MAX) + ')</small>' : '') + '</button></div>' + errHTML();
+      '<button type="button" class="btn' + (s.giocate ? ' primary' : '') + '" data-act="end">' + (s.giocate ? 'Fine turno' : 'Passa') + (h.length > K.limite(s, me) ? ' <small>(scarti ' + (h.length - K.limite(s, me)) + ')</small>' : '') + '</button></div>' + errHTML();
   }
   function boardHTML(s) {
     var P = persp(s);
@@ -867,9 +881,10 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   }
   function whereText(s, P, c) {
     var q = K.padrone(s, c);
-    if (q >= 0) return 'Nella stalla ' + dio(s, P, q) + (K.attivo(s, q, c) ? '' : ' · senza effetto per il Flash abbagliante');
+    if (q >= 0) return 'Nel' + laStalla(s, P, q) + (K.attivo(s, q, c) ? '' : ' · senza effetto per il Flash abbagliante');
     if (s.discard.indexOf(c) >= 0) return 'Negli scarti';
     if (s.nursery.indexOf(c) >= 0) return 'Nel Nido';
+    if ((s.box || []).indexOf(c) >= 0) return 'Fuori dal gioco';
     if (P.me >= 0 && (s.hand[P.me] || []).indexOf(c) >= 0) return 'Nella tua mano';
     return '';
   }
@@ -908,9 +923,12 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     return sheetWrap(hn(s, p) + botTag(s, p), body);
   }
   function pileSheetHTML(s) {
-    var list = ui.pile === 'nido' ? s.nursery.slice() : s.discard.slice().reverse();
-    var body = list.length ? '<div class="opts">' + list.map(function (c) { return cardHTML(c, { w: 58 }); }).join('') + '</div>' : '<p class="muted">' + (ui.pile === 'nido' ? 'Il Nido è vuoto.' : 'Ancora niente negli scarti.') + '</p>';
-    return sheetWrap(ui.pile === 'nido' ? 'Il Nido' : 'Gli scarti', '<p class="muted small">' + (ui.pile === 'nido' ? 'I cuccioli che non sono in nessuna stalla.' : 'Dall\'ultima carta scartata alla prima.') + '</p>' + body);
+    var x = { nido: ['Il Nido', 'I cuccioli che non sono in nessuna stalla.', 'Il Nido è vuoto.', s.nursery.slice()],
+      fuori: ['Fuori dal gioco', 'Le carte tolte dal gioco: non tornano più.', 'Nessuna carta è uscita dal gioco.', (s.box || []).slice().reverse()],
+      scarti: ['Gli scarti', 'Dall\'ultima carta scartata alla prima.', 'Ancora niente negli scarti.', s.discard.slice().reverse()] }[ui.pile] || null;
+    if (!x) return '';
+    var body = x[3].length ? '<div class="opts">' + x[3].map(function (c) { return cardHTML(c, { w: 58 }); }).join('') + '</div>' : '<p class="muted">' + x[2] + '</p>';
+    return sheetWrap(x[0], '<p class="muted small">' + x[1] + '</p>' + body);
   }
   function resultKey(s) { return s ? s.v + '/' + s.status : null; }
   function confettiHTML() {
@@ -942,23 +960,42 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     }).join('');
     return sheetWrap('Storico', items ? '<ul class="log">' + items + '</ul>' : '<p class="muted">Ancora nessuna mossa.</p>');
   }
-  function rulesHTML() {
+  // Il catalogo di un mazzo (base o espansione): una riga per carta, con le copie.
+  var GRUPPI = [['cucciolo', 'I cuccioli'], ['semplice', 'Gli unicorni semplici'], ['magico', 'Gli unicorni magici'], ['magia', 'Le Magie'], ['bonus', 'I Bonus'], ['malus', 'I Malus'], ['istante', 'Le istantanee']];
+  function catalogoHTML(exp) {
     var counts = {}, firstOf = {};
     K.ALL.forEach(function (c) { var k = K.keyOf(c); counts[k] = (counts[k] || 0) + 1; if (!firstOf[k]) firstOf[k] = c; });
-    var groups = [['cucciolo', 'I cuccioli (13, nel Nido)'], ['semplice', 'Gli unicorni semplici (22)'], ['magico', 'Gli unicorni magici (30)'], ['magia', 'Le Magie (25)'], ['bonus', 'I Bonus (14)'], ['malus', 'I Malus (8)'], ['istante', 'Le istantanee (15)']];
-    var cards = groups.map(function (g) {
-      var ks = K.CARTE.filter(function (d) { return d.t === g[0] && d.exp === 'base'; });
-      if (g[0] === 'cucciolo') ks = ks.slice(0, 1);
-      if (g[0] === 'semplice') ks = ks.filter(function (d) { return d.id === 'rosso' || d.id === 'narvalo'; });
-      return '<h3>' + g[1] + '</h3><div class="catalog">' + ks.map(function (d) {
-        var label = g[0] === 'cucciolo' ? 'Cuccioli di 13 colori' : d.id === 'rosso' ? 'Unicorni di 7 colori ×3' : esc(d.name) + (counts[d.id] > 1 ? ' ×' + counts[d.id] : '');
-        return '<div class="row">' + cardHTML(firstOf[d.id], { w: 46 }) + '<div class="t"><b>' + label + '</b>' + esc(d.text) + '</div></div>';
-      }).join('') + '</div>';
+    var row = function (c, label, text) { return '<div class="row">' + cardHTML(c, { w: 46 }) + '<div class="t"><b>' + label + '</b>' + esc(text) + '</div></div>'; };
+    return GRUPPI.map(function (g) {
+      var ks = K.CARTE.filter(function (d) { return d.t === g[0] && d.exp === exp; });
+      if (!ks.length) return '';
+      var tot = ks.reduce(function (a, d) { return a + counts[d.id]; }, 0), rows;
+      if (g[0] === 'cucciolo') rows = row(firstOf[ks[0].id], exp === 'base' ? 'Cuccioli di 13 colori' : esc(ks.map(function (d) { return sname(firstOf[d.id]); }).join(', ')), ks[0].text);
+      else if (g[0] === 'semplice') {
+        var colori = ks.filter(function (d) { return counts[d.id] === 3; }), altri = ks.filter(function (d) { return counts[d.id] !== 3; });
+        rows = row(firstOf[colori[0].id], exp === 'base' ? 'Unicorni di 7 colori ×3' : esc(colori.map(function (d) { return sname(firstOf[d.id]); }).join(', ')) + ' ×3', colori[0].text) +
+          altri.map(function (d) { return row(firstOf[d.id], esc(d.name), d.text); }).join('');
+      } else rows = ks.map(function (d) { return row(firstOf[d.id], esc(d.name) + (counts[d.id] > 1 ? ' ×' + counts[d.id] : ''), d.text); }).join('');
+      return '<h3>' + g[1] + ' (' + tot + (g[0] === 'cucciolo' ? ', nel Nido' : '') + ')</h3><div class="catalog">' + rows + '</div>';
     }).join('');
-    var due = K.VIA_IN_DUE.map(function (k) { return K.TYPES[k].name; });
+  }
+  // Cosa cambia con ogni espansione (oltre alle carte).
+  var NOVITA = {
+    incubi: '<p>Si gioca col mazzo base: le sue carte si mescolano con queste.</p><ul>' +
+      '<li><span class="kw">TOGLI DAL GIOCO</span>: la carta esce dalla partita e non torna più, nemmeno dagli scarti (i cuccioli invece tornano nel Nido). Le carte tolte si vedono nella pila «fuori dal gioco».</li>' +
+      '<li>Gli <b>Incubi</b> sono Malus: la Seduta spiritica li cerca nel mazzo e li mette nella stalla di chi vuoi. Quelli che dicono «quando entra» fanno effetto ogni volta che entrano in una stalla, anche se ci arrivano rubati o spostati.</li>' +
+      '<li>Il <b>Nitrito maledetto</b> è un Nitrito: oltre a fermare la carta, la toglie dal gioco.</li></ul>'
+  };
+  function rulesHTML() {
+    var dueDi = function (exp) { return K.VIA_IN_DUE.filter(function (k) { return K.TYPES[k].exp === exp; }).map(function (k) { return K.TYPES[k].name; }); };
+    var espansioni = K.ESPANSIONI.filter(function (e) { return e.pronta && e.id !== 'base'; }).map(function (e) {
+      var due = dueDi(e.id);
+      return '<h3 class="exp-t">Espansione: ' + esc(e.name) + '</h3>' + (NOVITA[e.id] || '') +
+        (due.length ? '<p class="muted small">In due si tolgono anche ' + esc(andList(due)) + ' e gli unicorni semplici dell\'espansione.</p>' : '') + catalogoHTML(e.id);
+    }).join('');
     return sheetWrap('Come si gioca',
       '<h3>Lo scopo</h3><p>Vince chi ha <b>7 unicorni</b> nella sua stalla (<b>6</b> se giocate in 6, 7 o 8). Ogni unicorno conta 1, l\'Unicornone 2; anche i cuccioli contano.</p>' +
-      '<h3>Si comincia</h3><p>Ognuno ha un cucciolo nella stalla e 5 carte in mano; gli altri cuccioli stanno nel Nido.</p>' +
+      '<h3>Si comincia</h3><p>Ognuno ha un cucciolo nella stalla e 5 carte in mano; gli altri cuccioli stanno nel Nido. Le espansioni si scelgono prima di cominciare: le loro carte si mescolano col mazzo base.</p>' +
       '<h3>Il turno</h3><ul><li><b>Inizio</b>: puoi usare gli effetti delle carte della tua stalla che dicono «all\'inizio del tuo turno», in qualsiasi ordine. Quelli che non usi adesso li perdi.</li>' +
       '<li><b>Pesca</b> una carta.</li><li><b>Azione</b>: gioca una carta dalla mano <i>oppure</i> pesca un\'altra carta.</li><li><b>Fine</b>: se hai più di 7 carte in mano, scarta fino ad averne 7.</li></ul>' +
       '<h3>Le carte</h3><ul><li><b>Unicorni</b>: entrano nella tua stalla. Quelli magici hanno un effetto, che parte quando entrano (anche se li rubi).</li>' +
@@ -971,7 +1008,8 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       '<li>«Poi»: la seconda cosa si fa solo se è riuscita la prima. «Puoi»: decidi tu. Un effetto che non si può fare si salta.</li>' +
       '<li>I <b>cuccioli</b> non vanno mai in mano né negli scarti: tornano nel Nido. I <b>Volanti</b> sacrificati o distrutti tornano in mano a chi li aveva.</li></ul>' +
       '<h3>Se il mazzo finisce</h3><p>Vince chi ha più unicorni; a pari merito chi ha più lettere nei nomi dei suoi unicorni; se sono ancora pari, perdono tutti.</p>' +
-      '<h3>In due</h3><p>Si tolgono dal mazzo tutti gli unicorni semplici e ' + esc(due.join(', ')) + '. Ognuno comincia con un Nitrito in più in mano.</p>' + cards);
+      '<h3>In due</h3><p>Si tolgono dal mazzo tutti gli unicorni semplici e ' + esc(dueDi('base').join(', ')) + '. Ognuno comincia con un Nitrito in più in mano.</p>' +
+      '<h3 class="exp-t">Il mazzo base</h3>' + catalogoHTML('base') + espansioni);
   }
   function delHTML() {
     var g = net ? net.carica(ui.sheetId) : null;
@@ -996,7 +1034,8 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
 
   /* ---------- suoni ---------- */
   var FX = { gioca: 'carta', nitrito: 'click', fermata: 'errore', entrata: 'anima', distrutta: 'fuoco', sacrificata: 'scarta', rubata: 'ruba', presa: 'ruba',
-    rimandata: 'scarta', mescola: 'mescola', rimescolone: 'mescola', rianimata: 'evoca', portata: 'evoca', cercata: 'carta', recuperata: 'carta', extra: 'compra', salvata: 'anima', vince: 'vittoria', mani: 'ruba' };
+    rimandata: 'scarta', mescola: 'mescola', rimescolone: 'mescola', rianimata: 'evoca', portata: 'evoca', cercata: 'carta', recuperata: 'carta', extra: 'compra', salvata: 'anima', vince: 'vittoria', mani: 'ruba',
+    esiliata: 'fuoco', evocata: 'evoca', mostra: 'carta', tornata: 'scarta' };
   function playSounds(s) {
     var key = gameKey(s) + '/' + s.createdAt;
     var lastI = s.log.length ? (s.log[s.log.length - 1].i || 0) : 0;
