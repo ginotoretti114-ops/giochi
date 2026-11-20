@@ -236,6 +236,7 @@
     pota(p); salva(p);
     novita.livello = livelloDi(xpTotale(p)); novita.salito = novita.livello > livPrima;
     avvisa(novita);
+    cambiato();
     return novita;
   }
 
@@ -251,8 +252,16 @@
     pota(p); salva(p);
     novita.livello = livelloDi(xpTotale(p)); novita.salito = novita.livello > livPrima;
     if (novita.xp || novita.medaglie.length || novita.salito) avvisa(novita);
+    cambiato();
     return novita;
   }
+
+  /* ---------- per l'account (lib/conti.js): avvisi di modifica, sostituzione, oblio ---------- */
+  var ascoltatori = [];
+  function cambiato() { ascoltatori.forEach(function (f) { try { f(); } catch (e) { /* un ascoltatore rotto non ferma gli altri */ } }); }
+  function quandoCambia(f) { if (typeof f === 'function') ascoltatori.push(f); }
+  function sostituisci(dati) { salva(normalizza(dati)); }
+  function cancella() { try { var m = mem(); if (m) { m.removeItem(KEY); m.removeItem(DEV_KEY); } } catch (e) { /* niente memoria */ } }
 
   /* ---------- unione di due profili (stesso giocatore, dispositivi diversi) ---------- */
   function unisci(a, b) {
@@ -383,7 +392,7 @@
           '<span>' + esc(m.presa ? m.nome : m.desc) + '</span></li>';
       }).join('') + '</ul>' +
       (mostra.length < r.medaglie.length || tutte ? '<button type="button" class="pf-more">' + (tutte ? 'Mostra meno' : 'Tutte le medaglie') + '</button>' : '') +
-      '</section></div><p class="pf-foot">Per ora i progressi restano in questo browser.</p></div>';
+      '</section></div><div class="pf-conto"><p class="pf-foot">Per ora i progressi restano in questo browser.</p></div></div>';
     var more = el.querySelector('.pf-more');
     if (more) more.addEventListener('click', function () { el.setAttribute('data-tutte', tutte ? '0' : '1'); disegna(el); });
   }
@@ -395,6 +404,7 @@
   var Profilo = {
     GIOCHI: GIOCHI, MEDAGLIE: MEDAGLIE, KEY: KEY,
     osserva: sicuro(osserva, null), evento: sicuro(evento, null), unisci: unisci, riepilogo: riepilogo, carica: carica,
+    quandoCambia: quandoCambia, sostituisci: sostituisci, cancella: cancella,
     chip: sicuro(chip, ''), disegna: sicuro(disegna, undefined), soglia: soglia, livelloDi: livelloDi, sfideDel: sfideDel, giorno: giorno,
     // solo per i test: memoria e orologio finti
     _prova: function (o) { if (o.store !== undefined) store = o.store; if (o.ora) ora = o.ora; }
