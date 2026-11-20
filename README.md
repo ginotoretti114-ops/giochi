@@ -25,7 +25,8 @@ https://ginotoretti114-ops.github.io/giochi/
   passarlo) o contro il computer (da 3 a 6 bot).
 - **Stalla Matta** (`stalla-matta/`): da 2 a 8 giocatori, carte con unicorni: vince chi ne ha 7 nella stalla (6 da
   6 giocatori in su), tra Magie, Bonus, Malus e Nitriti che fermano le carte degli altri. Mazzo base completo (127
-  carte), con le espansioni da aggiungere una alla volta. Online, sullo stesso telefono o contro il computer (da 1 a 5 bot).
+  carte) e l'espansione Brutti sogni (53 carte) da accendere nella lobby; le altre espansioni arrivano una alla volta.
+  Online, sullo stesso telefono o contro il computer (da 1 a 5 bot).
 
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
 effetti, solo effetti o niente (la scelta vale per tutti i giochi).
@@ -133,8 +134,10 @@ i ruoli dei morti e una «reputazione» pubblica (`rep`) che il motore aggiorna 
 
 Segue il mazzo base della seconda edizione dell'originale (114 carte e 13 cuccioli), con nomi e grafica nuovi; il
 campo `o` delle carte dice che testo e numero di copie sono quelli originali. Le espansioni stanno in `ESPANSIONI`
-(`pronta: false` finché non ci sono le carte) e le carte nuove si aggiungono a `CARTE` con il loro `exp`: la lobby e
-la sala d'attesa le mostrano da sole. Gli effetti sono passi su una pila (`stack`) con un `prompt` per volta; il Nitrito
+(`pronta: false` finché non ci sono le carte) e le carte nuove si aggiungono a `CARTE` con il loro `exp`: la lobby,
+la sala d'attesa e il foglio delle regole le mostrano da sole. Pronta: Brutti sogni (`incubi`, 50 carte e 3 cuccioli),
+che porta le carte tolte dal gioco (`s.box`), gli Incubi (Malus con `inc`), il Nitrito maledetto e le carte che non si
+sacrificano né si distruggono (`salda`). In due, oltre agli unicorni semplici, si tolgono le carte di `VIA_IN_DUE`. Gli effetti sono passi su una pila (`stack`) con un `prompt` per volta; il Nitrito
 e gli effetti «ogni giocatore» chiedono a più giocatori insieme (`prompt.wait`), e online ognuno risponde dal suo
 telefono (se due risposte si incrociano, la pagina rimanda la propria). Chi non ha Nitriti lascia passare da solo,
 dopo una pausa a caso. I bot (`StallaBot`) usano solo quello che si vede al tavolo e la propria mano.
@@ -151,7 +154,7 @@ node sette-stelle/test/motore.test.js          # scenari di regole + 400 partite
 node sette-stelle/test/bot.test.js             # i bot dei tre livelli uno contro l'altro
 node polvere-e-piombo/test/motore.test.js      # ruoli, distanze, carte e personaggi + 300 partite da 4 a 7 giocatori
 node polvere-e-piombo/test/bot.test.js         # i bot dei tre livelli: vittorie per posto, ruoli a caso
-node stalla-matta/test/motore.test.js          # una prova per ogni carta + 175 partite da 2 a 8 giocatori
-node stalla-matta/test/bot.test.js             # i bot dei tre livelli uno contro l'altro
+node stalla-matta/test/motore.test.js          # una prova per ogni carta + 350 partite da 2 a 8 giocatori (base e con espansioni)
+node stalla-matta/test/bot.test.js             # i bot dei tre livelli uno contro l'altro, col mazzo base e con le espansioni
 PARTITE=3000 node gran-bazar/test/motore.test.js
 ```
