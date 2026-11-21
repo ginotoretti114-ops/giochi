@@ -17,15 +17,21 @@
     recinto: -5, pericolante: -3, occhio: -2, rito_oscuro: -8, raffreddore: -4,
     // Brutti sogni
     cerchio_di_sale: 5, elisir: 4, cuore_stregato: 4, spirito_guida: 3, poltergeist: 3, lavoretto: 2,
-    incubo_sepolto: -9, incubo_palestra: -5, incubo_vuoto: -4 };
+    incubo_sepolto: -9, incubo_palestra: -5, incubo_vuoto: -4,
+    // Miti e leggende
+    colpo_critico: 3, bisaccia: 3, muro_di_corna: 3, pace_divina: -3, maleficio: -5 };
   var EXTRA = { reginetta: 4, paladino: 3, miciocorno: 2, cenere: 3, vendicativo: 2, ariete: 5, unicornone: 0,
-    spettrale: 5, sensitivo: 2, diavolicorno: 2, pipistrellicorno: 2 };
+    spettrale: 5, sensitivo: 2, diavolicorno: 2, pipistrellicorno: 2, domatore: 4, bardo: 2 };
   // Quanto vale avere una carta in mano.
   var MANO = { nitrito: 9, supernitrito: 12, mela: 8, due_per_uno: 8, scambio_stalla: 5, zoccolata: 6, colpo_mirato: 5, cambio_di_rotta: 5,
     bocca_a_muso: 6, arraffa: 5, giro_di_ruota: 6, affare_doro: 5, baratto: 3, bufera: 4, mulinello: 3, rimescolone: 3, tabula_rasa: 3,
     unicornone: 10, pandastrofe: 9, monolocale: 6, rito_oscuro: 6, flash: 5, recinto: 4, raffreddore: 4, pericolante: 3, occhio: 2,
     nitrito_maledetto: 10, toc_toc: 8, possessione: 6, seduta_spiritica: 6, fuori_dalla_tomba: 5, piu_spettro: 4, nonnina: 11,
-    incubo_occupato: 9, incubo_sepolto: 8, incubo_palestra: 6, incubo_vuoto: 4 };
+    incubo_occupato: 9, incubo_sepolto: 8, incubo_palestra: 6, incubo_vuoto: 4,
+    raso_al_suolo: 5, voltagabbana: 6, raglio: 6, palla_di_fuoco: 5, fulmine: 7, negromanzia: 6,
+    nitrito_messere: 8, nitrito_villano: 9, nitrito_canaglia: 9, pace_divina: 4, maleficio: 6, igiene_medievale: 5 };
+  // Quale Nitrito usare per primo: quello che fa più danno a chi viene fermato, il «messere» per ultimo.
+  var NITRITI = ['nitrito_villano', 'nitrito_maledetto', 'nitrito', 'nitrito_canaglia', 'nitrito_messere'];
   // Gli Incubi da mettere nella stalla di un altro (Seduta spiritica): dal peggiore.
   var INCUBO = { incubo_occupato: 4, incubo_sepolto: 3, incubo_palestra: 2, incubo_vuoto: 1 };
 
@@ -68,7 +74,7 @@
       if ((k === 'unicornone' || k === 'nonnina') && K.attivo(s, q, c)) return 20;
       return 10 + (t === 'magico' && K.attivo(s, q, c) ? (EXTRA[k] || 1) : 0);
     }
-    if (k === 'flash') return -2 - 3 * magici(s, q);
+    if (k === 'flash' || k === 'igiene_medievale') return -2 - 3 * magici(s, q);
     if (k === 'monolocale') return -4 - 3 * Math.max(0, grezzi(s, q) - 3);
     if (k === 'pandastrofe') return -8 - 4 * grezzi(s, q);
     // con «Incubo: occupato!» non si vince: peggio quanto più si è vicini
@@ -84,6 +90,8 @@
     if (!senzaCenere && mano(s, q).length && ((d.id === 'cenere' && K.attivo(s, q, c)) || (d.t !== 'malus' && K.has(s, q, 'elisir')))) v = Math.min(v, 5);
     // la Nonna Zuccherina, andandosene, si porta via un'altra carta
     if (d.id === 'nonnina' && K.attivo(s, q, c)) v += 6;
+    // l'Unicorno Furioso distrutto fa sacrificare a chi l'aveva un altro unicorno
+    if (d.id === 'furioso' && K.attivo(s, q, c)) v += 5;
     return v;
   }
   function handValue(s, me, c) {
@@ -126,6 +134,30 @@
     return stalla(s, q).reduce(function (a, c) {
       return a + (K.kind(c) === 'semplice' && K.distruggibile(s, q, c, true) ? lossValue(s, q, c) * weight(s, me, q) : 0);
     }, 0);
+  }
+  // Il primo unicorno che q sacrificherebbe (il meno caro); null se non ne ha.
+  function menoCaro(s, q) {
+    var o = opz(s, q, 'sacrifica', { filtro: 'unicorno' });
+    return o.length ? -maxOf(o, function (c) { return -lossValue(s, q, c); }) : null;
+  }
+  // Unicorno Stregone: si sacrificano le carte che costano meno di quanto rende distruggere le migliori degli altri.
+  function stregonePiano(s, me) {
+    var mie = opz(s, me, 'sacrifica', { filtro: 'carta' }).sort(function (a, b) { return lossValue(s, me, a) - lossValue(s, me, b); });
+    var loro = opz(s, me, 'distruggi', { filtro: 'carta' }).map(function (c) { var q = K.padrone(s, c); return lossValue(s, q, c) * weight(s, me, q); }).sort(function (a, b) { return b - a; });
+    // le proprie perdite pesano di più (si torna indietro verso i 7), e al massimo 3 scambi ben convenienti
+    var scelte = [], v = 0;
+    for (var i = 0; i < Math.min(mie.length, loro.length, 3); i++) {
+      var lv = lossValue(s, me, mie[i]), guadagno = loro[i] - (lv > 0 ? lv * (1.3 + 0.1 * K.conta(s, me)) : lv);
+      if (guadagno <= 3) break;
+      scelte.push(mie[i]); v += guadagno;
+    }
+    return { cards: scelte, v: v };
+  }
+  // Raglio prismatico: quanto rende con 1 o con 2 carte scartate.
+  function raglioPiano(s, me, senza) {
+    var vals = others(s, me).map(function (q) { var m = menoCaro(s, q); return m == null ? 0 : m * weight(s, me, q); }).sort(function (a, b) { return b - a; });
+    var uno = (vals[0] || 0) - costoScarti(s, me, 1, senza), due = (vals[0] || 0) + (vals[1] || 0) - costoScarti(s, me, 2, senza);
+    return due > uno ? { n: 2, v: due } : { n: 1, v: uno };
   }
   function costoScarti(s, me, n, senza) {
     var h = mano(s, me).filter(function (c) { return c !== senza; });
@@ -178,6 +210,15 @@
       case 'mietitore': return v + 3;
       case 'burattino': x = maxOf(stalla(s, me).filter(function (y) { return K.kind(y) === 'malus'; }), function (y) { return -stallaValue(s, me, y); }); return v + Math.max(0, x * 0.9);
       case 'uncinocorno': return v + Math.max(0, bestExile(s, me) - costoScarti(s, me, 1, c));
+      case 'furioso': return v + Math.max(0, bestDestroy(s, me, 'unicorno'));
+      case 'divino': return v + 4;
+      case 'nanocorno': return v + Math.max(0, deckValue(s, me, 'bonus') + 2 - costoScarti(s, me, 1, c));
+      case 'elficorno': return v + 1;
+      case 'orchicorno': x = maxOf(stalla(s, me).filter(function (y) { return K.kind(y) === 'malus'; }), function (y) { return -stallaValue(s, me, y); }); return v + Math.max(0, x * 0.9) + (x > 0 ? 2 : 0);
+      case 'cavaliere': return v + Math.max(0, bestDestroy(s, me, 'carta'));
+      case 'furfante': return v + Math.max(0, bestSteal(s, me, 'carta') - costoScarti(s, me, 2, c));
+      case 'stregone': return v + stregonePiano(s, me).v;
+      case 'mago': return v + Math.max(0, 6 - costoScarti(s, me, 1, c));
     }
     return v;
   }
@@ -225,6 +266,12 @@
       case 'fuori_dalla_tomba': return opz(s, me, 'rianima', { filtro: 'semplice' }).length ? 13 + (K.conta(s, me) + 1 >= s.goal && K.puoVincere(s, me) ? 200 : 0) : 0;
       case 'piu_spettro': return maxOf([me].concat(others(s, me)), function (q) { return strageValue(s, me, q); });
       case 'seduta_spiritica': return maxOf(others(s, me), function (q) { return weight(s, me, q); }) * 9;
+      case 'raso_al_suolo': return maxOf(opz(s, me, 'colpo'), function (y) { var q = K.padrone(s, y); return q === me ? -stallaValue(s, me, y) : stallaValue(s, q, y) * weight(s, me, q); });
+      case 'voltagabbana': return bestSteal(s, me, 'unicorno') - costoScarti(s, me, 2, c);
+      case 'raglio': return raglioPiano(s, me, c).v;
+      case 'palla_di_fuoco': return others(s, me).reduce(function (a, q) { var m = menoCaro(s, q); return a + (m == null ? 0 : m * weight(s, me, q)); }, 0) - (menoCaro(s, me) || 0);
+      case 'fulmine': return bestDestroy(s, me, 'carta', true) - 3;
+      case 'negromanzia': x = opz(s, me, 'rianima'); return x.length ? maxOf(x, function (y) { return K.kind(y) === 'magico' ? enterValue(s, me, y) + 10 : 10; }) - sacrificeCost(s, me, 'unicorno') : 0;
     }
     return 1;
   }
@@ -272,6 +319,12 @@
       case 'fuori_dalla_tomba': return (K.conta(s, q) + 1 >= s.goal && K.puoVincere(s, q) ? -300 : -10 * wq);
       case 'piu_spettro': return -pMe * 10 * stalla(s, me).filter(function (y) { return K.kind(y) === 'semplice'; }).length - 2 * wq;
       case 'seduta_spiritica': return -pMe * 10 - 1;
+      case 'raso_al_suolo': return -pMe * maxOf(stalla(s, me), function (y) { return K.kind(y) === 'bonus' ? stallaValue(s, me, y) : 0; }) - 1;
+      case 'voltagabbana': return -pMe * 10 - 2 * wq;
+      case 'raglio': return -pMe * 8 - 2 * wq;
+      case 'palla_di_fuoco': return (menoCaro(s, me) != null ? -8 : 0) - 2 * wq;
+      case 'fulmine': return -pMe * myBest * 1.2 - 2 * wq;
+      case 'negromanzia': return -6 * wq;
       case 'due_per_uno': return -pMe * myBest * 1.6 - 3 * wq;
       case 'zoccolata': case 'scambio_stalla': return -pMe * 7 - 2 * wq;
       case 'arraffa': case 'baratto': return -pMe * 4 - 2 * wq;
@@ -289,8 +342,8 @@
     var ch = s.chain, i = ch.length - 1, e0 = impatto(s, me, ch[0]);
     var e = (i % 2 === 0 ? 1 : -1) * e0; // quanto mi conviene che la carta in cima vada a buon fine
     if (ch[i].p === me) return pass;
-    // prima i Nitriti normali, poi quelli maledetti; il Supernitrito per le carte decisive
-    var plain = mine.filter(function (c) { return K.keyOf(c) === 'nitrito'; }).concat(mine.filter(function (c) { return K.keyOf(c) === 'nitrito_maledetto'; }));
+    // prima i Nitriti che fanno più danno a chi è fermato; il Supernitrito per le carte decisive
+    var plain = mine.filter(function (c) { return NITRITI.indexOf(K.keyOf(c)) >= 0; }).sort(function (a, b) { return NITRITI.indexOf(K.keyOf(a)) - NITRITI.indexOf(K.keyOf(b)); });
     var sup = mine.filter(function (c) { return K.keyOf(c) === 'supernitrito'; });
     var use = function (c) { return { type: 'answer', cards: [c], pid: P.id }; };
     if (lv === 'facile') return (e < -6 && rnd() < 0.3) ? use(mine[0]) : pass;
@@ -327,6 +380,9 @@
           else if (src === 'acchiappapeluche') gain = 5;
           else if (src === 'pagliaccio') gain = others(s, me).reduce(function (a, q) { return a + Math.max(0, bestReturn(s, me, q)); }, 0);
           else if (src === 'uncinocorno' || src === 'lavoretto') gain = bestExile(s, me);
+          else if (src === 'furfante') gain = bestSteal(s, me, 'carta');
+          else if (src === 'nanocorno') gain = deckValue(s, me, 'bonus') + 2;
+          else if (src === 'mago') gain = 6;
           if (gain <= cost * (lv === 'difficile' ? 0.6 : 0.8)) return no;
         }
         return { type: 'answer', cards: peggiori(s, me, o, n), pid: P.id };
@@ -370,6 +426,14 @@
         return one(ex);
       }
       case 'evoca': return one(argmax(o, function (c) { return INCUBO[K.keyOf(c)] || 0; }));
+      case 'stregone': {
+        var sp = stregonePiano(s, me);
+        return sp.cards.length ? { type: 'answer', cards: sp.cards, pid: P.id } : no;
+      }
+      case 'raglio': return { type: 'answer', cards: peggiori(s, me, o, Math.min(n, raglioPiano(s, me).n)), pid: P.id };
+      case 'divino': return one(argmax(o, function (c) { return handValue(s, me, c); }));
+      case 'scruta': return one(argmin(o, function (c) { return handValue(s, me, c); }));
+      case 'mago': return one(argmax(o, function (c) { return MANO[K.keyOf(c)] || 4; }));
       case 'scambio': return one(argmin(o, function (c) { return lossValue(s, me, c); }));
       case 'indovino':
         if (P.fase === 'cima') return one(argmin(o, function (c) { return handValue(s, me, c); }));
@@ -404,6 +468,12 @@
         case 'spirito_guida': v = 2.5; break;
         case 'poltergeist': v = 2.5; break;
         case 'lavoretto': v = bestExile(s, me) - worst(3) * 0.6; break;
+        case 'domatore': v = 6.5; break;
+        case 'bardo': v = 3.5 + (opz(s, me, 'ruba', { filtro: 'unicorno' }).length || !K.has(s, me, 'cavaliere') ? 0 : -12) + maxOf(others(s, me), function (q) {
+          var via = stallaValue(s, me, c) + stallaValue(s, q, c) * weight(s, me, q);
+          var meglio = maxOf(stalla(s, q).filter(function (y) { return K.isUni(y) && K.entra(s, y, me); }), function (y) { return stallaValue(s, me, y) + lossValue(s, q, y) * weight(s, me, q); });
+          return Math.max(meglio, via) - via;
+        }); break;
       }
       if (v > bv) { bv = v; best = c; }
     });
@@ -415,6 +485,9 @@
     if (P.op === 'sposta') return t(argmax(o, function (q) { return benefit(s, me, q, P.c); }));
     if (P.op === 'scambio') return t(argmax(o, function (q) { return maxOf(stalla(s, q).filter(K.isUni), function (c) { return lossValue(s, q, c); }) * weight(s, me, q); }));
     if (P.op === 'evoca') return t(argmax(o, function (q) { return benefit(s, me, q, P.c); }));
+    if (P.op === 'raglio') return t(argmax(o, function (q) { var m = menoCaro(s, q); return m == null ? -1 : m * weight(s, me, q); }));
+    if (P.op === 'passa_maleficio') return t(argmax(o, function (q) { return weight(s, me, q); }));
+    if (src === 'bardo') return t(argmax(o, function (q) { return maxOf(stalla(s, q).filter(function (y) { return K.isUni(y) && K.entra(s, y, me); }), function (y) { return stallaValue(s, me, y) + lossValue(s, q, y) * weight(s, me, q); }); }));
     if (src === 'piu_spettro') return t(argmax(o, function (q) { return strageValue(s, me, q); }));
     if (src === 'baratto') return t(argmax(o, function (q) { return mano(s, q).length; }));
     if (src === 'arraffa' || src === 'mano_lesta' || src === 'pipistrellicorno' || src === 'poltergeist') return t(argmax(o, function (q) { return mano(s, q).length + threat(s, q) * 3; }));
@@ -431,7 +504,7 @@
       case 'nitrito': return nitrito(s, me, P, lv, rnd);
       case 'carte': return scegliCarte(s, me, P, lv, rnd);
       case 'giocatore': return giocatore(s, me, P, lv);
-      case 'si': return { type: 'answer', yes: P.q === 'mietitore' ? true : bestDestroy(s, me, 'unicorno') > 10, pid: P.id };
+      case 'si': return { type: 'answer', yes: P.q === 'mietitore' ? true : P.q === 'critico' ? playValue(s, me, { card: P.c }) > 5 : bestDestroy(s, me, 'unicorno') > 10, pid: P.id };
       case 'scelta': {
         var c = P.c, keep = lossValue(s, me, c, true);
         if (P.opts.indexOf('scarta') >= 0 && !P.mono && keep > 4 && peggiori(s, me, mano(s, me), 1).some(function (x) { return handValue(s, me, x) < 9; })) return { type: 'answer', pick: 'scarta', pid: P.id };
