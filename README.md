@@ -25,7 +25,8 @@ https://ginotoretti114-ops.github.io/giochi/
   passarlo) o contro il computer (da 3 a 6 bot).
 - **Stalla Matta** (`stalla-matta/`): da 2 a 8 giocatori, carte con unicorni: vince chi ne ha 7 nella stalla (6 da
   6 giocatori in su), tra Magie, Bonus, Malus e Nitriti che fermano le carte degli altri. Mazzo base completo (127
-  carte) e l'espansione Brutti sogni (53 carte) da accendere nella lobby; le altre espansioni arrivano una alla volta.
+  carte) e le espansioni Brutti sogni (53 carte) e Miti e leggende (54 carte) da accendere nella lobby; le altre
+  arrivano una alla volta.
   Online, sullo stesso telefono o contro il computer (da 1 a 5 bot).
 
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
@@ -137,7 +138,9 @@ campo `o` delle carte dice che testo e numero di copie sono quelli originali. Le
 (`pronta: false` finché non ci sono le carte) e le carte nuove si aggiungono a `CARTE` con il loro `exp`: la lobby,
 la sala d'attesa e il foglio delle regole le mostrano da sole. Pronta: Brutti sogni (`incubi`, 50 carte e 3 cuccioli),
 che porta le carte tolte dal gioco (`s.box`), gli Incubi (Malus con `inc`), il Nitrito maledetto e le carte che non si
-sacrificano né si distruggono (`salda`). In due, oltre agli unicorni semplici, si tolgono le carte di `VIA_IN_DUE`. Gli effetti sono passi su una pila (`stack`) con un `prompt` per volta; il Nitrito
+sacrificano né si distruggono (`salda`). Pronta anche Miti e leggende (`leggende`, 50 carte e 4 cuccioli): le Magie
+giocate subito (`subito`: Unicorno Mago, Colpo critico), i Nitriti con un effetto, il Maleficio che passa di mano, la
+Pace divina e il Cavaliere senza macchia. In due, oltre agli unicorni semplici, si tolgono le carte di `VIA_IN_DUE`. Gli effetti sono passi su una pila (`stack`) con un `prompt` per volta; il Nitrito
 e gli effetti «ogni giocatore» chiedono a più giocatori insieme (`prompt.wait`), e online ognuno risponde dal suo
 telefono (se due risposte si incrociano, la pagina rimanda la propria). Chi non ha Nitriti lascia passare da solo,
 dopo una pausa a caso. I bot (`StallaBot`) usano solo quello che si vede al tavolo e la propria mano.
