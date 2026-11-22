@@ -25,8 +25,8 @@ https://ginotoretti114-ops.github.io/giochi/
   passarlo) o contro il computer (da 3 a 6 bot).
 - **Stalla Matta** (`stalla-matta/`): da 2 a 8 giocatori, carte con unicorni: vince chi ne ha 7 nella stalla (6 da
   6 giocatori in su), tra Magie, Bonus, Malus e Nitriti che fermano le carte degli altri. Mazzo base completo (127
-  carte) e le espansioni Brutti sogni (53 carte), Miti e leggende (54 carte), Avventure (54 carte) e Draghi (54
-  carte) da accendere nella lobby; l'ultima arriva dopo.
+  carte) e le cinque espansioni da accendere nella lobby: Brutti sogni (53 carte), Miti e leggende (54), Avventure
+  (54), Draghi (54) e Diluvio arcobaleno (54).
   Online, sullo stesso telefono o contro il computer (da 1 a 5 bot).
 
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
@@ -148,6 +148,10 @@ anche Draghi (`draghi`, 48 carte e 6 cuccioli): le carte con «drago» nel nome 
 nell'originale), l'Unicorno Ammazzadraghi (`distruggibile` guarda la carta che distrugge), la Benedizione del drago
 (`attivo` spegne i Malus), l'Unicorno Drago che scatta ogni volta che lascia la stalla (`LASCIA`, in `togli`) e le
 carte in fondo al mazzo. Tre carte hanno il numero di copie ricostruito (`o: 1`), con le 54 carte della scatola.
+Pronta anche Diluvio arcobaleno (`diluvio`, 52 carte e 2 cuccioli): 8 sono altre copie di quattro carte del mazzo
+base, scritte nel campo `copie` della carta (`expDi` dice da quale espansione arriva ogni copia); poi le sette Magie
+dell'apocalisse (`APOCALISSE`), la Principessa Arcobaleno (domanda `giocatori`, più giocatori insieme), il Pisolino
+(`s.dorme`, guardato da `prossimo`) e i limiti della mano di Carestia e Zoccoletti (`limite`).
 In due, oltre agli unicorni semplici, si tolgono le carte di `VIA_IN_DUE`. Gli effetti sono passi su una pila (`stack`) con un `prompt` per volta; il Nitrito
 e gli effetti «ogni giocatore» chiedono a più giocatori insieme (`prompt.wait`), e online ognuno risponde dal suo
 telefono (se due risposte si incrociano, la pagina rimanda la propria). Chi non ha Nitriti lascia passare da solo,

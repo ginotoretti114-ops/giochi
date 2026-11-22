@@ -22,10 +22,10 @@ function play(levels, seed, exp) {
   return s;
 }
 var N = +process.env.PARTITE || 240;
-function compare(a, b, exp) {
+function compare(a, b, exp, quante) {
   var st = {}; st[a] = { seats: 0, wins: 0 }; st[b] = { seats: 0, wins: 0 };
   var done = 0, turns = 0;
-  for (var g = 0; g < N; g++) {
+  for (var g = 0; g < quante; g++) {
     var np = 2 + (g % 4), lv = [];
     for (var i = 0; i < np; i++) lv.push((i + g) % 2 ? a : b);
     var s = play(lv, 20000 + g, exp);
@@ -40,9 +40,11 @@ var MAZZI = [[null, 'mazzo base'], [K.ESPANSIONI.filter(function (e) { return e.
 MAZZI.forEach(function (mz) {
   out.push(mz[1] + (mz[0] ? ' (' + mz[0].join(', ') + ')' : '') + ':');
   [['medio', 'facile'], ['difficile', 'facile'], ['difficile', 'medio']].forEach(function (pair) {
-    var r = compare(pair[0], pair[1], mz[0]);
-    out.push('  ' + pair[0] + ' ' + Math.round(r.a * 100) + '% contro ' + pair[1] + ' ' + Math.round(r.b * 100) + '% (vittorie per posto, ' + r.done + '/' + N + ' partite finite, ' + r.turns + ' turni in media)');
-    assert.strictEqual(r.done, N, 'tutte le partite finiscono');
+    // difficile e medio sono vicini (qualche punto): servono più partite perché il caso non inverta l'ordine
+    var quante = pair[1] === 'medio' ? 2 * N : N;
+    var r = compare(pair[0], pair[1], mz[0], quante);
+    out.push('  ' + pair[0] + ' ' + Math.round(r.a * 100) + '% contro ' + pair[1] + ' ' + Math.round(r.b * 100) + '% (vittorie per posto, ' + r.done + '/' + quante + ' partite finite, ' + r.turns + ' turni in media)');
+    assert.strictEqual(r.done, quante, 'tutte le partite finiscono');
     assert.ok(r.a > r.b, pair[0] + ' deve vincere più spesso di ' + pair[1] + ' (' + mz[1] + ')');
   });
   // tavoli grandi e tutti difficili: si finisce

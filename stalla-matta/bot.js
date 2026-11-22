@@ -23,11 +23,14 @@
     // Avventure
     rito_antico: 3, buca: 4, zoccoli_reali: 3, kit: 5, meridiana: -3, zainetto: -6, in_mare: -4,
     // Draghi
-    fortuna_drago: 5, protezione_drago: 4, maledizione_drago: -4, sfortuna_drago: -4, cieli_dei_draghi: -7 };
+    fortuna_drago: 5, protezione_drago: 4, maledizione_drago: -4, sfortuna_drago: -4, cieli_dei_draghi: -7,
+    // Diluvio arcobaleno
+    zuccherini: 4, consegna_speciale: 4, zoccoletti: -4 };
   var EXTRA = { reginetta: 4, paladino: 3, miciocorno: 2, cenere: 3, vendicativo: 2, ariete: 5, unicornone: 0,
     spettrale: 5, sensitivo: 2, diavolicorno: 2, pipistrellicorno: 2, domatore: 4, bardo: 2,
     avventuriero: 2, vagabondo: 2, sopravvissuto: 1, bungee: 2, impavido: 1, primo_ufficiale: 2,
-    ammazzadraghi: 2, unicorno_drago: 3, volante_squamoso: 2 };
+    ammazzadraghi: 2, unicorno_drago: 3, volante_squamoso: 2,
+    volante_adorabile: 2, angelo: 3, fertile: 3, minuscolo: 2, morte: 4, carestia: 0, guerra: 3, zombi: 3 };
   // Quanto vale avere una carta in mano.
   var MANO = { nitrito: 9, supernitrito: 12, mela: 8, due_per_uno: 8, scambio_stalla: 5, zoccolata: 6, colpo_mirato: 5, cambio_di_rotta: 5,
     bocca_a_muso: 6, arraffa: 5, giro_di_ruota: 6, affare_doro: 5, baratto: 3, bufera: 4, mulinello: 3, rimescolone: 3, tabula_rasa: 3,
@@ -39,9 +42,11 @@
     canna_da_pesca: 7, rete: 8, razzo: 6, nitrito_marinaio: 9, corno_luminoso: 7, cercametalli: 6, bussola: 7, lingua_dargento: 5,
     furto_di_culle: 8, paletta: 6, macchia_nera: 6, meridiana: 4, zainetto: 6, in_mare: 4,
     alito_di_drago: 8, fuoco_di_drago: 5, bacio_del_drago: 6, stalle_bruciate: 3, nitrito_bestiaccia: 9,
-    maledizione_drago: 5, sfortuna_drago: 4, cieli_dei_draghi: 7 };
+    maledizione_drago: 5, sfortuna_drago: 4, cieli_dei_draghi: 7,
+    attacco_tenero: 6, fuoco_e_zolfo: 4, castigo_celeste: 4, alpacalisse: 4, sovrappopolazione: 4, tempesta_tenerezza: 4,
+    distruzione_totale: 4, apocalisse_zombi: 4, unicorni_apocalisse: 5, peste_nera: 6, spruzzino: 6, pisolino: 6, nitrito_grazie: 8, zoccoletti: 5 };
   // Quale Nitrito usare per primo: quello che fa più danno a chi viene fermato, il «messere» per ultimo.
-  var NITRITI = ['nitrito_villano', 'nitrito_maledetto', 'nitrito', 'nitrito_canaglia', 'nitrito_marinaio', 'nitrito_bestiaccia', 'nitrito_messere'];
+  var NITRITI = ['nitrito_villano', 'nitrito_maledetto', 'nitrito', 'nitrito_canaglia', 'nitrito_marinaio', 'nitrito_bestiaccia', 'nitrito_grazie', 'nitrito_messere'];
   // Gli Incubi da mettere nella stalla di un altro (Seduta spiritica): dal peggiore.
   var INCUBO = { incubo_occupato: 4, incubo_sepolto: 3, incubo_palestra: 2, incubo_vuoto: 1 };
 
@@ -209,6 +214,33 @@
     }
     return 1;
   }
+  // Le Magie dell'apocalisse: perdi tutti i tuoi unicorni, ne distruggi uno a testa agli altri e ne trovi uno nel mazzo.
+  function apocalisseValue(s, me, k) {
+    var mio = stalla(s, me).filter(function (c) { return K.isUni(c) && K.sacrificabile(s, me, c); }).reduce(function (a, c) { return a + lossValue(s, me, c); }, 0);
+    var loro = others(s, me).reduce(function (a, q) {
+      var o = opz(s, me, 'distruggi', { filtro: 'unicorno', magia: true, da: q });
+      return a + (o.length ? maxOf(o, function (c) { return lossValue(s, q, c); }) * weight(s, me, q) : 0);
+    }, 0);
+    var trova = deckValue(s, me, null, k) ? 10 + (EXTRA[k] || 1) : 0;
+    return loro + trova - mio;
+  }
+  // Unicorno della Pestilenza: quante carte scartare (le meno utili), se gli altri ne perdono di più.
+  function pestilenzaPiano(s, me, senza) {
+    var h = peggiori(s, me, mano(s, me).filter(function (c) { return c !== senza; }), 99), best = { v: 0, cards: [] }, cost = 0;
+    for (var k = 1; k <= h.length; k++) {
+      cost += handValue(s, me, h[k - 1]);
+      var gain = others(s, me).reduce(function (a, q) { return a + Math.min(k, mano(s, q).length) * 2.5 * Math.max(0.3, weight(s, me, q)); }, 0);
+      if (gain - cost > best.v) best = { v: gain - cost, cards: h.slice(0, k) };
+    }
+    return best;
+  }
+  // Attacco di tenerezza e Spruzzino: gli unicorni distrutti tornano come Cuccioli, conta l'effetto che si perde.
+  function tenerezzaValue(s, me, q, quanti) {
+    var o = opz(s, me, 'distruggi', { filtro: 'unicorno', magia: true, da: q }).map(function (c) { return lossValue(s, q, c) - 10; }).sort(function (a, b) { return b - a; });
+    var k = Math.min(quanti, o.length), v = 0;
+    for (var i = 0; i < k; i++) v += o[i] + (i < s.nursery.length ? 0 : 10);
+    return v * weight(s, me, q);
+  }
   function costoScarti(s, me, n, senza) {
     var h = mano(s, me).filter(function (c) { return c !== senza; });
     return h.length < n ? Infinity : peggiori(s, me, h, n).reduce(function (a, c) { return a + handValue(s, me, c); }, 0);
@@ -218,13 +250,14 @@
     return o.length ? -maxOf(o, function (c) { return -lossValue(s, me, c); }) : Infinity;
   }
   // Cercare nel mazzo: il bot non sa cosa c'è nel mazzo, ma sa quali carte non ha ancora visto.
-  function deckValue(s, me, filtro) {
+  function deckValue(s, me, filtro, chiave) {
     var visti = {};
     s.discard.concat(mano(s, me)).forEach(function (c) { visti[c] = 1; });
     for (var q = 0; q < s.seats.length; q++) stalla(s, q).forEach(function (c) { visti[c] = 1; });
     var resto = K.mazzoPer(s.exp, s.seats.length).filter(function (c) {
       if (visti[c]) return false;
       var k = K.kind(c);
+      if (chiave) return K.keyOf(c) === chiave;
       return filtro === 'narvalo' || filtro === 'drago' ? K.filtra(c, filtro) : k === filtro;
     });
     return resto.length ? 4 : 0;
@@ -283,7 +316,13 @@
       case 'alchimista': return v + deckValue(s, me, 'magia') * 1.4;
       case 'dragotartaruga': return v + 3.5;
       case 'dragocorno_amico': return v + 3.5 - others(s, me).reduce(function (a, q) { return a + 1.5 * Math.max(0, weight(s, me, q)); }, 0);
-      case 'volante_squamoso': return v + others(s, me).reduce(function (a, q) {
+      case 'alpacorno_zucchero': return v + others(s, me).reduce(function (a, q) { var m = menoCaro(s, q); return a + (m == null ? 0 : (m - 3) * Math.max(0.3, weight(s, me, q))); }, 0) - Math.max(0, (menoCaro(s, me) || 0) - 3);
+      case 'bulldog': return v + 4 + others(s, me).reduce(function (a, q) { return a + (mano(s, q).length ? 2 * Math.max(0.3, weight(s, me, q)) : 0); }, 0);
+      case 'brillantinato': return v + Math.max(0, maxOf(mano(s, me).filter(function (y) { return K.kind(y) === 'bonus'; }), function (y) { return stallaValue(s, me, y); }));
+      case 'pestilenza': return v + pestilenzaPiano(s, me, c).v;
+      case 'guerra': return v + Math.max(0, bestDestroy(s, me, 'unicorno')) - 3;
+      case 'principessa': return v + 6;
+      case 'volante_adorabile': case 'volante_squamoso': return v + others(s, me).reduce(function (a, q) {
         var o = opz(s, q, 'sacrifica', { filtro: 'carta' });
         return a + (o.length ? Math.max(0, -maxOf(o, function (y) { return -lossValue(s, q, y); })) * Math.max(0.3, weight(s, me, q)) : 0);
       }, 0) - Math.min(3, Math.max(0, sacrificeCost(s, me, 'carta')));
@@ -350,6 +389,22 @@
       case 'stalle_bruciate': return [me].concat(others(s, me)).reduce(function (a, q) {
         return a + stalla(s, q).reduce(function (b, y) { return b + (K.kind(y) === 'bonus' || K.kind(y) === 'malus' ? (q === me ? -stallaValue(s, me, y) : stallaValue(s, q, y) * weight(s, me, q)) : 0); }, 0);
       }, 0);
+      // Diluvio arcobaleno
+      case 'attacco_tenero': return maxOf(others(s, me), function (q) { return tenerezzaValue(s, me, q, 3); });
+      case 'fuoco_e_zolfo': return apocalisseValue(s, me, 'cenere');
+      case 'castigo_celeste': return apocalisseValue(s, me, 'angelo');
+      case 'alpacalisse': return apocalisseValue(s, me, 'alpacorno');
+      case 'sovrappopolazione': return apocalisseValue(s, me, 'fertile');
+      case 'tempesta_tenerezza': return apocalisseValue(s, me, 'miciocorno');
+      case 'distruzione_totale': return apocalisseValue(s, me, 'catastrofe');
+      case 'apocalisse_zombi': return apocalisseValue(s, me, 'zombi');
+      case 'unicorni_apocalisse': {
+        var cheap = opz(s, me, 'sacrifica', { filtro: 'unicorno' }).map(function (y) { return lossValue(s, me, y); }).sort(function (a, b) { return a - b; });
+        return cheap.length >= 4 ? 4 * 12 - cheap[0] - cheap[1] - cheap[2] - cheap[3] : -50;
+      }
+      case 'peste_nera': return stregonePiano(s, me).v;
+      case 'spruzzino': return others(s, me).reduce(function (a, q) { return a + tenerezzaValue(s, me, q, 1); }, 0);
+      case 'pisolino': return maxOf(others(s, me), function (q) { return 9 * weight(s, me, q); });
     }
     return 1;
   }
@@ -397,6 +452,17 @@
       case 'fuoco_di_drago': return -pMe * maxOf(stalla(s, me), function (y) { return K.kind(y) === 'bonus' ? stallaValue(s, me, y) : 0; }) - 1;
       case 'bacio_del_drago': return -4 * wq;
       case 'stalle_bruciate': return -stalla(s, me).reduce(function (b, y) { return b + (K.kind(y) === 'bonus' || K.kind(y) === 'malus' ? stallaValue(s, me, y) : 0); }, 0) - 1;
+      case 'attacco_tenero': {
+        var tre = stalla(s, me).filter(function (y) { return K.isUni(y) && K.distruggibile(s, me, y, true, c); })
+          .map(function (y) { return lossValue(s, me, y) - 10; }).sort(function (x, y) { return y - x; }).slice(0, 3);
+        return -pMe * Math.max(0, tre.reduce(function (x, y) { return x + y; }, 0)) - 2 * wq;
+      }
+      case 'fuoco_e_zolfo': case 'castigo_celeste': case 'alpacalisse': case 'sovrappopolazione': case 'tempesta_tenerezza': case 'distruzione_totale': case 'apocalisse_zombi':
+        return -myBest * 1.1 - 3 * wq;
+      case 'unicorni_apocalisse': return -12 * wq;
+      case 'peste_nera': return -pMe * myBest * 1.4 - 3 * wq;
+      case 'spruzzino': return -Math.max(0, myBest - 10) - 2 * wq;
+      case 'pisolino': return -pMe * 9 - 1;
       case 'possessione': return -pMe * 7 - 2 * wq;
       case 'fuori_dalla_tomba': return (K.conta(s, q) + 1 >= s.goal && K.puoVincere(s, q) ? -300 : -10 * wq);
       case 'piu_spettro': return -pMe * 10 * stalla(s, me).filter(function (y) { return K.kind(y) === 'semplice'; }).length - 2 * wq;
@@ -531,9 +597,15 @@
       case 'rianima':
         pk = argmax(o, function (c) { return K.kind(c) === 'magico' ? 10 + enterValue(s, me, c) : 10; });
         return one(pk);
-      case 'dalla_mano': case 'nido': return one(o[0]);
+      case 'dalla_mano':
+        if (P.filtro === 'bonus') { var bb = argmax(o, function (c) { return stallaValue(s, me, c); }); return P.may && stallaValue(s, me, bb) <= 0 ? no : one(bb); }
+        return one(o[0]);
+      case 'nido': return one(o[0]);
       // Sfortuna del drago: la carta che serve meno; Cieli dei draghi: l'unicorno che costa meno (un Cucciolo non fa pescare)
       case 'in_fondo': return one(peggiori(s, me, o, 1)[0]);
+      case 'raccogli': return one(argmax(o, function (c) { return handValue(s, me, c); }));
+      case 'pestilenza': { var pp = pestilenzaPiano(s, me); return pp.cards.length ? { type: 'answer', cards: pp.cards, pid: P.id } : no; }
+      case 'tenerezza': return { type: 'answer', cards: o.slice().sort(function (a, b) { return lossValue(s, K.padrone(s, b), b) - lossValue(s, K.padrone(s, a), a); }).slice(0, n), pid: P.id };
       case 'sotto': return one(argmin(o, function (c) { return stallaValue(s, me, c) - (K.kind(c) === 'cucciolo' ? 0 : 3.5); }));
     }
     if (P.may && lv !== 'facile') return no;
@@ -567,6 +639,13 @@
         case 'buca': v = bestSteal(s, me, 'unicorno') - stallaValue(s, me, c); break;
         case 'zoccoli_reali': v = 1.5; break;
         case 'fortuna_drago': v = 9 - stallaValue(s, me, c); break;
+        case 'angelo': v = maxOf(s.discard.filter(function (y) { return K.isUni(y) && K.entra(s, y, me); }).concat([c]), function (y) { return 10 + (K.kind(y) === 'magico' ? enterValue(s, me, y) : 0); }) - stallaValue(s, me, c); break;
+        case 'fertile': v = (s.nursery.length ? 10 : 0) - worst(1); break;
+        case 'morte': v = bestDestroy(s, me, 'unicorno') - sacrificeCost(s, me, 'unicorno'); break;
+        case 'zombi': v = maxOf(s.discard.filter(function (y) { return K.isUni(y) && K.entra(s, y, me); }), function (y) { return 10 + (K.kind(y) === 'magico' ? enterValue(s, me, y) : 0); })
+          - maxOf(h.filter(K.isUni), function (y) { return -handValue(s, me, y); }) * -1 - 9; break;
+        case 'zuccherini': v = 3 * 3.5 - 9 + (h.length < 2 ? 3 : 0); break;
+        case 'consegna_speciale': v = (s.nursery.length ? 10 : 0) - 6; break;
         case 'bardo': v = 3.5 + (opz(s, me, 'ruba', { filtro: 'unicorno' }).length || !K.has(s, me, 'cavaliere') ? 0 : -12) + maxOf(others(s, me), function (q) {
           var via = stallaValue(s, me, c) + stallaValue(s, q, c) * weight(s, me, q);
           var meglio = maxOf(stalla(s, q).filter(function (y) { return K.isUni(y) && K.entra(s, y, me); }), function (y) { return stallaValue(s, me, y) + lossValue(s, q, y) * weight(s, me, q); });
@@ -587,6 +666,8 @@
     if (P.op === 'passa_maleficio') return t(argmax(o, function (q) { return weight(s, me, q); }));
     if (src === 'bardo') return t(argmax(o, function (q) { return maxOf(stalla(s, q).filter(function (y) { return K.isUni(y) && K.entra(s, y, me); }), function (y) { return stallaValue(s, me, y) + lossValue(s, q, y) * weight(s, me, q); }); }));
     if (src === 'piu_spettro') return t(argmax(o, function (q) { return strageValue(s, me, q); }));
+    if (src === 'attacco_tenero') return t(argmax(o, function (q) { return tenerezzaValue(s, me, q, 3); }));
+    if (src === 'pisolino') return t(argmax(o, function (q) { return weight(s, me, q); }));
     if (src === 'baratto') return t(argmax(o, function (q) { return mano(s, q).length; }));
     if (src === 'imbroglione') return t(argmax(o, function (q) { return mano(s, q).length; }));
     if (src === 'arraffa' || src === 'mano_lesta' || src === 'pipistrellicorno' || src === 'poltergeist' || src === 'pescatore' || src === 'vagabondo' || src === 'zoccoli_reali') return t(argmax(o, function (q) { return mano(s, q).length + threat(s, q) * 3; }));
@@ -623,6 +704,8 @@
         return { type: 'answer', pick: best, pid: P.id };
       }
       case 'vedi': return { type: 'answer', yes: true, pid: P.id };
+      // Principessa Arcobaleno: io (2 carte) e chi è così indietro che una carta in più non gli serve a vincere
+      case 'giocatori': return { type: 'answer', targets: P.opts.filter(function (q) { return q === me || (weight(s, me, q) < 0.3 && K.conta(s, q) < s.goal - 2); }), pid: P.id };
       case 'reazione': {
         var mia = mano(s, me).filter(function (x) { return K.def(x).rea === P.tipo; })[0], gioca = false;
         if (P.tipo === 'ruba') gioca = P.q === me ? lossValue(s, me, P.c) > 4 : stallaValue(s, me, P.c) > 5;

@@ -229,6 +229,7 @@ button.ch:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .tgts { display: grid; gap: 6px; }
 .tgt { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--raise); cursor: pointer; min-height: 48px; }
 .tgt:disabled { opacity: .45; cursor: default; }
+.tgt[aria-pressed="true"] { border-color: var(--saffron); box-shadow: 0 0 0 2px var(--saffron) inset; }
 .tgt .av { font: 22px/1 var(--emoji); }
 .tgt .t { flex: 1; min-width: 0; }
 .tgt .t small { display: block; color: var(--muted); font-size: 13px; }
@@ -357,7 +358,8 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   var TY = { cucciolo: '♡', semplice: '•', magico: '✦', magia: '✷', bonus: '▲', malus: '▼', istante: '!' };
   var ORDER = { cucciolo: 0, semplice: 1, magico: 2, bonus: 3, malus: 4 };
   function cname(c) { var d = K.def(c); return d ? d.name : ''; }
-  function sname(c) { return cname(c).replace(/^(Unicorno|Cucciolo) /, ''); }
+  // nome corto per le etichette: «Unicorno della Morte» → «Morte», «Unicorno col Drago Tatuato» → «Drago Tatuato»
+  function sname(c) { return cname(c).replace(/^(Unicorno|Cucciolo) ((della|dello|del|dei|degli|delle|col) )?/, ''); }
   // Sillabe per andare a capo nei nomi lunghi sulle carte (trattino morbido tra le sillabe, regole dell'italiano).
   var VOC = 'aeiouàèéìòù', ATTACCO = /^(s?[bcdfgptv][rl]|sch|s[bcdfgklmnpqrstvz]|[cg]h|gn|[bcdfghklmnpqrstvz])$/;
   function sillabe(w) {
@@ -496,6 +498,11 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       case 'mostrate': return { e: '👅', t: 'Gli altri mostrano la mano a ' + (isMe(P, p) ? 'te' : hn(s, p)) };
       case 'zoccoli': return { e: '🤴', t: Who(s, P, p) + ' ' + v(P, p, 'prenderai', 'prenderà') + ' una carta dalla mano ' + dio(s, P, e.q) + ' invece di pescare' };
       case 'meridiana': return { e: '🕰️', t: Who(s, P, p) + ' ' + v(P, p, 'salti', 'salta') + ' l\'inizio del turno' };
+      case 'pisolino': return { e: '😴', t: Who(s, P, e.q) + ' ' + v(P, e.q, 'salterai', 'salterà') + ' il prossimo turno' };
+      case 'dorme': return { e: '💤', t: Who(s, P, p) + ' ' + v(P, p, 'dormi', 'dorme') + ': il turno passa' };
+      case 'salta_azione': return { e: '🚚', t: Who(s, P, p) + ' ' + v(P, p, 'salti', 'salta') + ' la fase delle azioni' };
+      case 'scelti': return { e: '👸', t: (e.src ? cb(e.src) + ': ' : '') + (e.qs.length ? Who(s, P, p) + ' ' + v(P, p, 'scegli', 'sceglie') + ' ' + andList(e.qs.map(function (q) { return q === p ? (isMe(P, p) ? 'te' : 'sé') : whom(s, P, q); })) : 'nessuno') };
+      case 'nessuno_scarto': return { e: '·', t: (e.src ? cb(e.src) + ': ' : '') + Who(s, P, p) + ' non ' + v(P, p, 'scarti', 'scarta') + ' niente' };
       case 'in_fondo': return { e: '⬇️', t: Who(s, P, p) + ' ' + v(P, p, 'metti', 'mette') + ' ' + ((e.priv || []).indexOf(P.me) >= 0 && !P.local ? cb(e.c) : 'una carta della mano') + ' in fondo al mazzo' };
       case 'sotto': return { e: '⬇️', t: Who(s, P, p) + ' ' + v(P, p, 'metti', 'mette') + ' ' + cb(e.c) + (e.dove === 'nido' ? ' nel Nido' : ' in fondo al mazzo') };
       case 'recuperata': return { e: '♻️', t: Who(s, P, p) + ' ' + v(P, p, 'prendi', 'prende') + ' ' + cb(e.c) + ' dagli scarti' };
@@ -637,13 +644,17 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       case 'esilia': return src + 'scegli una carta da togliere dal gioco' + (pr.may ? ', oppure lascia stare.' : '.');
       case 'evoca': return src + 'ecco gli Incubi nel mazzo: scegli quale evocare.';
       case 'scambio': return src + 'scegli il tuo unicorno da mandare in un\'altra stalla.';
-      case 'cerca': return src + 'ecco ' + ({ narvalo: 'le carte con «Narvalo» nel nome', drago: 'le carte con «drago» nel nome', bonus: 'i Bonus', malus: 'i Malus', magia: 'le Magie' }[f] || 'le carte') + ' nel mazzo: prendine una (poi il mazzo si mescola).';
+      case 'cerca': if (pr.opts.length && pr.filtro == null && pr.chiave) return src + 'ecco ' + cb(pr.opts[0]) + ' nel mazzo: mettilo nella tua stalla (poi il mazzo si mescola).';
+        return src + 'ecco ' + ({ narvalo: 'le carte con «Narvalo» nel nome', drago: 'le carte con «drago» nel nome', bonus: 'i Bonus', malus: 'i Malus', magia: 'le Magie', unicorno: 'gli unicorni' }[f] || 'le carte') + ' nel mazzo: ' + (pr.stalla ? 'scegline uno da mettere nella tua stalla' : 'prendine una') + ' (poi il mazzo si mescola).';
       case 'in_fondo': return src + 'scegli la carta della tua mano da mettere in fondo al mazzo.';
+      case 'raccogli': return src + 'scegli quale delle carte scartate prendere in mano.';
+      case 'pestilenza': return src + 'scegli le carte da scartare (anche nessuna): ogni altro giocatore ne scarterà altrettante (' + ui.sel.length + ' scelte).';
+      case 'tenerezza': return src + 'scegli i 3 unicorni da distruggere: al loro posto arrivano 3 Cuccioli dal Nido (' + ui.sel.length + '/3).';
       case 'sotto': return src + 'scegli l\'unicorno della tua stalla da mettere in fondo al mazzo (poi peschi una carta; un Cucciolo invece torna nel Nido e non peschi).';
       case 'recupera': return src + 'prendi in mano ' + cosa(f) + ' dagli scarti' + (pr.may ? ', oppure lascia stare.' : '.');
       case 'rianima': return src + 'porta nella tua stalla ' + (f === 'semplice' ? 'un unicorno semplice' : f === 'stalla' ? 'una carta' : 'un unicorno') + ' dagli scarti.';
-      case 'dalla_mano': return src + 'porta nella tua stalla un unicorno semplice dalla tua mano.';
-      case 'nido': return src + 'scegli un cucciolo dal Nido.';
+      case 'dalla_mano': return src + (f === 'bonus' ? 'metti nella tua stalla un Bonus della tua mano' + (pr.may ? ', oppure lascia stare.' : '.') : 'porta nella tua stalla un unicorno semplice dalla tua mano.');
+      case 'nido': return src + (pr.may ? 'puoi portare nella tua stalla un cucciolo dal Nido: scegli quale, oppure lascia stare.' : 'scegli un cucciolo dal Nido.');
       case 'stregone': return src + 'scegli le carte della tua stalla da sacrificare: poi ne distruggerai altrettante (' + ui.sel.length + ' scelte).';
       case 'raglio': return src + 'scegli 1 o 2 carte da scartare: poi altrettanti giocatori sacrificano un unicorno (' + ui.sel.length + '/' + n + ').';
       case 'divino': return src + 'le prime carte del mazzo: prendine una, le altre vanno negli scarti.';
@@ -665,6 +676,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     if (k === 'bardo') return src + 'in quale stalla mandi il Bardo? Poi rubi un unicorno da lì e peschi una carta.';
     return src + ({ mano_lesta: 'da chi prendi una carta a caso?', volante_dispettoso: 'chi deve scartare una carta?', arraffa: 'di chi guardi la mano?', baratto: 'con chi scambi la mano?',
       pipistrellicorno: 'di chi guardi la mano?', poltergeist: 'da chi prendi una carta a caso? (salti la pesca)', piu_spettro: 'di chi distruggi gli unicorni semplici?',
+      attacco_tenero: 'a chi distruggi 3 unicorni (con altrettanti Cuccioli al loro posto)?', pisolino: 'chi salta il suo prossimo turno?',
       pescatore: 'di chi guardi la mano?', vagabondo: 'da chi prendi una carta a caso?', zoccoli_reali: 'da chi prendi una carta invece di pescare?', imbroglione: 'con chi scambi la mano?' }[k] || 'scegli un giocatore.');
   }
   function optsHTML(s, P, pr) {
@@ -754,6 +766,14 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
             return '<button type="button" class="tgt go" data-act="target" data-seat="' + q + '"><span class="av" aria-hidden="true">' + (q === me ? '🏠' : isBot(s, q) ? '🤖' : '🧑') + '</span><span class="t"><b>' + (q === me && !P.local ? 'Tu' : hn(s, q)) + '</b><small>' +
               unicorni(K.conta(s, q)) + ' · ' + s.hand[q].length + ' ' + plural(s.hand[q].length, 'carta', 'carte') + ' in mano</small></span></button>';
           }).join('') + '</div>' + (pr.may ? '<button type="button" class="btn wide" data-act="skip">Lascia stare</button>' : '') + errHTML();
+        case 'giocatori': {
+          var scelti = ui.selP || [];
+          return '<p class="hint">' + (pr.src ? cb(pr.src) + ': ' : '') + 'scegli quanti giocatori vuoi (anche te): peschi tante carte quanti sono, e ognuno di loro ne pesca una.</p><div class="tgts">' +
+            pr.opts.map(function (q) {
+              return '<button type="button" class="tgt" data-act="tgt-toggle" data-seat="' + q + '" aria-pressed="' + (scelti.indexOf(q) >= 0) + '"><span class="av" aria-hidden="true">' + (scelti.indexOf(q) >= 0 ? '✅' : q === me ? '🏠' : isBot(s, q) ? '🤖' : '🧑') + '</span><span class="t"><b>' + (q === me && !P.local ? 'Tu' : hn(s, q)) + '</b><small>' +
+                unicorni(K.conta(s, q)) + ' · ' + s.hand[q].length + ' ' + plural(s.hand[q].length, 'carta', 'carte') + ' in mano</small></span></button>';
+            }).join('') + '</div><button type="button" class="btn primary wide" data-act="tgt-go">' + (scelti.length ? 'Conferma (' + scelti.length + ')' : 'Nessuno') + '</button>' + errHTML();
+        }
         case 'opzione':
           return '<p class="hint">' + (pr.src ? cb(pr.src) + ': ' : '') + 'scegli' + (pr.may ? ' (oppure lascia stare)' : '') + '.</p><div class="opzioni">' +
             pr.opts.map(function (i) { return '<button type="button" class="btn primary wide" data-act="opz" data-v="' + i + '">' + esc(pr.voci[i]) + '</button>'; }).join('') + '</div>' +
@@ -797,7 +817,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     // esperienza, medaglie e sfide del giorno a fine partita (lib/profilo.js)
     if (window.Profilo && s.status === 'gameOver' && s.result) Profilo.osserva('stalla-matta', s, P, { vinto: (s.result.winners || []).indexOf(P.me) >= 0 });
     var k = gameKey(s) + ':' + s.createdAt + ':' + (s.prompt ? s.prompt.id : 'free' + s.v);
-    if (ui.selKey !== k) { ui.selKey = k; ui.sel = []; }
+    if (ui.selKey !== k) { ui.selKey = k; ui.sel = []; ui.selP = []; }
     var others = [], base = P.me < 0 ? (P.shared ? s.turn : 0) : P.me;
     for (var i = 1; i < s.seats.length; i++) others.push((base + i) % s.seats.length);
     if (P.me < 0) others.unshift(base);
@@ -1033,11 +1053,13 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   // Il catalogo di un mazzo (base o espansione): una riga per carta, con le copie.
   var GRUPPI = [['cucciolo', 'I cuccioli'], ['semplice', 'Gli unicorni semplici'], ['magico', 'Gli unicorni magici'], ['magia', 'Le Magie'], ['bonus', 'I Bonus'], ['malus', 'I Malus'], ['istante', 'Le istantanee']];
   function catalogoHTML(exp) {
-    var counts = {}, firstOf = {};
-    K.ALL.forEach(function (c) { var k = K.keyOf(c); counts[k] = (counts[k] || 0) + 1; if (!firstOf[k]) firstOf[k] = c; });
+    var counts = {}, firstOf = {}, num = {};
+    // le copie contano per l'espansione da cui arrivano (Diluvio arcobaleno ristampa 4 carte del mazzo base)
+    K.ALL.forEach(function (c) { var k = K.keyOf(c) + '|' + K.expDi(c); num[k] = (num[k] || 0) + 1; if (!firstOf[K.keyOf(c)] || K.expDi(c) === exp && K.expDi(firstOf[K.keyOf(c)]) !== exp) firstOf[K.keyOf(c)] = c; });
+    K.CARTE.forEach(function (d) { counts[d.id] = num[d.id + '|' + exp] || 0; });
     var row = function (c, label, text) { return '<div class="row">' + cardHTML(c, { w: 46 }) + '<div class="t"><b>' + label + '</b>' + esc(text) + '</div></div>'; };
     return GRUPPI.map(function (g) {
-      var ks = K.CARTE.filter(function (d) { return d.t === g[0] && d.exp === exp; });
+      var ks = K.CARTE.filter(function (d) { return d.t === g[0] && counts[d.id] > 0; });
       if (!ks.length) return '';
       var tot = ks.reduce(function (a, d) { return a + counts[d.id]; }, 0), rows;
       if (g[0] === 'cucciolo') rows = row(firstOf[ks[0].id], exp === 'base' ? 'Cuccioli di 13 colori' : esc(ks.map(function (d) { return sname(firstOf[d.id]); }).join(', ')), ks[0].text);
@@ -1045,7 +1067,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
         var colori = ks.filter(function (d) { return counts[d.id] === 3; }), altri = ks.filter(function (d) { return counts[d.id] !== 3; });
         rows = row(firstOf[colori[0].id], exp === 'base' ? 'Unicorni di 7 colori ×3' : esc(colori.map(function (d) { return sname(firstOf[d.id]); }).join(', ')) + ' ×3', colori[0].text) +
           altri.map(function (d) { return row(firstOf[d.id], esc(d.name), d.text); }).join('');
-      } else rows = ks.map(function (d) { return row(firstOf[d.id], esc(d.name) + (counts[d.id] > 1 ? ' ×' + counts[d.id] : ''), d.text); }).join('');
+      } else rows = ks.map(function (d) { return row(firstOf[d.id], esc(d.name) + (counts[d.id] > 1 ? ' ×' + counts[d.id] : '') + (d.exp !== exp ? ' <span class="muted small">(altre copie)</span>' : ''), d.text); }).join('');
       return '<h3>' + g[1] + ' (' + tot + (g[0] === 'cucciolo' ? ', nel Nido' : '') + ')</h3><div class="catalog">' + rows + '</div>';
     }).join('');
   }
@@ -1067,7 +1089,11 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       '<li>Le carte <b>col drago nel nome</b> (Draghetto, Dragocorno, Ammazzadraghi, Alito di drago…) sono quelle che cercano l\'Unicorno Domadraghi e l\'Evocadraghi; l\'Unicorno Ammazzadraghi protegge i tuoi unicorni da quelle che distruggono.</li>' +
       '<li>Con la <b>Benedizione del drago</b> i Malus della tua stalla restano lì ma non fanno niente, finché c\'è la Benedizione.</li>' +
       '<li>L\'<b>Unicorno Drago</b> fa il suo effetto ogni volta che lascia la tua stalla: rubato, rimandato in mano, spostato, sacrificato o distrutto.</li>' +
-      '<li>«In fondo al mazzo»: la carta va sotto tutte le altre e si pescherà per ultima.</li></ul>'
+      '<li>«In fondo al mazzo»: la carta va sotto tutte le altre e si pescherà per ultima.</li></ul>',
+    diluvio: '<p>Si gioca col mazzo base: le sue carte si mescolano con queste. Ci sono anche altre copie di quattro carte del mazzo base.</p><ul>' +
+      '<li>Le sette <b>Magie dell\'apocalisse</b> fanno sacrificare tutti i tuoi unicorni e distruggere un unicorno a ogni altro giocatore; poi cerchi nel mazzo la carta che dicono e la metti nella tua stalla.</li>' +
+      '<li>Con l\'<b>Unicorno della Carestia</b> in una stalla, tutti tengono in mano 5 carte in meno a fine turno; con gli Zoccoletti, chi li ha 4 in meno.</li>' +
+      '<li>Chi prende un <b>Pisolino</b> salta il suo prossimo turno.</li></ul>'
   };
   function rulesHTML() {
     var dueDi = function (exp) { return K.VIA_IN_DUE.filter(function (k) { return K.TYPES[k].exp === exp; }).map(function (k) { return K.TYPES[k].name; }); };
@@ -1450,6 +1476,12 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     skip: function () { play({ type: 'answer', skip: true }); },
     use: function (el) { play({ type: 'answer', cards: [el.dataset.c] }); },
     target: function (el) { play({ type: 'answer', target: +el.dataset.seat }); },
+    'tgt-toggle': function (el) {
+      var q = +el.dataset.seat, a = ui.selP = ui.selP || [], i = a.indexOf(q);
+      if (i >= 0) a.splice(i, 1); else a.push(q);
+      S.effetto('click'); render();
+    },
+    'tgt-go': function () { var a = (ui.selP || []).slice().sort(); ui.selP = []; play({ type: 'answer', targets: a }); },
     save: function (el) { play({ type: 'answer', pick: el.dataset.v }); },
     opz: function (el) { play({ type: 'answer', pick: +el.dataset.v }); },
     reagisci: function (el) { play({ type: 'answer', cards: [el.dataset.c] }); },
