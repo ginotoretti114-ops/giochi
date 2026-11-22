@@ -274,6 +274,8 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
 <div id="app"></div>
 <div id="layer"></div>
 <script src="../lib/ambiente.js"></script>
+<script src="../lib/profilo.js"></script>
+<script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
 <script src="bot.js"></script>
 <script src="../lib/mqtt.min.js"></script>
@@ -579,6 +581,12 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   }
   function boardHTML(s) {
     var P = persp(s);
+    // esperienza, medaglie e sfide del giorno a fine partita (lib/profilo.js)
+    if (window.Profilo && s.status === 'gameOver' && s.result) {
+      var vintoPP = (s.result.winners || []).indexOf(P.me) >= 0, evPP = {};
+      if (vintoPP && s.role && s.role[P.me]) evPP['vince-' + s.role[P.me]] = 1;   // medaglie dei ruoli
+      Profilo.osserva('polvere-e-piombo', s, P, { vinto: vintoPP, eventi: evPP });
+    }
     var k = selKey(s);
     if (ui.selKey !== k) { ui.selKey = k; ui.sel = []; }
     // punti vita che scendono: un lampo sul pallino
@@ -650,7 +658,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a>' + S.bottone() + '</nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Polvere e <span>Piombo</span></h1>' +
       '<p class="tag">Duelli nel vecchio West con ruoli segreti: lo Sceriffo e i Vice contro i Fuorilegge, e un Rinnegato che vuole restare l\'ultimo. Da 4 a 7 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +

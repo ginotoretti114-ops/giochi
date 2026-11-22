@@ -23,9 +23,21 @@ https://ginotoretti114-ops.github.io/giochi/
   Fuorilegge, più un Rinnegato. 80 carte con valore e seme (per «Estrai!»), 16 personaggi, distanze e armi.
   Online (ognuno vede solo ruolo e carte sue; i bot completano il tavolo), sullo stesso telefono (che dice a chi
   passarlo) o contro il computer (da 3 a 6 bot).
+- **Stalla Matta** (`stalla-matta/`): da 2 a 8 giocatori, carte con unicorni: vince chi ne ha 7 nella stalla (6 da
+  6 giocatori in su), tra Magie, Bonus, Malus e Nitriti che fermano le carte degli altri. Mazzo base completo (127
+  carte) e le cinque espansioni da accendere nella lobby: Brutti sogni (53 carte), Miti e leggende (54), Avventure
+  (54), Draghi (54) e Diluvio arcobaleno (54).
+  Online, sullo stesso telefono o contro il computer (da 1 a 5 bot).
 
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
 effetti, solo effetti o niente (la scelta vale per tutti i giochi).
+
+Ogni giocatore ha un profilo nella pagina iniziale: le partite finite danno esperienza e fanno salire di livello
+(di più se si vince, contro persone o contro il computer al livello difficile), ci sono 31 medaglie da sbloccare e
+ogni giorno tre sfide nuove, uguali per tutti. Alla fine di una partita un avviso mostra cosa si è guadagnato.
+Senza account i progressi restano nel browser (`lib/profilo.js`). Con un account (accesso con Google o con un
+link via email, `lib/conti.js` su Supabase) sono salvati nell'account e uguali su tutti i dispositivi; si possono
+eliminare in ogni momento. Cosa viene salvato e dove è spiegato in `privacy.html`.
 
 C'è anche un sito di prova, https://ginotoretti114-ops.github.io/giochi/prova/, dove le novità arrivano prima che
 sul sito vero: ha una striscia rosa con la scritta PROVA, le sue partite online e la sua memoria del browser, così
@@ -57,12 +69,13 @@ Non c'è niente da compilare: quello che finisce sul ramo `main` va online da so
 2. Aggiungi una voce all'array `GIOCHI` in `index.html`.
 3. Tutti i giochi stanno sullo stesso sito, quindi condividono la memoria del browser:
    - usa un prefisso tuo per `localStorage` (Gran Bazar usa `gb-…`, Sottozero `sz-…`, Piccante `pc-…`,
-     Diavolerie `dv-…`, Sette Stelle `ss-…`, Polvere e Piombo `pp-…`; la scelta dell'audio è `sala-audio`, comune a tutti);
+     Diavolerie `dv-…`, Sette Stelle `ss-…`, Polvere e Piombo `pp-…`, Stalla Matta `sm-…`; la scelta dell'audio è `sala-audio`, comune a tutti);
    - per l'online usa argomenti MQTT tuoi (Gran Bazar usa `granbazar/v1/<partita>/state`, Sottozero `sottozero/v1/…`,
-     Piccante `piccante/v1/…`, Diavolerie `diavolerie/v1/…`, Sette Stelle `settestelle/v1/…`, Polvere e Piombo `polvereepiombo/v1/…`).
+     Piccante `piccante/v1/…`, Diavolerie `diavolerie/v1/…`, Sette Stelle `settestelle/v1/…`, Polvere e Piombo `polvereepiombo/v1/…`,
+     Stalla Matta `stallamatta/v1/…`).
 4. Per un gioco online a turni conviene partire da `lib/stanze.js`, come fa Sottozero.
 5. Per i suoni includi `../lib/suoni.js`, scegli la musica con `Suoni.tema('nome')` (temi: `sala`, `bazar`,
-   `sottozero`, `piccante`, `diavolerie`, `settestelle`, `polvere`; per aggiungerne uno basta una voce in `THEMES`), metti il pulsante con
+   `sottozero`, `piccante`, `diavolerie`, `settestelle`, `polvere`, `stalla`; per aggiungerne uno basta una voce in `THEMES`), metti il pulsante con
    `Suoni.bottone()` e suona gli effetti con `Suoni.effetto('carta')` o `Suoni.sequenza([...])`
    (effetti: `click`, `carta`, `mescola`, `dadi`, `anima`, `moneta`, `compra`, `evoca`, `ruba`, `scarta`, `turno`,
    `vittoria`, `errore`, `punti`, `fuoco`). I browser fanno partire l'audio solo dopo il primo tocco sulla pagina.
@@ -118,6 +131,32 @@ la partita li muove il suo telefono (se non c'è, dopo qualche secondo ci pensan
 I bot di Polvere e Piombo usano solo quello che vedrebbe un giocatore: il proprio ruolo e le proprie carte, lo Sceriffo,
 i ruoli dei morti e una «reputazione» pubblica (`rep`) che il motore aggiorna quando qualcuno attacca qualcun altro.
 
+## Stalla Matta
+
+Segue il mazzo base della seconda edizione dell'originale (114 carte e 13 cuccioli), con nomi e grafica nuovi; il
+campo `o` delle carte dice che testo e numero di copie sono quelli originali. Le espansioni stanno in `ESPANSIONI`
+(`pronta: false` finché non ci sono le carte) e le carte nuove si aggiungono a `CARTE` con il loro `exp`: la lobby,
+la sala d'attesa e il foglio delle regole le mostrano da sole. Pronta: Brutti sogni (`incubi`, 50 carte e 3 cuccioli),
+che porta le carte tolte dal gioco (`s.box`), gli Incubi (Malus con `inc`), il Nitrito maledetto e le carte che non si
+sacrificano né si distruggono (`salda`). Pronta anche Miti e leggende (`leggende`, 50 carte e 4 cuccioli): le Magie
+giocate subito (`subito`: Unicorno Mago, Colpo critico), i Nitriti con un effetto, il Maleficio che passa di mano, la
+Pace divina e il Cavaliere senza macchia. Pronta anche Avventure (`avventure`, 50 carte e 4 cuccioli): le carte
+«scegli: … oppure …» (passo `oppure`, domanda `opzione`), le istantanee che non sono Nitriti (`rea`: Canna da pesca
+quando qualcuno ruba, Rete quando sacrifica o distrugge, Razzo all'inizio del turno di un altro; domanda `reazione`
+solo a chi ce l'ha, e gli altri vedono «Un momento»), lo Zainetto che passa di mano e la Macchia nera. Pronta
+anche Draghi (`draghi`, 48 carte e 6 cuccioli): le carte con «drago» nel nome (filtro `drago`, come «Dragon»
+nell'originale), l'Unicorno Ammazzadraghi (`distruggibile` guarda la carta che distrugge), la Benedizione del drago
+(`attivo` spegne i Malus), l'Unicorno Drago che scatta ogni volta che lascia la stalla (`LASCIA`, in `togli`) e le
+carte in fondo al mazzo. Tre carte hanno il numero di copie ricostruito (`o: 1`), con le 54 carte della scatola.
+Pronta anche Diluvio arcobaleno (`diluvio`, 52 carte e 2 cuccioli): 8 sono altre copie di quattro carte del mazzo
+base, scritte nel campo `copie` della carta (`expDi` dice da quale espansione arriva ogni copia); poi le sette Magie
+dell'apocalisse (`APOCALISSE`), la Principessa Arcobaleno (domanda `giocatori`, più giocatori insieme), il Pisolino
+(`s.dorme`, guardato da `prossimo`) e i limiti della mano di Carestia e Zoccoletti (`limite`).
+In due, oltre agli unicorni semplici, si tolgono le carte di `VIA_IN_DUE`. Gli effetti sono passi su una pila (`stack`) con un `prompt` per volta; il Nitrito
+e gli effetti «ogni giocatore» chiedono a più giocatori insieme (`prompt.wait`), e online ognuno risponde dal suo
+telefono (se due risposte si incrociano, la pagina rimanda la propria). Chi non ha Nitriti lascia passare da solo,
+dopo una pausa a caso. I bot (`StallaBot`) usano solo quello che si vede al tavolo e la propria mano.
+
 ## Collaudo
 
 ```
@@ -130,5 +169,7 @@ node sette-stelle/test/motore.test.js          # scenari di regole + 400 partite
 node sette-stelle/test/bot.test.js             # i bot dei tre livelli uno contro l'altro
 node polvere-e-piombo/test/motore.test.js      # ruoli, distanze, carte e personaggi + 300 partite da 4 a 7 giocatori
 node polvere-e-piombo/test/bot.test.js         # i bot dei tre livelli: vittorie per posto, ruoli a caso
+node stalla-matta/test/motore.test.js          # una prova per ogni carta + 350 partite da 2 a 8 giocatori (base e con espansioni)
+node stalla-matta/test/bot.test.js             # i bot dei tre livelli uno contro l'altro, col mazzo base e con le espansioni
 PARTITE=3000 node gran-bazar/test/motore.test.js
 ```

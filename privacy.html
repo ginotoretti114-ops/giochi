@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · Sala giochi</title>
+<meta name="theme-color" content="#131833">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<style>
+  :root { --bg: #131833; --panel: #1b2246; --line: #3b4784; --text: #f6eedd; --muted: #b3b5d4; --saffron: #f5aa3e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 "Atkinson Hyperlegible", system-ui, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 18px 56px; }
+  a { color: var(--saffron); }
+  .back { display: inline-block; margin-bottom: 18px; font-weight: 700; text-decoration: none; }
+  h1 { font: 44px/1.1 "Rozha One", Georgia, serif; margin: 0 0 8px; }
+  h2 { font: 26px/1.2 "Rozha One", Georgia, serif; margin: 30px 0 8px; }
+  p, li { color: var(--text); }
+  .muted { color: var(--muted); }
+  ul { padding-left: 22px; }
+  li + li { margin-top: 6px; }
+  .box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">‹ Torna ai giochi</a>
+  <h1>Privacy</h1>
+  <p class="muted">Cosa sa di te la Sala giochi, dove sta e come cancellarlo.</p>
+
+  <div class="box">In breve: per giocare non serve nessun dato personale. Se crei un account salviamo la tua email e i
+  tuoi progressi, solo per farti entrare e ritrovarli; niente pubblicità, niente profilazione, nessuna cessione a terzi.
+  Puoi eliminare l'account e i progressi in ogni momento dalla pagina iniziale.</div>
+
+  <h2>Senza account</h2>
+  <ul>
+    <li>Nomi al tavolo, partite in corso, impostazioni dell'audio e progressi (livello, medaglie, sfide) restano nella
+      memoria di questo browser. Non usiamo cookie di tracciamento.</li>
+    <li>Le partite online passano da due server pubblici di messaggi (MQTT): ci viaggiano solo lo stato della partita e
+      il nome che scegli al tavolo, visibile agli altri giocatori. Non metterci il tuo nome completo se non vuoi.</li>
+  </ul>
+
+  <h2>Con l'account</h2>
+  <ul>
+    <li><b>Cosa salviamo:</b> l'indirizzo email e, se entri con Google, il nome e l'immagine del profilo che Google
+      ci passa; poi i tuoi progressi nella sala (esperienza, medaglie, sfide del giorno, partite contate).</li>
+    <li><b>Perché:</b> per farti entrare e per avere gli stessi progressi su tutti i tuoi dispositivi. Non li usiamo
+      per altro.</li>
+    <li><b>Dove:</b> su Supabase, il servizio che gestisce account e database, con i server nell'Unione Europea
+      (Francoforte). Le email con il link per entrare partono dal servizio di posta collegato a Supabase.</li>
+    <li><b>Per quanto:</b> finché hai l'account. «Elimina il mio account», nella pagina iniziale dopo l'accesso,
+      cancella subito account e progressi.</li>
+  </ul>
+
+  <h2>Altri servizi usati dalle pagine</h2>
+  <ul>
+    <li>Le pagine sono pubblicate con GitHub Pages e i caratteri arrivano da Google Fonts: come per ogni sito, questi
+      servizi ricevono l'indirizzo IP di chi visita.</li>
+  </ul>
+
+  <h2>I tuoi diritti</h2>
+  <p>Puoi vedere i tuoi progressi nella pagina iniziale e cancellare tutto con «Elimina il mio account». Per ogni altra
+    richiesta sui tuoi dati (accesso, correzione, cancellazione, reclamo al Garante per la protezione dei dati
+    personali) puoi rivolgerti al gestore del sito.</p>
+  <p class="muted">Ultimo aggiornamento: novembre 2026.</p>
+</main>
+<script src="lib/ambiente.js"></script>
+</body>
+</html>
