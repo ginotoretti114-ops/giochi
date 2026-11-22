@@ -93,8 +93,10 @@ test('mazzo: 114 carte e 13 cuccioli, numeri giusti; in due 82 carte', () => {
   assert.strictEqual(due.length, 82);
   assert.ok(!due.some(function (c) { return K.kind(c) === 'semplice' || K.VIA_IN_DUE.indexOf(K.keyOf(c)) >= 0; }));
   assert.strictEqual(K.CARTE.filter(function (d) { return d.id === 'nitrito'; })[0].n, 14);
-  K.CARTE.forEach(function (d) { assert.ok(d.text && d.name && d.e, 'carta incompleta ' + d.id); assert.strictEqual(d.o, 2); });
-  assert.deepStrictEqual(K.ESPANSIONI.filter(function (e) { return e.pronta; }).map(function (e) { return e.id; }), ['base', 'incubi', 'leggende']);
+  // fedeli all'originale; dei Draghi tre carte hanno il numero di copie ricostruito (54 carte in tutto, come la scatola)
+  var RICOSTRUITE = ['fortuna_drago', 'protezione_drago', 'sfortuna_drago'];
+  K.CARTE.forEach(function (d) { assert.ok(d.text && d.name && d.e, 'carta incompleta ' + d.id); assert.strictEqual(d.o, RICOSTRUITE.indexOf(d.id) >= 0 ? 1 : 2, 'fedeltà di ' + d.id); });
+  assert.deepStrictEqual(K.ESPANSIONI.filter(function (e) { return e.pronta; }).map(function (e) { return e.id; }), ['base', 'incubi', 'leggende', 'avventure', 'draghi']);
   var nomi = {};
   K.CARTE.forEach(function (d) { assert.ok(!nomi[d.name], 'nome doppio ' + d.name); nomi[d.name] = 1; });
 });
@@ -117,6 +119,25 @@ test('Miti e leggende: 50 carte e 4 cuccioli come l\'originale; in due senza i s
   assert.strictEqual(K.mazzoPer(['base', 'leggende'], 4).length, 164);
   assert.strictEqual(K.mazzoPer(['base', 'leggende'], 2).length, 82 + 38);
   assert.ok(K.isNeigh('nitrito_messere.1') && K.isNeigh('nitrito_villano.2') && K.isNeigh('nitrito_canaglia.1'));
+});
+
+test('Avventure: 50 carte e 4 cuccioli come l\'originale; in due senza semplici e senza le 5 carte dell\'elenco', () => {
+  assert.deepStrictEqual(perTipo('avventure'), { cucciolo: 4, semplice: 12, magico: 12, magia: 8, istante: 9, bonus: 5, malus: 4 });
+  assert.strictEqual(K.mazzoPer(['base', 'avventure'], 2).length, 82 + 50 - 12 - 6);
+  assert.ok(K.isNeigh('nitrito_marinaio.1') && !K.isNeigh('rete.1') && !K.isNeigh('canna_da_pesca.1'));
+});
+
+test('Draghi: 48 carte e 6 cuccioli come l\'originale; in due senza semplici e senza le 4 carte dell\'elenco', () => {
+  assert.deepStrictEqual(perTipo('draghi'), { cucciolo: 6, semplice: 12, magico: 10, magia: 9, istante: 6, bonus: 6, malus: 5 });
+  assert.strictEqual(K.mazzoPer(['base', 'draghi'], 4).length, 114 + 48);
+  assert.strictEqual(K.nidoPer(['base', 'draghi']).length, 19);
+  assert.strictEqual(K.mazzoPer(['base', 'draghi'], 2).length, 82 + 48 - 12 - 5, 'le 2 Protezioni del drago e altre 3 carte');
+  assert.ok(K.isNeigh('nitrito_bestiaccia.1'));
+  // «drago» nel nome: le stesse carte che nell'originale hanno «Dragon», e nessun'altra
+  var draghi = K.CARTE.filter(function (d) { return K.filtra(d.id + '.1', 'drago'); });
+  assert.strictEqual(draghi.length, 26);
+  assert.ok(draghi.every(function (d) { return d.exp === 'draghi'; }));
+  ['apprendista', 'tiradadi', 'alchimista', 'volante_squamoso', 'nitrito_bestiaccia'].forEach(function (k) { assert.ok(!K.filtra(k + '.1', 'drago'), k); });
 });
 
 test('preparazione: un cucciolo a testa, 5 carte (in due anche un Nitrito), 7 unicorni per vincere (6 da 6 giocatori)', () => {
@@ -1229,6 +1250,324 @@ test('Nitrito, messere! e Nitrito, villano!: chi è stato fermato pesca o scarta
   var t = mk({ exp: LG, hands: { 0: ['blu.1'], 1: ['nitrito_messere.1'] }, top: ['verde.1'] });
   t = passa(ans(play(t, 0, 'blu.1'), 1, { cards: ['nitrito_messere.1'] }));
   assert.ok(has(t.hand[0], 'verde.1'));
+});
+
+/* ---------- Avventure ---------- */
+var AV = ['avventure'];
+function opz(s, p, i) { return mv(s, p, { type: 'answer', pick: i, pid: s.prompt.id }); }
+test('carte «Scegli: … oppure …»: Capitano Tagliagole, Unicorno Imbroglione, Lupo di Mare', () => {
+  var s = mk({ exp: AV, hands: { 0: ['capitano.1'] }, stables: { 1: ['cucciolo_rosso.1', 'blu.1'] }, discard: ['rosso.1'] });
+  s = playOk(s, 0, 'capitano.1');
+  assert.strictEqual(P(s).kind, 'opzione');
+  assert.deepStrictEqual(P(s).opts, [0, 1]);
+  assert.ok(P(s).may);
+  s = opz(s, 0, 0);
+  assert.ok(has(s.stable[0], 'cucciolo_rosso.1'));
+  var t = mk({ exp: AV, hands: { 0: ['imbroglione.1', 'mela.1'], 1: ['blu.1', 'blu.2'] } });
+  t = opz(playOk(t, 0, 'imbroglione.1'), 0, 1);
+  t = ans(t, 0, { target: 1 });
+  assert.ok(has(t.hand[0], 'blu.1') && has(t.hand[1], 'mela.1'));
+  var u = mk({ exp: AV, hands: { 0: ['lupo_di_mare.1'], 1: ['blu.1'], 2: ['rosso.1'] } });
+  u = opz(playOk(u, 0, 'lupo_di_mare.1'), 0, 0);
+  assert.ok(has(u.discard, 'blu.1') && has(u.discard, 'rosso.1'));
+});
+
+test('Unicorno Bungee, Primo Ufficiale, Unicorno Impavido: cosa succede quando se ne vanno', () => {
+  var s = mk({ exp: AV, hands: { 0: ['mela.1'] }, stables: { 1: ['bungee.1', 'raffreddore.1'] } });
+  s = playOk(s, 0, 'mela.1');
+  assert.strictEqual(P(s).s, 1);
+  s = opz(s, 1, 1);
+  assert.ok(has(s.hand[1], 'bungee.1'));
+  var t = mk({ exp: AV, hands: { 0: ['mela.1'] }, stables: { 1: ['primo_ufficiale.1'] }, top: ['blu.1', 'blu.2'] });
+  t = opz(playOk(t, 0, 'mela.1'), 1, 0);
+  assert.ok(has(t.hand[1], 'blu.1') && has(t.hand[1], 'blu.2'));
+  var u = mk({ exp: AV, hands: { 0: ['mela.1'] }, stables: { 1: ['impavido.1'] }, discard: ['rete.1'] });
+  u = pick(playOk(u, 0, 'mela.1'), 1, 'rete.1');
+  assert.ok(has(u.hand[1], 'rete.1'));
+});
+
+test('Avventuriero Estremo: niente unicorni semplici nella sua stalla; Unicorno Clandestino e Pescatore', () => {
+  var s = mk({ exp: AV, hands: { 0: ['blu.1'] }, stables: { 0: ['avventuriero.1'] } });
+  assert.ok(no(s, 0, { type: 'play', card: 'blu.1' }));
+  var t = mk({ exp: AV, hands: { 0: ['clandestino.1'] }, top: ['squalicorno.1'] });
+  t = playOk(t, 0, 'clandestino.1');
+  assert.ok(has(t.stable[0], 'squalicorno.1') && last(t, 'mostra').dentro);
+  var u = mk({ exp: AV, hands: { 0: ['pescatore.1'], 1: ['blu.1', 'mela.1'] } });
+  u = pick(ans(playOk(u, 0, 'pescatore.1'), 0, { target: 1 }), 0, 'mela.1');
+  assert.ok(has(u.hand[0], 'mela.1'));
+});
+
+test('Pirata Saccheggiatore, Corno luminoso, Cercametalli, Paletta e secchiello', () => {
+  var s = mk({ exp: AV, hands: { 0: ['saccheggiatore.1'] }, stables: { 1: ['urra.1'] } });
+  s = opz(playOk(s, 0, 'saccheggiatore.1'), 0, 0);
+  assert.ok(has(s.stable[0], 'urra.1'));
+  var c = mk({ exp: AV, hands: { 0: ['corno_luminoso.1'] }, discard: ['urra.1'] });
+  c = opz(playOk(c, 0, 'corno_luminoso.1'), 0, 1);
+  assert.ok(has(c.stable[0], 'urra.1'));
+  var m = mk({ exp: AV, hands: { 0: ['cercametalli.1'] }, top: ['blu.1', 'blu.2', 'blu.3'] });
+  m = pick(opz(playOk(m, 0, 'cercametalli.1'), 0, 0), 0, 'blu.2');
+  assert.ok(has(m.hand[0], 'blu.1') && has(m.hand[0], 'blu.3') && has(m.discard, 'blu.2'));
+  var p = mk({ exp: AV, hands: { 0: ['paletta.1'] }, discard: ['blu.1', 'rosso.1'] });
+  p = opz(playOk(p, 0, 'paletta.1'), 0, 1);
+  p = pick(p, 0, 'blu.1');
+  assert.ok(has(p.hand[0], 'blu.1') && has(p.hand[0], 'rosso.1'));
+  assert.ok(no(mk({ exp: AV, hands: { 0: ['paletta.1'] } }), 0, { type: 'play', card: 'paletta.1' }));
+});
+
+test('Bussola misteriosa (un altro turno), Lingua d\'argento, Furto di culle', () => {
+  var s = mk({ exp: AV, hands: { 0: ['bussola.1', 'mela.1', 'mela.2', 'mela.3'] } });
+  s = opz(playOk(s, 0, 'bussola.1'), 0, 0);
+  assert.strictEqual(s.turn, 0, 'il turno ricomincia');
+  assert.ok(has(s.discard, 'mela.3'));
+  var l = mk({ exp: AV, hands: { 0: ['lingua_dargento.1'], 1: ['blu.1'], 2: ['rosso.1', 'verde.1'] } });
+  l = opz(playOk(l, 0, 'lingua_dargento.1'), 0, 0);
+  assert.strictEqual(P(l).kind, 'vedi');
+  assert.deepStrictEqual(P(l).mani[2], ['rosso.1', 'verde.1']);
+  l = ans(l, 0, { yes: true });
+  var d = mk({ exp: AV, hands: { 0: ['lingua_dargento.1'], 1: ['blu.1'], 2: ['rosso.1', 'verde.1'] } });
+  d = opz(playOk(d, 0, 'lingua_dargento.1'), 0, 1);
+  d = ans(d, 2, { cards: ['verde.1'] });
+  assert.ok(has(d.hand[0], 'blu.1') && has(d.hand[0], 'verde.1'));
+  var f = mk({ exp: AV, hands: { 0: ['furto_di_culle.1', 'mela.1', 'mela.2'] } });
+  f = pick(pick(playOk(f, 0, 'furto_di_culle.1'), 0, 'cucciolo_rosso.1'), 0, 'cucciolo_blu.1');
+  assert.ok(has(f.stable[0], 'cucciolo_rosso.1') && has(f.stable[0], 'cucciolo_blu.1'));
+});
+
+test('Canna da pesca: chi ruba resta a mani vuote e la carta va nella stalla di chi pesca', () => {
+  var s = mk({ exp: ['avventure', 'incubi'], hands: { 0: ['possessione.1', 'mela.1'], 2: ['canna_da_pesca.1'] }, stables: { 1: ['blu.1'] } });
+  s = playOk(s, 0, 'possessione.1');
+  assert.strictEqual(P(s).kind, 'reazione');
+  assert.deepStrictEqual(P(s).wait, [2]);
+  s = passa(ans(s, 2, { cards: ['canna_da_pesca.1'] }));
+  assert.ok(has(s.stable[2], 'blu.1') && !has(s.stable[0], 'blu.1') && has(s.discard, 'canna_da_pesca.1'));
+  var t = mk({ exp: ['avventure', 'incubi'], hands: { 0: ['possessione.1', 'mela.1'], 2: ['canna_da_pesca.1'] }, stables: { 1: ['blu.1'] } });
+  t = playOk(t, 0, 'possessione.1');
+  t = ans(t, 2, { pass: true });
+  assert.ok(has(t.stable[0], 'blu.1'), 'senza la Canna il furto riesce');
+});
+
+test('Rete per unicorni: la carta sacrificata o distrutta finisce nella mano di chi gioca la Rete', () => {
+  var s = mk({ exp: AV, hands: { 0: ['mela.1'], 2: ['rete.1'] }, stables: { 1: ['blu.1'] } });
+  s = playOk(s, 0, 'mela.1');
+  assert.strictEqual(P(s).kind, 'reazione');
+  s = passa(ans(s, 2, { cards: ['rete.1'] }));
+  assert.ok(has(s.hand[2], 'blu.1') && !has(s.discard, 'blu.1'));
+});
+
+test('Razzo di segnalazione: chi lo subisce salta l\'inizio del turno e la pesca', () => {
+  var s = mk({ exp: AV, hands: { 0: ['razzo.1'] }, stables: { 1: ['vagabondo.1'] }, top: ['blu.1'] });
+  s = mv(s, 0, { type: 'end' });
+  assert.strictEqual(P(s).kind, 'reazione');
+  assert.deepStrictEqual(P(s).wait, [0]);
+  s = passa(ans(s, 0, { cards: ['razzo.1'] }));
+  assert.strictEqual(s.turn, 1);
+  assert.ok(!has(s.hand[1], 'blu.1') && !s.prompt);
+});
+
+test('Rito antico, Buca coperta di foglie, Zoccoli reali, Vagabondo, Sopravvissuto (inizio del turno)', () => {
+  var s = mk({ exp: AV, stables: { 0: ['rito_antico.1', 'blu.1'] }, top: ['verde.1', 'verde.2', 'verde.3', 'rosso.1'] });
+  s = pick(alTurno(s, 0), 0, 'rito_antico.1');
+  assert.strictEqual(s.hand[0].length, 4, '3 carte del rito e 1 della pesca');
+  var b = mk({ exp: AV, stables: { 0: ['buca.1'], 1: ['blu.1'] } });
+  b = pick(alTurno(b, 0), 0, 'buca.1');
+  assert.ok(has(b.stable[0], 'blu.1') && has(b.discard, 'buca.1'));
+  var z = mk({ exp: AV, hands: { 1: ['rosso.1'] }, stables: { 0: ['zoccoli_reali.1'] }, top: ['verde.1'] });
+  z = ans(pick(alTurno(z, 0), 0, 'zoccoli_reali.1'), 0, { target: 1 });
+  assert.ok(has(z.hand[0], 'rosso.1') && !has(z.hand[0], 'verde.1'));
+  var v = mk({ exp: AV, hands: { 0: ['mela.1'], 1: ['rosso.1'] }, stables: { 0: ['vagabondo.1'] } });
+  v = ans(pick(pick(alTurno(v, 0), 0, 'vagabondo.1'), 0, 'mela.1'), 0, { target: 1 });
+  assert.ok(has(v.hand[0], 'rosso.1'));
+  var w = mk({ exp: AV, hands: { 0: ['mela.1'] }, stables: { 0: ['sopravvissuto.1', 'raffreddore.1'] } });
+  w = pick(pick(alTurno(w, 0), 0, 'sopravvissuto.1'), 0, 'mela.1');
+  assert.ok(has(w.discard, 'raffreddore.1'));
+});
+
+test('Kit di sopravvivenza, Unicorno in mare!, Meridiana rotta, Zainetto minuscolo, La macchia nera', () => {
+  var s = mk({ exp: AV, hands: { 0: ['mela.1'], 1: ['rosso.2', 'rosso.3'] }, stables: { 1: ['kit.1', 'blu.1'] } });
+  s = playOk(s, 0, 'mela.1');
+  assert.ok(P(s).opts.indexOf('scarta2') >= 0);
+  s = ans(s, 1, { pick: 'scarta2' });
+  assert.ok(has(s.stable[1], 'blu.1') && has(s.discard, 'rosso.2') && has(s.discard, 'rosso.3'));
+  var m = mk({ exp: AV, hands: { 0: ['mela.1'], 1: ['rosso.2', 'rosso.3'] }, stables: { 1: ['in_mare.1', 'blu.1'] } });
+  m = pick(playOk(m, 0, 'mela.1'), 1, 'rosso.2');
+  assert.ok(has(m.discard, 'blu.1') && has(m.discard, 'rosso.2'));
+  var r = mk({ exp: AV, stables: { 0: ['meridiana.1', 'rito_antico.1', 'blu.1'] } });
+  r = alTurno(r, 0);
+  assert.ok(!r.prompt && last(r, 'meridiana'));
+  var z = mk({ exp: AV, hands: { 0: ['blu.1'], 1: ['rosso.1'] }, stables: { 0: ['zainetto.1'] }, top: ['verde.1'] });
+  z = mv(z, 0, { type: 'draw' });
+  assert.strictEqual(P(z).s, 0);
+  z = pick(z, 0, 'blu.1');
+  assert.ok(has(z.discard, 'blu.1'));
+  var y = mk({ exp: AV, hands: { 0: ['blu.1'], 1: ['rosso.1'] }, stables: { 0: ['zainetto.1'] } });
+  y = play(y, 0, 'blu.1');
+  assert.ok(has(y.stable[1], 'zainetto.1'), 'senza carte in mano lo Zainetto passa a chi ne ha');
+  var n = mk({ exp: AV, turn: 1, hands: { 1: ['verde.1'] }, stables: { 1: ['macchia_nera.1', 'blu.1', 'blu.2', 'blu.3', 'rosso.1', 'rosso.2', 'rosso.3'] } });
+  n = playOk(n, 1, 'verde.1');
+  assert.strictEqual(n.status, 'playing');
+  assert.ok(!K.puoVincere(n, 1));
+});
+
+/* ---------- Draghi ---------- */
+var DR = ['draghi'];
+test('Dragocorno Arrabbiato e Volante Squamoso: tutti (tu compreso) scartano o sacrificano; il Volante torna in mano', () => {
+  var s = mk({ exp: DR, hands: { 0: ['dragocorno_arrabbiato.1', 'mela.1', 'mela.2'], 1: ['blu.1', 'blu.2'], 2: ['rosso.1'] } });
+  s = playOk(s, 0, 'dragocorno_arrabbiato.1');
+  assert.strictEqual(P(s).kind, 'ogni');
+  assert.deepStrictEqual(P(s).wait, [0, 1]);
+  s = pick(pick(s, 0, 'mela.1'), 1, 'blu.2');
+  assert.ok(has(s.discard, 'mela.1') && has(s.discard, 'blu.2') && has(s.discard, 'rosso.1'));
+  var v = mk({ exp: DR, hands: { 0: ['volante_squamoso.1'] }, stables: { 0: ['blu.1'], 1: ['rosso.1', 'doppietta.1'], 2: ['verde.1'] } });
+  v = playOk(v, 0, 'volante_squamoso.1');
+  assert.strictEqual(P(v).kind, 'ogni');
+  assert.strictEqual(P(v).filtro, 'carta');
+  assert.deepStrictEqual(P(v).opts[0].sort(), ['blu.1', 'volante_squamoso.1']);
+  assert.ok(has(P(v).opts[1], 'doppietta.1'), 'si sacrifica una carta qualsiasi, anche un Bonus');
+  v = pick(pick(v, 0, 'volante_squamoso.1'), 1, 'doppietta.1');
+  assert.ok(has(v.hand[0], 'volante_squamoso.1'), 'il Volante sacrificato torna in mano');
+  assert.ok(has(v.discard, 'doppietta.1') && has(v.discard, 'verde.1') && has(v.stable[1], 'rosso.1'));
+});
+
+test('Unicorno Cavalcadraghi: sposta un Bonus o un Malus, ma non nella tua stalla', () => {
+  var s = mk({ exp: DR, hands: { 0: ['cavalcadraghi.1'] }, stables: { 1: ['raffreddore.1'] } });
+  s = playOk(s, 0, 'cavalcadraghi.1');
+  assert.ok(P(s).may);
+  s = pick(s, 0, 'raffreddore.1');
+  assert.deepStrictEqual(P(s).opts, [2]);
+  s = ans(s, 0, { target: 2 });
+  assert.ok(has(s.stable[2], 'raffreddore.1'));
+});
+
+test('Unicorno Ammazzadraghi: i suoi unicorni non li distruggono le carte col drago (le altre sì)', () => {
+  var s = mk({ exp: DR, hands: { 0: ['alito_di_drago.1', 'mela.1'] }, stables: { 1: ['ammazzadraghi.1', 'blu.1'] } });
+  assert.ok(/distrugg/.test(no(s, 0, { type: 'play', card: 'alito_di_drago.1' })));
+  s = playOk(s, 0, 'mela.1');
+  assert.deepStrictEqual(P(s).opts.sort(), ['ammazzadraghi.1', 'blu.1']);
+  var t = mk({ exp: DR, hands: { 0: ['alito_di_drago.1'] }, stables: { 1: ['ammazzadraghi.1', 'blu.1'], 2: ['rosso.1'] } });
+  t = playOk(t, 0, 'alito_di_drago.1');
+  assert.ok(has(t.discard, 'rosso.1'), 'resta solo l\'unicorno dell\'altro giocatore');
+});
+
+test('Unicorno Evocadraghi, Domadraghi, Alchimista, Dragotartaruga: cercano carte col drago o Magie', () => {
+  var s = mk({ exp: DR, hands: { 0: ['evocadraghi.1'] }, discard: ['alito_di_drago.1', 'mela.1', 'draghetto_nero.1'.replace('draghetto_nero.1', 'fortuna_drago.1')] });
+  s = playOk(s, 0, 'evocadraghi.1');
+  assert.deepStrictEqual(P(s).opts.sort(), ['alito_di_drago.1', 'fortuna_drago.1']);
+  s = pick(s, 0, 'fortuna_drago.1');
+  assert.ok(has(s.hand[0], 'fortuna_drago.1'));
+  var d = mk({ exp: DR, hands: { 0: ['domadraghi.1'] }, deck: ['bacio_del_drago.1', 'mela.1', 'travestito.1', 'blu.1'] });
+  d = playOk(d, 0, 'domadraghi.1');
+  assert.deepStrictEqual(P(d).opts.sort(), ['bacio_del_drago.1', 'travestito.1']);
+  d = pick(d, 0, 'travestito.1');
+  assert.ok(has(d.hand[0], 'travestito.1'));
+  var a = mk({ exp: DR, hands: { 0: ['alchimista.1'] }, deck: ['bacio_del_drago.1', 'mela.1', 'blu.1'] });
+  a = playOk(a, 0, 'alchimista.1');
+  assert.deepStrictEqual(P(a).opts.sort(), ['bacio_del_drago.1', 'mela.1']);
+  var t = mk({ exp: DR, hands: { 0: ['dragotartaruga.1'] }, top: ['verde.1'] });
+  t = playOk(t, 0, 'dragotartaruga.1');
+  assert.ok(has(t.hand[0], 'verde.1'));
+});
+
+test('Unicorno Drago: quando lascia la stalla (anche se rimandato in mano) chi l\'aveva può distruggere un unicorno', () => {
+  var s = mk({ exp: DR, hands: { 0: ['zoccolata.1'], 1: ['rosso.2'] }, stables: { 0: ['blu.1'], 1: ['unicorno_drago.1'] } });
+  s = playOk(s, 0, 'zoccolata.1');
+  assert.ok(has(s.hand[1], 'unicorno_drago.1'), 'l\'unica carta da rimandare in mano si sceglie da sola');
+  s = pick(s, 1, 'rosso.2');
+  assert.strictEqual(P(s).s, 1);
+  assert.strictEqual(P(s).op, 'distruggi');
+  s = pick(s, 1, 'blu.1');
+  assert.ok(has(s.discard, 'blu.1'));
+  var t = mk({ exp: DR, hands: { 0: ['mela.1'] }, stables: { 0: ['rosso.1'], 1: ['unicorno_drago.1'] } });
+  t = playOk(t, 0, 'mela.1');
+  assert.strictEqual(P(t).s, 1);
+  t = pick(t, 1, 'rosso.1');
+  assert.ok(has(t.discard, 'rosso.1') && has(t.discard, 'unicorno_drago.1'));
+  assert.strictEqual(t.log.filter(function (e) { return e.t === 'distrutta'; }).length, 2, 'scatta una volta sola');
+});
+
+test('Dragocorno Amichevole: ognuno pesca una carta, in ordine di turno (finché ce ne sono)', () => {
+  var s = mk({ exp: DR, hands: { 0: ['dragocorno_amico.1'] }, deck: ['rosso.1', 'verde.1', 'verde.2', 'verde.3'] });
+  s = playOk(s, 0, 'dragocorno_amico.1');
+  assert.ok(has(s.hand[0], 'verde.3') && has(s.hand[1], 'verde.2') && has(s.hand[2], 'verde.1'));
+  var t = mk({ exp: DR, hands: { 0: ['dragocorno_amico.1', 'blu.1'] }, deck: ['verde.1', 'verde.2'], max: 2 });
+  t = playOk(t, 0, 'dragocorno_amico.1');
+  assert.ok(has(t.hand[0], 'verde.2') && has(t.hand[1], 'verde.1') && !t.hand[2].length);
+  assert.strictEqual(t.status, 'playing', 'il mazzo vuoto non fa finire la partita a metà effetto');
+});
+
+test('Alito di drago, Fuoco di drago, Bacio del drago, Stalle bruciate dal drago', () => {
+  var s = mk({ exp: DR, hands: { 0: ['alito_di_drago.1'] }, stables: { 1: ['blu.1'] } });
+  s = playOk(s, 0, 'alito_di_drago.1');
+  assert.ok(has(s.discard, 'blu.1'));
+  var f = mk({ exp: DR, hands: { 0: ['fuoco_di_drago.1'] }, stables: { 0: ['raffreddore.1'], 1: ['doppietta.1'] } });
+  f = pick(playOk(f, 0, 'fuoco_di_drago.1'), 0, 'doppietta.1');
+  assert.ok(has(f.discard, 'doppietta.1') && has(f.stable[0], 'raffreddore.1'));
+  var b = mk({ exp: DR, hands: { 0: ['bacio_del_drago.1'] }, stables: { 1: ['blu.1'] }, deck: ['mela.1', 'rosso.1', 'verde.1'] });
+  b = playOk(b, 0, 'bacio_del_drago.1');
+  assert.ok(last(b, 'cercata') && last(b, 'gioca').c === 'mela.1', 'la Magia trovata si gioca subito');
+  b = passa(b);
+  assert.ok(has(b.discard, 'blu.1') && has(b.discard, 'mela.1'));
+  var r = mk({ exp: DR, hands: { 0: ['stalle_bruciate.1'] }, stables: { 0: ['raffreddore.1', 'blu.1'], 1: ['doppietta.1'] }, discard: ['rosso.1'] });
+  r = playOk(r, 0, 'stalle_bruciate.1');
+  assert.ok(has(r.discard, 'raffreddore.1') && has(r.discard, 'doppietta.1') && has(r.stable[0], 'blu.1'));
+  assert.ok(has(r.discard, 'rosso.1') && !last(r, 'mescola'), 'gli scarti non si rimescolano');
+});
+
+test('Benedizione del drago: i Malus della tua stalla non hanno effetto', () => {
+  var s = mk({ exp: DR, stables: { 0: ['benedizione_drago.1', 'flash.1', 'paladino.1', 'raffreddore.1'] } });
+  assert.ok(K.attivo(s, 0, 'paladino.1'), 'il Flash abbagliante non spegne gli unicorni');
+  assert.ok(K.nitrisce(s, 0), 'col Raffreddore si nitrisce lo stesso');
+  var m = mk({ exp: DR, stables: { 0: ['benedizione_drago.1', 'maledizione_drago.1'] }, hands: { 0: ['blu.1'] } });
+  m = alTurno(m, 0);
+  assert.strictEqual(m.phase, 'azione', 'la Maledizione non chiede niente');
+  assert.ok(has(m.hand[0], 'blu.1'));
+  var o = mk({ exp: ['draghi', 'incubi'], stables: { 0: ['benedizione_drago.1', 'incubo_occupato.1'] } });
+  assert.ok(K.puoVincere(o, 0));
+  var z = mk({ exp: ['draghi', 'leggende'], hands: { 0: ['blu.1'], 1: ['rosso.1'] }, stables: { 0: ['benedizione_drago.1', 'maleficio.1'] } });
+  z = play(z, 0, 'blu.1');
+  assert.ok(has(z.stable[0], 'maleficio.1'), 'il Maleficio senza effetto non passa di mano');
+});
+
+test('Fortuna del drago (un altro turno), Protezione del drago (scarti invece di perdere la carta distrutta)', () => {
+  var s = mk({ exp: DR, stables: { 0: ['fortuna_drago.1'] }, top: ['verde.1'] });
+  s = alTurno(s, 0);
+  assert.ok(P(s).may);
+  s = pick(s, 0, 'fortuna_drago.1');
+  assert.ok(has(s.discard, 'fortuna_drago.1'));
+  assert.strictEqual(s.extra, 1);
+  var p = mk({ exp: DR, hands: { 0: ['mela.1'], 1: ['rosso.1'] }, stables: { 1: ['protezione_drago.1', 'blu.1'] } });
+  p = playOk(p, 0, 'mela.1');
+  assert.strictEqual(P(p).kind, 'scelta');
+  assert.strictEqual(P(p).con, 'protezione_drago');
+  p = ans(p, 1, { pick: 'scarta' });
+  assert.ok(has(p.stable[1], 'blu.1') && has(p.discard, 'rosso.1'));
+  assert.strictEqual(last(p, 'salvata').con, 'protezione_drago');
+  // solo per le carte distrutte: per un sacrificio niente
+  var q = mk({ exp: DR, hands: { 1: ['rosso.1'] }, stables: { 1: ['protezione_drago.1', 'blu.1', 'rito_oscuro.1'] } });
+  q = alTurno(q, 1);
+  assert.ok(P(q).must.length);
+  q = pick(q, 1, 'rito_oscuro.1');
+  assert.ok(has(q.discard, 'blu.1'), 'il sacrificio non si evita');
+});
+
+test('Maledizione, Sfortuna e Cieli dei draghi (inizio del turno, obbligatori)', () => {
+  var s = mk({ exp: DR, hands: { 0: ['blu.1', 'rosso.1'] }, stables: { 0: ['maledizione_drago.1'] } });
+  s = alTurno(s, 0);
+  assert.deepStrictEqual(P(s).must, ['maledizione_drago.1']);
+  assert.ok(!P(s).may);
+  s = pick(pick(s, 0, 'maledizione_drago.1'), 0, 'rosso.1');
+  assert.ok(has(s.discard, 'rosso.1'));
+  var f = mk({ exp: DR, hands: { 0: ['blu.1', 'rosso.1'] }, stables: { 0: ['sfortuna_drago.1'] } });
+  f = pick(pick(alTurno(f, 0), 0, 'sfortuna_drago.1'), 0, 'rosso.1');
+  assert.strictEqual(f.deck[0], 'rosso.1', 'la carta va in fondo al mazzo');
+  assert.ok(!has(f.hand[0], 'rosso.1'));
+  var c = mk({ exp: DR, stables: { 0: ['cieli_dei_draghi.1', 'blu.1', 'cucciolo_rosso.1'] }, top: ['verde.1', 'verde.2'] });
+  c = pick(pick(alTurno(c, 0), 0, 'cieli_dei_draghi.1'), 0, 'blu.1');
+  assert.strictEqual(c.deck[0], 'blu.1');
+  assert.ok(has(c.hand[0], 'verde.1') && has(c.hand[0], 'verde.2'), 'una carta per i Cieli e una per la pesca');
+  var d = mk({ exp: DR, stables: { 0: ['cieli_dei_draghi.1', 'cucciolo_rosso.1'] }, top: ['verde.1', 'verde.2'] });
+  d = pick(alTurno(d, 0), 0, 'cieli_dei_draghi.1');
+  assert.ok(has(d.nursery, 'cucciolo_rosso.1'), 'un Cucciolo torna nel Nido');
+  assert.deepStrictEqual(d.hand[0], ['verde.1'], 'e allora non si pesca la carta in più');
 });
 
 function partita(np, seed, lim, exp) {

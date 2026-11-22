@@ -25,8 +25,8 @@ https://ginotoretti114-ops.github.io/giochi/
   passarlo) o contro il computer (da 3 a 6 bot).
 - **Stalla Matta** (`stalla-matta/`): da 2 a 8 giocatori, carte con unicorni: vince chi ne ha 7 nella stalla (6 da
   6 giocatori in su), tra Magie, Bonus, Malus e Nitriti che fermano le carte degli altri. Mazzo base completo (127
-  carte) e le espansioni Brutti sogni (53 carte) e Miti e leggende (54 carte) da accendere nella lobby; le altre
-  arrivano una alla volta.
+  carte) e le espansioni Brutti sogni (53 carte), Miti e leggende (54 carte), Avventure (54 carte) e Draghi (54
+  carte) da accendere nella lobby; l'ultima arriva dopo.
   Online, sullo stesso telefono o contro il computer (da 1 a 5 bot).
 
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
@@ -140,7 +140,15 @@ la sala d'attesa e il foglio delle regole le mostrano da sole. Pronta: Brutti so
 che porta le carte tolte dal gioco (`s.box`), gli Incubi (Malus con `inc`), il Nitrito maledetto e le carte che non si
 sacrificano né si distruggono (`salda`). Pronta anche Miti e leggende (`leggende`, 50 carte e 4 cuccioli): le Magie
 giocate subito (`subito`: Unicorno Mago, Colpo critico), i Nitriti con un effetto, il Maleficio che passa di mano, la
-Pace divina e il Cavaliere senza macchia. In due, oltre agli unicorni semplici, si tolgono le carte di `VIA_IN_DUE`. Gli effetti sono passi su una pila (`stack`) con un `prompt` per volta; il Nitrito
+Pace divina e il Cavaliere senza macchia. Pronta anche Avventure (`avventure`, 50 carte e 4 cuccioli): le carte
+«scegli: … oppure …» (passo `oppure`, domanda `opzione`), le istantanee che non sono Nitriti (`rea`: Canna da pesca
+quando qualcuno ruba, Rete quando sacrifica o distrugge, Razzo all'inizio del turno di un altro; domanda `reazione`
+solo a chi ce l'ha, e gli altri vedono «Un momento»), lo Zainetto che passa di mano e la Macchia nera. Pronta
+anche Draghi (`draghi`, 48 carte e 6 cuccioli): le carte con «drago» nel nome (filtro `drago`, come «Dragon»
+nell'originale), l'Unicorno Ammazzadraghi (`distruggibile` guarda la carta che distrugge), la Benedizione del drago
+(`attivo` spegne i Malus), l'Unicorno Drago che scatta ogni volta che lascia la stalla (`LASCIA`, in `togli`) e le
+carte in fondo al mazzo. Tre carte hanno il numero di copie ricostruito (`o: 1`), con le 54 carte della scatola.
+In due, oltre agli unicorni semplici, si tolgono le carte di `VIA_IN_DUE`. Gli effetti sono passi su una pila (`stack`) con un `prompt` per volta; il Nitrito
 e gli effetti «ogni giocatore» chiedono a più giocatori insieme (`prompt.wait`), e online ognuno risponde dal suo
 telefono (se due risposte si incrociano, la pagina rimanda la propria). Chi non ha Nitriti lascia passare da solo,
 dopo una pausa a caso. I bot (`StallaBot`) usano solo quello che si vede al tavolo e la propria mano.
