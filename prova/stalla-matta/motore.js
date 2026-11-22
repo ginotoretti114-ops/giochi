@@ -26,7 +26,7 @@
     { id: 'leggende', name: 'Miti e leggende', pronta: true, text: '50 carte e 4 cuccioli fantasy: cavalieri, maghi, incantesimi e Nitriti con effetto.' },
     { id: 'avventure', name: 'Avventure', pronta: true, text: '50 carte e 4 cuccioli da esploratori: pirati, carte a scelta e istantanee che non sono Nitriti.' },
     { id: 'draghi', name: 'Draghi', pronta: true, text: '48 carte e 6 draghetti: carte col drago nel nome, Malus che bruciano e un Unicorno Ammazzadraghi.' },
-    { id: 'diluvio', name: 'Diluvio arcobaleno', pronta: false }
+    { id: 'diluvio', name: 'Diluvio arcobaleno', pronta: true, text: '52 carte e 2 cuccioli (8 sono altre copie di carte del mazzo base): i cavalieri dell\'apocalisse, Magie che svuotano la stalla e cuccioli a volontà.' }
   ];
 
   var CUCCIOLO = 'Se sta per essere sacrificato, distrutto o rimandato in mano, torna invece nel Nido.';
@@ -65,12 +65,12 @@
     { id: 'boscaiolo', name: 'Unicorno Boscaiolo', t: 'magico', e: '🪓', text: 'Quando entra nella tua stalla, puoi DISTRUGGERE un Bonus o SACRIFICARE un Malus.' },
     { id: 'narvalo_frac', name: 'Narvalo in Frac', t: 'magico', e: '🎩', text: 'Quando entra nella tua stalla, puoi cercare nel mazzo un Bonus e prenderlo in mano. Poi mescoli il mazzo.' },
     { id: 'ombra', name: 'Unicorno Ombra', t: 'magico', e: '🌑', text: 'Quando entra nella tua stalla, puoi SACRIFICARE un unicorno, poi portare nella tua stalla un unicorno dagli scarti.' },
-    { id: 'catastrofe', name: 'Unicorno Catastrofe', t: 'magico', e: '💥', text: 'Quando entra nella tua stalla, ogni giocatore (tu compreso) deve SACRIFICARE un unicorno.' },
+    { id: 'catastrofe', name: 'Unicorno Catastrofe', t: 'magico', e: '💥', copie: [{ exp: 'diluvio', n: 2 }], text: 'Quando entra nella tua stalla, ogni giocatore (tu compreso) deve SACRIFICARE un unicorno.' },
     { id: 'unicornone', name: 'Unicornone', t: 'magico', e: '⛰️', text: 'Conta come 2 unicorni. Non puoi giocare carte Nitrito.' },
     { id: 'volante_ingordo', name: 'Volante Ingordo', t: 'magico', e: '🤤', vola: true, text: 'Quando entra nella tua stalla, PESCA una carta.' + VOLA },
-    { id: 'alpacorno', name: 'Alpacorno', t: 'magico', e: '🦙', text: 'Quando entra nella tua stalla, ogni giocatore (tu compreso) deve SCARTARE una carta.' },
+    { id: 'alpacorno', name: 'Alpacorno', t: 'magico', e: '🦙', copie: [{ exp: 'diluvio', n: 2, o: 1 }], text: 'Quando entra nella tua stalla, ogni giocatore (tu compreso) deve SCARTARE una carta.' },
     { id: 'volante_stregato', name: 'Volante Stregato', t: 'magico', e: '✨', vola: true, text: 'Quando entra nella tua stalla, puoi prendere in mano una Magia dagli scarti.' + VOLA },
-    { id: 'miciocorno', name: 'Miciocorno', t: 'magico', e: '🐱', text: 'Le carte Magia non possono distruggerlo.' },
+    { id: 'miciocorno', name: 'Miciocorno', t: 'magico', e: '🐱', copie: [{ exp: 'diluvio', n: 2, o: 1 }], text: 'Le carte Magia non possono distruggerlo.' },
     { id: 'volante_regale', name: 'Volante Regale', t: 'magico', e: '👑', vola: true, text: 'Quando entra nella tua stalla, puoi prendere in mano un unicorno dagli scarti.' + VOLA },
     { id: 'chioccia', name: 'Unicorno Chioccia', t: 'magico', e: '🐔', text: 'Quando entra nella tua stalla, puoi portarci un Cucciolo dal Nido.' },
     { id: 'risacca', name: 'Unicorno Risacca', t: 'magico', e: '🌊', text: 'Quando entra nella tua stalla, rimanda in mano a un altro giocatore una carta della sua stalla.' },
@@ -87,7 +87,7 @@
     { id: 'narvalo_supremo', name: 'Narvalo Supremo', t: 'magico', e: '🐳', text: 'Quando entra nella tua stalla, puoi cercare nel mazzo una carta con «Narvalo» nel nome e prenderla in mano. Poi mescoli il mazzo.' },
     { id: 'popcorno', name: 'Popcorno', t: 'magico', e: '🍿', text: 'Quando entra nella tua stalla, PESCA 2 carte e SCARTANE una.' },
     { id: 'indovino', name: 'Unicorno Indovino', t: 'magico', e: '👁️', text: 'Quando entra nella tua stalla, guarda le prime 3 carte del mazzo: prendine una e rimetti le altre in cima, nell\'ordine che vuoi.' },
-    { id: 'cenere', name: 'Unicorno Cenere', t: 'magico', e: '🔥', text: 'Se sta per essere sacrificato o distrutto, puoi invece SCARTARE una carta.' },
+    { id: 'cenere', name: 'Unicorno Cenere', t: 'magico', e: '🔥', copie: [{ exp: 'diluvio', n: 2 }], text: 'Se sta per essere sacrificato o distrutto, puoi invece SCARTARE una carta.' },
 
     { id: 'zoccolata', name: 'Zoccolata', t: 'magia', n: 3, e: '🦶', text: 'Rimanda in mano a un altro giocatore una carta della sua stalla. Poi quel giocatore deve SCARTARE una carta.' },
     { id: 'arraffa', name: 'Arraffa!', t: 'magia', e: '🧲', text: 'Guarda la mano di un altro giocatore: scegli una carta e prendila.' },
@@ -294,7 +294,49 @@
 
     { id: 'maledizione_drago', name: 'Maledizione del drago', t: 'malus', n: 2, e: '🥀', exp: 'draghi', text: INIZIO_TXT + 'SCARTA una carta.' },
     { id: 'sfortuna_drago', name: 'Sfortuna del drago', t: 'malus', n: 2, e: '🐈‍⬛', o: 1, exp: 'draghi', text: INIZIO_TXT + 'metti una carta della tua mano in fondo al mazzo.' },
-    { id: 'cieli_dei_draghi', name: 'Cieli dei draghi', t: 'malus', e: '🌩️', exp: 'draghi', text: INIZIO_TXT + 'metti un unicorno della tua stalla in fondo al mazzo, poi PESCA una carta.' }
+    { id: 'cieli_dei_draghi', name: 'Cieli dei draghi', t: 'malus', e: '🌩️', exp: 'draghi', text: INIZIO_TXT + 'metti un unicorno della tua stalla in fondo al mazzo, poi PESCA una carta.' },
+
+    /* ---- Diluvio arcobaleno (54 carte: 2 cuccioli, 6 semplici, 24 magici di cui 8 copie di carte del mazzo base
+       (copie), 14 Magie, 3 istantanee, 4 Bonus, 1 Malus) ---- */
+    { id: 'cucciolo_fiorito', name: 'Cucciolo Fiorito', t: 'cucciolo', e: '🌸', col: '#f2a0c8', exp: 'diluvio' },
+    { id: 'cucciolo_scintillante', name: 'Cucciolo Scintillante', t: 'cucciolo', e: '🌟', col: '#f7e07a', exp: 'diluvio' },
+
+    { id: 'cavallo_gelato', name: 'Cavallo col Gelato', t: 'semplice', n: 3, e: '🍦', col: '#f5c9a6', exp: 'diluvio', text: 'Nessun effetto, ma conta come tutti gli altri unicorni (anche se è un cavallo).' },
+    { id: 'coniglicorno', name: 'Coniglicorno Innocente', t: 'semplice', n: 3, e: '🐰', col: '#d9c3f2', exp: 'diluvio' },
+
+    { id: 'volante_adorabile', name: 'Volante Adorabile', t: 'magico', e: '🥰', vola: true, exp: 'diluvio', text: 'Quando entra nella tua stalla, ogni giocatore (tu compreso) deve SACRIFICARE una carta.' + VOLA },
+    { id: 'angelo', name: 'Unicorno Angelo', t: 'magico', n: 2, e: '👼', exp: 'diluvio', text: INIZIO_TXT + 'puoi SACRIFICARE questa carta, poi portare nella tua stalla un unicorno dagli scarti.' },
+    { id: 'alpacorno_zucchero', name: 'Alpacorno Zucchero Filato', t: 'magico', e: '🍭', exp: 'diluvio', text: 'Quando entra nella tua stalla, ogni giocatore (tu compreso) deve SACRIFICARE un unicorno, poi PESCARE una carta.' },
+    { id: 'fertile', name: 'Unicorno Fertilissimo', t: 'magico', n: 2, o: 1, e: '🥚', exp: 'diluvio', text: INIZIO_TXT + 'puoi SCARTARE una carta, poi portare nella tua stalla un Cucciolo dal Nido.' },
+    { id: 'bulldog', name: 'Bulldocorno', t: 'magico', e: '🐶', exp: 'diluvio', text: 'Quando entra nella tua stalla, ogni altro giocatore deve SCARTARE una carta: tu ne prendi in mano una di quelle scartate.' },
+    { id: 'brillantinato', name: 'Unicorno Brillantinato', t: 'magico', e: '💅', exp: 'diluvio', text: 'Quando entra nella tua stalla, puoi mettere nella tua stalla un Bonus che hai in mano.' },
+    { id: 'minuscolo', name: 'Unicorno Minuscolo', t: 'magico', e: '🐜', exp: 'diluvio', text: 'Gli effetti degli unicorni e dei Bonus non possono DISTRUGGERLO.' },
+    { id: 'morte', name: 'Unicorno della Morte', t: 'magico', e: '⚱️', exp: 'diluvio', text: INIZIO_TXT + 'puoi SACRIFICARE un unicorno, poi DISTRUGGERE un unicorno.' },
+    { id: 'carestia', name: 'Unicorno della Carestia', t: 'magico', e: '🍽️', exp: 'diluvio', text: 'Ogni giocatore (tu compreso) a fine turno tiene in mano 5 carte in meno.' },
+    { id: 'pestilenza', name: 'Unicorno della Pestilenza', t: 'magico', e: '🤢', exp: 'diluvio', text: 'Quando entra nella tua stalla, SCARTA quante carte vuoi: ogni altro giocatore deve SCARTARNE altrettante.' },
+    { id: 'guerra', name: 'Unicorno della Guerra', t: 'magico', e: '🪖', exp: 'diluvio', text: 'Quando entra nella tua stalla, ogni giocatore (tu compreso) può DISTRUGGERE un unicorno. Questa carta non si può distruggere.' },
+    { id: 'principessa', name: 'Principessa Arcobaleno', t: 'magico', e: '👸', exp: 'diluvio', text: 'Quando entra nella tua stalla, scegli quanti giocatori vuoi: PESCHI tante carte quanti sono, e ognuno di loro può PESCARE una carta.' },
+    { id: 'zombi', name: 'Unicorno Zombi', t: 'magico', n: 2, e: '🧠', exp: 'diluvio', text: INIZIO_TXT + 'puoi SCARTARE un unicorno, poi portare nella tua stalla un unicorno dagli scarti. Se lo fai, il tuo turno finisce subito.' },
+
+    { id: 'attacco_tenero', name: 'Attacco di tenerezza', t: 'magia', n: 2, e: '🥺', exp: 'diluvio', text: 'Scegli un altro giocatore: DISTRUGGI 3 unicorni della sua stalla (o quelli che ha) e porta nella sua stalla altrettanti Cuccioli dal Nido.' },
+    { id: 'fuoco_e_zolfo', name: 'Fuoco e zolfo', t: 'magia', e: '🌶️', exp: 'diluvio', text: 'SACRIFICA tutti i tuoi unicorni, poi DISTRUGGI un unicorno nella stalla di ogni altro giocatore. Poi cerca nel mazzo un Unicorno Cenere e mettilo nella tua stalla; poi mescoli il mazzo.' },
+    { id: 'castigo_celeste', name: 'Castigo celeste', t: 'magia', e: '☁️', exp: 'diluvio', text: 'SACRIFICA tutti i tuoi unicorni, poi DISTRUGGI un unicorno nella stalla di ogni altro giocatore. Poi cerca nel mazzo un Unicorno Angelo e mettilo nella tua stalla; poi mescoli il mazzo.' },
+    { id: 'alpacalisse', name: 'Alpacalisse', t: 'magia', e: '🏜️', exp: 'diluvio', text: 'SACRIFICA tutti i tuoi unicorni, poi DISTRUGGI un unicorno nella stalla di ogni altro giocatore. Poi cerca nel mazzo l\'Alpacorno e mettilo nella tua stalla; poi mescoli il mazzo.' },
+    { id: 'sovrappopolazione', name: 'Sovrappopolazione', t: 'magia', e: '👶', exp: 'diluvio', text: 'SACRIFICA tutti i tuoi unicorni, poi DISTRUGGI un unicorno nella stalla di ogni altro giocatore. Poi cerca nel mazzo un Unicorno Fertilissimo e mettilo nella tua stalla; poi mescoli il mazzo.' },
+    { id: 'tempesta_tenerezza', name: 'Tempesta di tenerezza', t: 'magia', e: '🫧', exp: 'diluvio', text: 'SACRIFICA tutti i tuoi unicorni, poi DISTRUGGI un unicorno nella stalla di ogni altro giocatore. Poi cerca nel mazzo un Miciocorno e mettilo nella tua stalla; poi mescoli il mazzo.' },
+    { id: 'distruzione_totale', name: 'Distruzione totale', t: 'magia', e: '🎇', exp: 'diluvio', text: 'SACRIFICA tutti i tuoi unicorni, poi DISTRUGGI un unicorno nella stalla di ogni altro giocatore. Poi cerca nel mazzo un Unicorno Catastrofe e mettilo nella tua stalla; poi mescoli il mazzo.' },
+    { id: 'apocalisse_zombi', name: 'Apocalisse zombi', t: 'magia', e: '🫥', exp: 'diluvio', text: 'SACRIFICA tutti i tuoi unicorni, poi DISTRUGGI un unicorno nella stalla di ogni altro giocatore. Poi cerca nel mazzo un Unicorno Zombi e mettilo nella tua stalla; poi mescoli il mazzo.' },
+    { id: 'unicorni_apocalisse', name: 'Gli unicorni dell\'apocalisse', t: 'magia', e: '🐎', exp: 'diluvio', text: 'SACRIFICA 4 unicorni, poi cerca nel mazzo 4 unicorni e mettili nella tua stalla; poi mescoli il mazzo.' },
+    { id: 'peste_nera', name: 'Peste nera', t: 'magia', e: '🕷️', exp: 'diluvio', text: 'SACRIFICA quante carte vuoi, poi DISTRUGGINE altrettante.' },
+    { id: 'spruzzino', name: 'Spruzzino della giovinezza', t: 'magia', e: '🧴', exp: 'diluvio', text: 'DISTRUGGI un unicorno nella stalla di ogni altro giocatore. Poi ognuno di loro può portare nella sua stalla un Cucciolo dal Nido.' },
+    { id: 'pisolino', name: 'Pisolino', t: 'magia', n: 2, e: '😴', exp: 'diluvio', text: 'Un altro giocatore, a tua scelta, salta il suo prossimo turno.' },
+
+    { id: 'nitrito_grazie', name: 'Nitrito, grazie!', t: 'istante', n: 3, o: 1, e: '🙇', neigh: true, exp: 'diluvio', text: 'Giocalo quando un altro giocatore prova a giocare una carta: la fermi e finisce negli scarti. Poi tu e lui potete PESCARE una carta.' },
+
+    { id: 'zuccherini', name: 'Zuccherini arcobaleno', t: 'bonus', n: 2, e: '🍬', exp: 'diluvio', text: INIZIO_TXT + 'puoi PESCARE 3 carte: se lo fai, il tuo turno finisce subito.' },
+    { id: 'consegna_speciale', name: 'Consegna speciale', t: 'bonus', n: 2, e: '🚚', exp: 'diluvio', text: INIZIO_TXT + 'puoi portare nella tua stalla un Cucciolo dal Nido: se lo fai, salti la fase delle azioni.' },
+
+    { id: 'zoccoletti', name: 'Zoccoletti', t: 'malus', e: '🩰', exp: 'diluvio', text: 'A fine turno tieni in mano 4 carte in meno.' }
   ];
   // Nella partita in due si tolgono tutti gli unicorni semplici e queste carte (e ognuno parte con un Nitrito in mano).
   // Brutti sogni: il Rancoroso è nell'elenco ufficiale; le altre tre seguono la sua regola (via le carte che parlano
@@ -302,7 +344,8 @@
   var VIA_IN_DUE = ['reginetta', 'rubacuori', 'pifferaio', 'chioccia', 'evocatore', 'occhio', 'rito_oscuro', 'raffreddore', 'urra',
     'rancoroso', 'mascherato', 'fuori_dalla_tomba', 'piu_spettro',
     'clandestino', 'capitano', 'avventuriero', 'macchia_nera', 'furto_di_culle',
-    'ammazzadraghi', 'cieli_dei_draghi', 'protezione_drago', 'volante_squamoso'];
+    'ammazzadraghi', 'cieli_dei_draghi', 'protezione_drago', 'volante_squamoso',
+    'pisolino', 'zoccoletti', 'consegna_speciale', 'fertile', 'carestia', 'sovrappopolazione'];
   var TIPI = { cucciolo: 'Cucciolo', semplice: 'Unicorno semplice', magico: 'Unicorno magico', magia: 'Magia', bonus: 'Bonus', malus: 'Malus', istante: 'Istantanea' };
 
   var TYPES = {}, META = {}, ALL = [];
@@ -312,7 +355,14 @@
     if (d.t === 'semplice' && !d.text) d.text = 'Nessun effetto, ma conta come tutti gli altri unicorni.';
     TYPES[d.id] = d;
     for (var i = 1; i <= d.n; i++) { var id = d.id + '.' + i; META[id] = { k: d.id }; ALL.push(id); }
+    // altre copie che arrivano con un'espansione (Diluvio arcobaleno ristampa 4 carte del mazzo base)
+    var num = d.n;
+    (d.copie || []).forEach(function (x) {
+      for (var j = 0; j < x.n; j++) { num++; var cid = d.id + '.' + num; META[cid] = { k: d.id, exp: x.exp, o: x.o == null ? 2 : x.o }; ALL.push(cid); }
+    });
   });
+  // Da quale espansione arriva questa copia della carta.
+  function expDi(c) { var m = META[c]; return (m && m.exp) || def(c).exp; }
   function keyOf(c) { var m = META[c]; return m ? m.k : null; }
   function def(c) { return TYPES[keyOf(c)] || null; }
   function kind(c) { var d = def(c); return d ? d.t : null; }
@@ -342,11 +392,11 @@
   function mazzoPer(exp, k) {
     return ALL.filter(function (c) {
       var d = def(c);
-      if (exp.indexOf(d.exp) < 0 || d.t === 'cucciolo') return false;
+      if (exp.indexOf(expDi(c)) < 0 || d.t === 'cucciolo') return false;
       return !(k === 2 && (d.t === 'semplice' || VIA_IN_DUE.indexOf(d.id) >= 0));
     });
   }
-  function nidoPer(exp) { return ALL.filter(function (c) { var d = def(c); return d.t === 'cucciolo' && exp.indexOf(d.exp) >= 0; }); }
+  function nidoPer(exp) { return ALL.filter(function (c) { return kind(c) === 'cucciolo' && exp.indexOf(expDi(c)) >= 0; }); }
 
   /* ---------- caso ---------- */
   var rng = null;
@@ -402,7 +452,12 @@
     return !(has(s, p, 'macchia_nera') && stalla(s, p).some(function (c) { return kind(c) === 'semplice'; }));
   }
   // Quante carte si possono tenere a fine turno.
-  function limite(s, p) { return Math.max(0, MANO_MAX - (has(s, p, 'incubo_palestra') ? 3 : 0) + (has(s, p, 'bisaccia') ? 3 : 0)); }
+  function limite(s, p) {
+    var l = MANO_MAX - (has(s, p, 'incubo_palestra') ? 3 : 0) + (has(s, p, 'bisaccia') ? 3 : 0) - (has(s, p, 'zoccoletti') ? 4 : 0);
+    // Unicorno della Carestia: vale per tutti, chiunque l'abbia nella stalla
+    for (var q = 0; q < n(s); q++) if (has(s, q, 'carestia')) { l -= 5; break; }
+    return Math.max(0, l);
+  }
   function lettere(s, p) {
     if (panda(s, p)) return 0;
     var k = 0;
@@ -423,6 +478,7 @@
   function salda(s, q, c, modo) {
     var k = keyOf(c);
     if (k === 'cerchio_di_sale' || (k === 'spettrale' && attivo(s, q, c))) return true;
+    if (modo === 'distruggi' && k === 'guerra' && attivo(s, q, c)) return true;
     return modo === 'distruggi' && kind(c) === 'bonus' && has(s, q, 'cuore_stregato');
   }
   function sacrificabile(s, q, c) { return tocca(s, q, c) && !salda(s, q, c, 'sacrifica'); }
@@ -432,6 +488,8 @@
     if (!isUni(c)) return true;
     if (panda(s, q) || has(s, q, 'scudo_arcobaleno')) return false;
     if (src && META[src] && filtra(src, 'drago') && has(s, q, 'ammazzadraghi')) return false;
+    // l'Unicorno Minuscolo: non lo distruggono gli effetti di unicorni e Bonus (le Magie sì)
+    if (keyOf(c) === 'minuscolo' && attivo(s, q, c) && src && META[src] && (isUni(src) || kind(src) === 'bonus')) return false;
     return !(magia && keyOf(c) === 'miciocorno' && attivo(s, q, c));
   }
   function nitrisce(s, p) { return !has(s, p, 'raffreddore') && !has(s, p, 'unicornone'); }
@@ -592,7 +650,15 @@
     // «ognuno può pescare»: come per gli altri «puoi PESCARE», si pesca (finché il mazzo non è vuoto)
     dragocorno_amico: function (s, p) { return giro(s, p).map(function (q) { return { k: 'pesca', n: 1, may: true, chi: q }; }); },
     alchimista: function () { return [{ k: 'cerca', filtro: 'magia', may: true }]; },
-    volante_squamoso: function () { return [{ k: 'ogni', op: 'sacrifica', filtro: 'carta' }]; }
+    volante_squamoso: function () { return [{ k: 'ogni', op: 'sacrifica', filtro: 'carta' }]; },
+    // Diluvio arcobaleno
+    volante_adorabile: function () { return [{ k: 'ogni', op: 'sacrifica', filtro: 'carta' }]; },
+    alpacorno_zucchero: function () { return [{ k: 'ogni', op: 'sacrifica', poi: 'pesca' }]; },
+    bulldog: function (s, p) { return [{ k: 'ogni', op: 'scarta', solo: altri(s, p) }, { k: 'raccogli' }]; },
+    brillantinato: function () { return [{ k: 'dalla_mano', filtro: 'bonus', may: true }]; },
+    pestilenza: function () { return [{ k: 'pestilenza' }]; },
+    guerra: function (s, p) { return giro(s, p).map(function (q) { return { k: 'distruggi', filtro: 'unicorno', may: true, p: q }; }); },
+    principessa: function () { return [{ k: 'principessa' }]; }
   };
   // «Se viene sacrificato o distrutto…»: lo risolve chi lo aveva nella stalla.
   var USCITA = {
@@ -651,7 +717,14 @@
     fortuna_drago: function (s, p, c) { return [{ k: 'sacrifica', c: c, lab: 'a' }, { k: 'turno_extra', dep: 'a' }]; },
     maledizione_drago: function () { return [{ k: 'scarta', n: 1 }]; },
     sfortuna_drago: function () { return [{ k: 'in_fondo' }]; },
-    cieli_dei_draghi: function () { return [{ k: 'sotto', lab: 'a' }, { k: 'pesca', n: 1, dep: 'a' }]; }
+    cieli_dei_draghi: function () { return [{ k: 'sotto', lab: 'a' }, { k: 'pesca', n: 1, dep: 'a' }]; },
+    // Diluvio arcobaleno
+    angelo: function (s, p, c) { return [{ k: 'sacrifica', c: c, lab: 'a' }, { k: 'rianima', dep: 'a' }]; },
+    fertile: function () { return [{ k: 'scarta', n: 1, may: true, cost: true, lab: 'a' }, { k: 'nido', dep: 'a' }]; },
+    morte: function () { return [{ k: 'sacrifica', filtro: 'unicorno', may: true, lab: 'a' }, { k: 'distruggi', filtro: 'unicorno', dep: 'a' }]; },
+    zombi: function () { return [{ k: 'scarta', filtro: 'unicorno', n: 1, may: true, cost: true, lab: 'a' }, { k: 'rianima', dep: 'a', lab: 'b' }, { k: 'salta_turno', dep: 'b' }]; },
+    zuccherini: function () { return [{ k: 'pesca', n: 3, lab: 'a' }, { k: 'salta_turno', dep: 'a' }]; },
+    consegna_speciale: function () { return [{ k: 'nido', lab: 'a' }, { k: 'salta_azione', dep: 'a' }]; }
   };
   function puoi(s, op, p, x) { var f = { k: op, p: p, e: 0 }; Object.keys(x || {}).forEach(function (k) { f[k] = x[k]; }); return opzioni(s, f).length > 0; }
   var USABILE = {
@@ -680,8 +753,19 @@
     fortuna_drago: function (s, p, c) { return sacrificabile(s, p, c); },
     maledizione_drago: function (s, p) { return mano(s, p).length > 0; },
     sfortuna_drago: function (s, p) { return mano(s, p).length > 0; },
-    cieli_dei_draghi: function (s, p) { return puoi(s, 'sotto', p); }
+    cieli_dei_draghi: function (s, p) { return puoi(s, 'sotto', p); },
+    angelo: function (s, p, c) { return sacrificabile(s, p, c) && (entra(s, c, p) || puoi(s, 'rianima', p)); },
+    fertile: function (s, p) { return mano(s, p).length > 0 && s.nursery.length > 0; },
+    morte: function (s, p) { return puoi(s, 'sacrifica', p, { filtro: 'unicorno' }) && puoi(s, 'distruggi', p, { filtro: 'unicorno' }); },
+    zombi: function (s, p) { return mano(s, p).some(isUni); },
+    zuccherini: function (s) { return s.deck.length >= 3; },
+    consegna_speciale: function (s) { return s.nursery.length > 0; }
   };
+  // Le sette Magie dell'apocalisse: sacrifichi tutti i tuoi unicorni, ne distruggi uno a testa agli altri, poi cerchi
+  // nel mazzo una carta precisa e la metti nella tua stalla.
+  function APOCALISSE(k) { return function (s, p) {
+    return [{ k: 'sacrifica_tutti' }].concat(altri(s, p).map(function (q) { return { k: 'distruggi', filtro: 'unicorno', magia: true, da: q }; }), [{ k: 'cerca', chiave: k, stalla: true }]);
+  }; }
   var MAGIA = {
     zoccolata: function () { return [{ k: 'rimanda', da: 'altri', lab: 'a' }, { k: 'scarta', n: 1, chi: 'vittima', dep: 'a' }]; },
     arraffa: function () { return [{ k: 'giocatore', lab: 'g' }, { k: 'arraffa', dep: 'g' }]; },
@@ -745,7 +829,28 @@
     alito_di_drago: function () { return [{ k: 'distruggi', filtro: 'unicorno', magia: true }]; },
     fuoco_di_drago: function () { return [{ k: 'colpo' }]; },
     bacio_del_drago: function () { return [{ k: 'mago' }]; },
-    stalle_bruciate: function () { return [{ k: 'tabula', senza: true }]; }
+    stalle_bruciate: function () { return [{ k: 'tabula', senza: true }]; },
+    // Diluvio arcobaleno
+    attacco_tenero: function () { return [{ k: 'giocatore', filtro: 'unicorni', lab: 'g' }, { k: 'tenerezza', dep: 'g' }]; },
+    fuoco_e_zolfo: APOCALISSE('cenere'),
+    castigo_celeste: APOCALISSE('angelo'),
+    alpacalisse: APOCALISSE('alpacorno'),
+    sovrappopolazione: APOCALISSE('fertile'),
+    tempesta_tenerezza: APOCALISSE('miciocorno'),
+    distruzione_totale: APOCALISSE('catastrofe'),
+    apocalisse_zombi: APOCALISSE('zombi'),
+    unicorni_apocalisse: function () {
+      var f = [], i;
+      for (i = 0; i < 4; i++) f.push({ k: 'sacrifica', filtro: 'unicorno' });
+      for (i = 0; i < 4; i++) f.push({ k: 'cerca', filtro: 'unicorno', stalla: true });
+      return f;
+    },
+    peste_nera: function () { return [{ k: 'stregone', magia: true }]; },
+    spruzzino: function (s, p) {
+      return altri(s, p).map(function (q) { return { k: 'distruggi', filtro: 'unicorno', magia: true, da: q }; })
+        .concat(altri(s, p).map(function (q) { return { k: 'nido', p: q, may: true }; }));
+    },
+    pisolino: function () { return [{ k: 'giocatore', lab: 'g' }, { k: 'pisolino', dep: 'g' }]; }
   };
   // Le Magie che non si possono giocare se manca un bersaglio per la prima cosa che fanno.
   var REQ = {
@@ -774,8 +879,14 @@
     paletta: function (s, p) { return puoi(s, 'rianima', p) || s.discard.filter(isUni).length >= 2 ? null : 'Negli scarti non ci sono unicorni.'; },
     alito_di_drago: function (s, p) { return puoi(s, 'distruggi', p, { filtro: 'unicorno', magia: true, src: 'alito_di_drago.1' }) ? null : 'Non c\'è un unicorno che si possa distruggere.'; },
     fuoco_di_drago: function (s, p) { return puoi(s, 'colpo', p) ? null : 'Non ci sono Bonus da distruggere né Malus tuoi da sacrificare.'; },
-    stalle_bruciate: function (s, p) { return giro(s, p).some(function (q) { return stalla(s, q).some(function (c) { return filtra(c, 'bm'); }); }) ? null : 'Non ci sono Bonus o Malus nelle stalle.'; }
+    stalle_bruciate: function (s, p) { return giro(s, p).some(function (q) { return stalla(s, q).some(function (c) { return filtra(c, 'bm'); }); }) ? null : 'Non ci sono Bonus o Malus nelle stalle.'; },
+    attacco_tenero: function (s, p) { return puoi(s, 'giocatore', p, { filtro: 'unicorni', src: 'attacco_tenero.1' }) ? null : 'Non c\'è un unicorno che si possa distruggere.'; },
+    unicorni_apocalisse: function (s, p) { return opzioni(s, { k: 'sacrifica', p: p, e: 0, filtro: 'unicorno' }).length >= 4 ? null : 'Nella tua stalla devono esserci 4 unicorni da sacrificare.'; },
+    pisolino: function (s, p) { return altri(s, p).length ? null : 'Non c\'è nessun altro giocatore.'; }
   };
+  ['fuoco_e_zolfo', 'castigo_celeste', 'alpacalisse', 'sovrappopolazione', 'tempesta_tenerezza', 'distruzione_totale', 'apocalisse_zombi'].forEach(function (k) {
+    REQ[k] = function (s, p) { return puoi(s, 'sacrifica', p, { filtro: 'unicorno' }) ? null : 'Nella tua stalla dev\'esserci un unicorno da sacrificare.'; };
+  });
   function innesco(s, t) {
     if (t.k === 'entra') return ENTRA[keyOf(t.c)](s, t.p, t.c);
     if (t.k === 'recinto') return [{ k: 'scarta', n: 1 }];
@@ -844,7 +955,7 @@
         return da([p], function (q, c) { return filtra(c, fl) && sacrificabile(s, q, c); });
       case 'distruggi':
         if (has(s, p, 'pace_divina')) return [];
-        return da(altri(s, p), function (q, c) { return filtra(c, fl) && distruggibile(s, q, c, f.magia, f.src); });
+        return da(f.da != null ? [chi(s, f, f.da)].filter(function (q) { return q !== p; }) : altri(s, p), function (q, c) { return filtra(c, fl) && distruggibile(s, q, c, f.magia, f.src); });
       case 'ruba':
         if (has(s, p, 'cavaliere')) return [];
         return da(f.da != null ? [chi(s, f, f.da)].filter(function (q) { return q !== p; }) : altri(s, p),
@@ -864,14 +975,19 @@
           return isUni(c) && tocca(s, p, c) && altri(s, p).some(function (r) { return entra(s, c, r); });
         });
       case 'scarta': out = mano(s, chi(s, f, f.chi)).filter(function (c) { return filtra(c, fl); }); return f.cost && out.length < (f.n || 1) ? [] : out;
-      case 'cerca': return s.deck.filter(function (c) { return filtra(c, fl); });
+      case 'cerca': return s.deck.filter(function (c) { return filtra(c, fl) && (!f.chiave || keyOf(c) === f.chiave); });
       case 'recupera': out = s.discard.filter(function (c) { return filtra(c, fl); }); return out.length >= (f.almeno || 1) ? out : [];
       case 'rianima': return s.discard.filter(function (c) { return (fl === 'stalla' ? filtra(c, fl) : isUni(c) && (!fl || filtra(c, fl))) && c !== f.escludi && entra(s, c, p); });
-      case 'dalla_mano': return mano(s, p).filter(function (c) { return kind(c) === 'semplice' && entra(s, c, p); });
+      case 'dalla_mano': return mano(s, p).filter(function (c) { return kind(c) === (fl || 'semplice') && entra(s, c, p); });
       case 'sotto': return stalla(s, p).filter(function (c) { return isUni(c) && tocca(s, p, c); });
       case 'in_fondo': return mano(s, p).slice();
       case 'nido': return s.nursery.slice();
-      case 'giocatore': return (f.tutti ? giro(s, p) : altri(s, p)).filter(function (q) { return fl !== 'mano' || mano(s, q).length > 0; });
+      case 'giocatore': return (f.tutti ? giro(s, p) : altri(s, p)).filter(function (q) {
+        if (fl === 'mano') return mano(s, q).length > 0;
+        // Attacco di tenerezza: chi ha unicorni che si possono distruggere
+        if (fl === 'unicorni') return opzioni(s, { k: 'distruggi', p: p, e: f.e, filtro: 'unicorno', magia: true, src: f.src, da: q }).length > 0;
+        return true;
+      });
     }
     return out;
   }
@@ -1046,7 +1162,7 @@
       }
       var o = opzioni(s, f);
       if (!o.length) { pushLog(s, { t: 'nulla', s: f.p, src: f.src, op: 'cerca' }); return ko(s, f); }
-      chiedi(s, f, { kind: 'carte', opts: o, n: 1, min: 1, may: !!f.may, zona: 'mazzo', filtro: f.filtro || null });
+      chiedi(s, f, { kind: 'carte', opts: o, n: 1, min: 1, may: !!f.may, zona: 'mazzo', filtro: f.filtro || null, chiave: f.chiave || null, stalla: !!f.stalla });
     },
     recupera: function (s, f) {
       scegli1(s, f, opzioni(s, f), 'scarti', function (c) {
@@ -1329,18 +1445,18 @@
       var a = f.ans; delete f.ans;
       if (!a) {
         var o = opzioni(s, { k: 'sacrifica', p: f.p, e: f.e, filtro: 'carta' });
-        if (!o.length || !opzioni(s, { k: 'distruggi', p: f.p, e: f.e, filtro: 'carta' }).length) return ko(s, f);
+        if (!o.length || !opzioni(s, { k: 'distruggi', p: f.p, e: f.e, filtro: 'carta', magia: f.magia, src: f.src }).length) return ko(s, f);
         return chiedi(s, f, { kind: 'carte', opts: o, n: o.length, min: 1, may: true, zona: 'stalla' });
       }
       s.stack.pop();
       if (a.skip) return;
-      s.stack.push({ k: 'stregone_d', p: f.p, e: f.e, src: f.src });
+      s.stack.push({ k: 'stregone_d', p: f.p, e: f.e, src: f.src, magia: f.magia });
       for (var i = a.cards.length - 1; i >= 0; i--) s.stack.push({ k: 'via', modo: 'sacrifica', q: f.p, c: a.cards[i], p: f.p, e: f.e, src: f.src, conta: 1 });
     },
     stregone_d: function (s, f) {
       var k = cx(s, f).n || 0;
       s.stack.pop();
-      for (var i = 0; i < k; i++) s.stack.push({ k: 'distruggi', filtro: 'carta', p: f.p, e: f.e, src: f.src });
+      for (var i = 0; i < k; i++) s.stack.push({ k: 'distruggi', filtro: 'carta', p: f.p, e: f.e, src: f.src, magia: f.magia });
     },
     // Unicorno Mago: una Magia dal mazzo in mano, la giochi subito (se si può), poi si mescola il mazzo.
     mago: function (s, f) {
@@ -1472,7 +1588,7 @@
       }
       var ord = giro(s, f.p).filter(function (q) { return f.got[q] != null; });
       if (f.op === 'scarta') {
-        ord.forEach(function (q) { var c = f.got[q]; if (dallaMano(s, q, c)) { s.discard.push(c); pushLog(s, { t: 'scartate', s: q, cards: [c] }); } });
+        ord.forEach(function (q) { var c = f.got[q]; if (dallaMano(s, q, c)) { s.discard.push(c); (cx(s, f).scartate = cx(s, f).scartate || []).push(c); pushLog(s, { t: 'scartate', s: q, cards: [c] }); } });
         return ok(s);
       }
       if (f.op === 'dai') {
@@ -1480,7 +1596,10 @@
         return ok(s);
       }
       s.stack.pop();
-      for (var i = ord.length - 1; i >= 0; i--) s.stack.push({ k: 'via', modo: 'sacrifica', q: ord[i], c: f.got[ord[i]], p: ord[i], e: f.e, src: f.src });
+      for (var i = ord.length - 1; i >= 0; i--) {
+        if (f.poi === 'pesca') s.stack.push({ k: 'pesca', n: 1, chi: ord[i], p: ord[i], e: f.e, src: f.src });
+        s.stack.push({ k: 'via', modo: 'sacrifica', q: ord[i], c: f.got[ord[i]], p: ord[i], e: f.e, src: f.src });
+      }
     },
     // Sfortuna del drago: una carta della mano in fondo al mazzo (gli altri non vedono quale).
     in_fondo: function (s, f) {
@@ -1501,6 +1620,75 @@
         return cucciolo ? ko(s, f) : ok(s);
       });
     },
+    // Bulldocorno: una delle carte appena scartate dagli altri in mano a chi l'ha giocato.
+    raccogli: function (s, f) {
+      var o = (cx(s, f).scartate || []).filter(function (c) { return s.discard.indexOf(c) >= 0; });
+      scegli1(s, f, o, 'scarti', function (c) {
+        if (!c) return ko(s, f);
+        s.discard.splice(s.discard.indexOf(c), 1); s.hand[f.p].push(c);
+        pushLog(s, { t: 'recuperata', s: f.p, c: c });
+        ok(s);
+      });
+    },
+    // Unicorno della Pestilenza: scarti quante carte vuoi (anche nessuna), poi ogni altro giocatore ne scarta altrettante.
+    pestilenza: function (s, f) {
+      var h = mano(s, f.p);
+      if (!f.ans) {
+        if (!h.length) { nulla(s, f); return ok(s); }
+        return chiedi(s, f, { kind: 'carte', opts: h.slice(), n: h.length, min: 1, may: true, zona: 'mano' });
+      }
+      var a = f.ans; delete f.ans;
+      var cs = a.skip ? [] : a.cards.filter(function (c) { return h.indexOf(c) >= 0; });
+      if (!cs.length) { pushLog(s, { t: 'nessuno_scarto', s: f.p, src: f.src }); return ok(s); }
+      scarta(s, f.p, cs);
+      var o = altri(s, f.p);
+      for (var i = o.length - 1; i >= 0; i--) s.stack.push({ k: 'scarta', chi: o[i], n: cs.length, p: f.p, e: f.e, src: f.src });
+    },
+    // Principessa Arcobaleno: scegli quanti giocatori vuoi; peschi tante carte quanti sono, poi ognuno di loro ne pesca una.
+    principessa: function (s, f) {
+      if (!f.ans) return chiedi(s, f, { kind: 'giocatori', opts: giro(s, f.p), min: 0 });
+      var t = f.ans.targets || []; delete f.ans;
+      s.stack.pop();
+      pushLog(s, { t: 'scelti', s: f.p, qs: t, src: f.src });
+      for (var i = t.length - 1; i >= 0; i--) s.stack.push({ k: 'pesca', n: 1, may: true, chi: t[i], p: f.p, e: f.e, src: f.src });
+      if (t.length) s.stack.push({ k: 'pesca', n: t.length, may: true, p: f.p, e: f.e, src: f.src });
+    },
+    // Attacco di tenerezza: fino a 3 unicorni distrutti al giocatore scelto, e altrettanti Cuccioli dal Nido nella sua stalla.
+    tenerezza: function (s, f) {
+      var g = chi(s, f, 'g'), o = opzioni(s, { k: 'distruggi', p: f.p, e: f.e, filtro: 'unicorno', magia: true, src: f.src, da: g });
+      var fatto = function (cs) {
+        s.stack.pop();
+        s.stack.push({ k: 'culle', q: g, p: f.p, e: f.e, src: f.src });
+        for (var i = cs.length - 1; i >= 0; i--) s.stack.push({ k: 'via', modo: 'distruggi', q: g, c: cs[i], p: f.p, e: f.e, src: f.src, conta: 1 });
+      };
+      if (f.ans) { var a = f.ans; delete f.ans; return fatto(a.cards); }
+      if (!o.length) { nulla(s, f); return ko(s, f); }
+      if (o.length <= 3) return fatto(o);
+      chiedi(s, f, { kind: 'carte', opts: o, n: 3, min: 3, zona: 'stalle', filtro: 'unicorno' });
+    },
+    culle: function (s, f) {
+      var k = Math.min(cx(s, f).n || 0, s.nursery.length);
+      for (var i = 0; i < k; i++) { var c = s.nursery.shift(); metti(s, f.q, c); pushLog(s, { t: 'portata', s: f.q, c: c, dal: 'nido' }); }
+      ok(s);
+    },
+    // Le Magie dell'apocalisse: via tutti i tuoi unicorni.
+    sacrifica_tutti: function (s, f) {
+      s.stack.pop();
+      var t = stalla(s, f.p).filter(function (c) { return isUni(c) && sacrificabile(s, f.p, c); });
+      for (var i = t.length - 1; i >= 0; i--) s.stack.push({ k: 'via', modo: 'sacrifica', q: f.p, c: t[i], p: f.p, e: f.e, src: f.src });
+    },
+    // Pisolino: chi è scelto salta il suo prossimo turno.
+    pisolino: function (s, f) {
+      var g = chi(s, f, 'g');
+      (s.dorme = s.dorme || []).push(g);
+      pushLog(s, { t: 'pisolino', s: f.p, q: g });
+      ok(s);
+    },
+    salta_azione: function (s, f) {
+      s.stack = s.stack.filter(function (g) { return !(g.k === 'azione' && g.turno); });
+      pushLog(s, { t: 'salta_azione', s: f.p });
+      ok(s);
+    },
     // La finestra del Nitrito sulla carta in cima alla catena.
     finestra: function (s, f) {
       var ch = s.chain;
@@ -1520,6 +1708,7 @@
       var kn = keyOf(nn.c);
       if (kn === 'nitrito_messere') avvia(s, x.p, nn.c, [{ k: 'pesca', n: 1, may: true }]);
       else if (kn === 'nitrito_villano') avvia(s, x.p, nn.c, [{ k: 'scarta', n: 1 }]);
+      else if (kn === 'nitrito_grazie') avvia(s, nn.p, nn.c, [{ k: 'pesca', n: 1, may: true }, { k: 'pesca', n: 1, may: true, chi: x.p }]);
     },
     risolvi: function (s) {
       s.stack.pop();
@@ -1588,7 +1777,14 @@
     prossimo: function (s) {
       s.stack.pop();
       if (s.extra > 0) { s.extra--; return iniziaTurno(s, s.turn, true); }
-      iniziaTurno(s, (s.turn + 1) % n(s));
+      var p = (s.turn + 1) % n(s);
+      // Pisolino: chi dorme salta il turno (al massimo un giro, così qualcuno gioca sempre)
+      for (var g = 0; g < n(s) && s.dorme && s.dorme.indexOf(p) >= 0; g++) {
+        s.dorme.splice(s.dorme.indexOf(p), 1);
+        pushLog(s, { t: 'dorme', s: p });
+        p = (p + 1) % n(s);
+      }
+      iniziaTurno(s, p);
     }
   };
   function paladino(s, q, c) {
@@ -1736,7 +1932,7 @@
       seats: names.map(function (nm, i) { return { keys: (i === 0 && opts.key) ? [opts.key] : [], name: String(nm || '').slice(0, 20) }; }),
       host: 0, bots: {}, exp: espansioni(opts.exp), goal: 7,
       deck: [], discard: [], nursery: [], box: [], hand: {}, stable: {},
-      turn: 0, turnNo: 0, phase: 'wait', giocate: 0, maxGiocate: 1, usati: [], salta: false, extra: 0, vuoto: false,
+      turn: 0, turnNo: 0, phase: 'wait', giocate: 0, maxGiocate: 1, usati: [], salta: false, extra: 0, vuoto: false, dorme: [],
       chain: [], inGioco: null, stack: [], queue: [], ctx: {}, eid: 0, pid: 0, prompt: null,
       log: [], logN: 0, result: null
     };
@@ -1757,7 +1953,7 @@
     for (p = 0; p < k; p++) pescaN(s, p, MANO_INIZIO);
     s.status = 'playing'; s.result = null; s.log = []; s.logN = 0; s.turnNo = 0;
     s.stack = []; s.queue = []; s.chain = []; s.ctx = {}; s.eid = 0; s.prompt = null;
-    s.vuoto = false; s.extra = 0; s.inGioco = null;
+    s.vuoto = false; s.extra = 0; s.inGioco = null; s.dorme = [];
     iniziaTurno(s, randInt(k));
     run(s);
     return s;
@@ -1878,6 +2074,12 @@
         if (m.skip) return P.may ? null : 'Qui devi scegliere.';
         return P.opts.indexOf(m.pick) >= 0 ? null : 'Scegli una delle possibilità.';
       case 'vedi': return null;
+      case 'giocatori': {
+        var ts = m.targets;
+        if (!Array.isArray(ts) || !uniq(ts) || ts.length < (P.min || 0)) return 'Scegli i giocatori.';
+        for (i = 0; i < ts.length; i++) if (P.opts.indexOf(ts[i]) < 0) return 'Scegli tra i giocatori indicati.';
+        return null;
+      }
       case 'reazione':
         if (m.pass) return null;
         if (!Array.isArray(cs) || cs.length !== 1 || mano(s, seat).indexOf(cs[0]) < 0 || def(cs[0]).rea !== P.tipo) return 'Non è una carta che puoi giocare adesso.';
@@ -1948,7 +2150,7 @@
       if (P.wait.length) P.s = P.wait[0]; else s.prompt = null;
       return;
     }
-    f.ans = { cards: m.cards, skip: !!m.skip, target: m.target, pick: m.pick, yes: m.yes };
+    f.ans = { cards: m.cards, skip: !!m.skip, target: m.target, pick: m.pick, yes: m.yes, targets: m.targets };
     s.prompt = null;
   }
   function gioca(s, p, m) {
@@ -2036,6 +2238,9 @@
           P.opts.forEach(function (x) { out.push(base({ pick: x })); });
           break;
         case 'vedi': out.push(base({ yes: true })); break;
+        case 'giocatori':
+          out.push(base({ targets: [] }), base({ targets: [p] }), base({ targets: P.opts.slice() }));
+          break;
         case 'reazione':
           out.push(base({ pass: true }));
           if (nitrisce(s, p)) mano(s, p).forEach(function (c) { if (def(c).rea === P.tipo) out.push(base({ cards: [c] })); });
@@ -2066,7 +2271,7 @@
     MIN_PLAYERS: MIN_PLAYERS, MAX_PLAYERS: MAX_PLAYERS, MANO_MAX: MANO_MAX,
     keyOf: keyOf, def: def, kind: kind, isUni: isUni, isNeigh: isNeigh, attivo: attivo, has: has, panda: panda,
     conta: conta, lettere: lettere, entra: entra, distruggibile: distruggibile, nitrisce: nitrisce, reattivi: reattivi,
-    salda: salda, sacrificabile: sacrificabile, puoVincere: puoVincere, limite: limite, filtra: filtra,
+    salda: salda, sacrificabile: sacrificabile, puoVincere: puoVincere, limite: limite, filtra: filtra, expDi: expDi,
     vedeMano: vedeMano, padrone: padrone, bersagli: bersagli, opzioni: opzioni, mazzoPer: mazzoPer, nidoPer: nidoPer,
     newGame: newGame, startGame: startGame, startLocal: startLocal, startBots: startBots, rematch: rematch, setExp: setExp,
     join: join, addBot: addBot, removeBot: removeBot, seatOf: seatOf, addSeatKey: addSeatKey,
