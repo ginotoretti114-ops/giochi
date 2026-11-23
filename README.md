@@ -15,8 +15,9 @@ https://ginotoretti114-ops.github.io/giochi/
 - **Diavolerie** (`diavolerie/`): da 2 a 5 giocatori, carte e dadi. Si raccolgono anime, si comprano bambini
   e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online, sullo
   stesso telefono (l'unica cosa segreta sono i demoni in mano) o contro il computer: da 1 a 4 bot, livello
-  facile, medio o difficile. Due temi da scegliere nella lobby: «Notte», come gli altri giochi, e «Grimorio», carta
-  antica e inchiostro.
+  facile, medio o difficile. Tre temi, dal pulsantino con la tavolozza in alto: «Notte», come gli altri giochi,
+  «Cemento» (graffiti su un muro, chiaro) e «Vecchia scuola» (tatuaggi da marinaio, scuro), che ridisegnano anche
+  tutte le carte.
 - **Sette Stelle** (`sette-stelle/`): da 2 a 8 giocatori, «pesca o fermati». Si pescano stelle numerate da 0 a 12:
   con un doppione si sballa, con sette numeri diversi si chiude il round con 15 punti in più; vince chi arriva a 200.
   Online (con bot per riempire il tavolo), sullo stesso telefono o contro il computer (da 1 a 5 bot).
@@ -120,10 +121,14 @@ restituisce una mossa per il motore. Il facile sceglie quasi a caso; il medio d�
 per vincere, colpisce chi è in testa e ritira i dadi quando conviene. Le partite contro il computer restano nel
 browser (`dv-bot`) e non passano dai server.
 
-I temi di Diavolerie cambiano solo l'aspetto. Il tema «Grimorio» è un blocco di regole CSS in fondo allo stile, attive
-con `data-tema="grimorio"` sull'elemento `html`: cambia le variabili dei colori, lo sfondo, le cornici, le carte e
-l'avviso del profilo. La scelta resta nel browser (`dv-tema`). Uno script in testa alla pagina, subito dopo
-`lib/ambiente.js`, la applica prima che la pagina si disegni.
+I temi di Diavolerie cambiano solo l'aspetto. Si scelgono da un pulsantino con la tavolozza nella barra in alto
+(lobby e tavolo), che apre un foglio coi tre temi; la scelta resta nel browser (`dv-tema`). Ogni tema diverso da
+«Notte» è un blocco di regole CSS in fondo allo stile, attive con `data-tema="cemento"` o `data-tema="vecchia"`
+sull'elemento `html` (colori, sfondo, cornici, caratteri, gettoni delle carte), più i disegni delle carte:
+`diavolerie/temi.js` disegna in SVG ogni bambino, animale, demone e candela al posto delle emoji, con le stesse
+forme nei due temi e tavolozze diverse (i bambini cambiano capelli, carnagione e faccia da dolce, peste o normale).
+I caratteri dei temi arrivano da Google Fonts solo quando il tema è acceso. Uno script in testa alla pagina, subito
+dopo `lib/ambiente.js`, applica il tema prima che la pagina si disegni.
 
 ## Sette Stelle e Polvere e Piombo
 
@@ -189,6 +194,7 @@ node sottozero/test/motore.test.js             # scenari di regole + 300 partite
 node piccante/test/motore.test.js              # scenari di regole e missioni + 300 partite da 2 a 8 giocatori
 node diavolerie/test/motore.test.js            # scenari di carte e demoni + 300 partite da 2 a 5 giocatori
 node diavolerie/test/bot.test.js               # sfide tra i livelli dei bot: il più forte deve vincere più spesso
+node diavolerie/test/temi.test.js              # ogni carta ha il suo disegno in ogni tema, SVG ben formati
 node sette-stelle/test/motore.test.js          # scenari di regole + 400 partite da 2 a 8 giocatori
 node sette-stelle/test/bot.test.js             # i bot dei tre livelli uno contro l'altro
 node polvere-e-piombo/test/motore.test.js      # ruoli, distanze, carte e personaggi + 300 partite da 4 a 7 giocatori
