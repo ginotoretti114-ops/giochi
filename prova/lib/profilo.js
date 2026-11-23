@@ -23,12 +23,13 @@
     { id: 'diavolerie', nome: 'Diavolerie', bot: true },
     { id: 'sette-stelle', nome: 'Sette Stelle', bot: true },
     { id: 'polvere-e-piombo', nome: 'Polvere e Piombo', bot: true },
-    { id: 'stalla-matta', nome: 'Stalla Matta', bot: true }
+    { id: 'stalla-matta', nome: 'Stalla Matta', bot: true },
+    { id: 'valanga', nome: 'Valanga', bot: true }
   ];
   var ICONE = {
     'gran-bazar': ['🐪', '💎'], 'sottozero': ['❄️', '🧊'], 'piccante': ['🌶️', '🌋'],
     'diavolerie': ['😈', '🔮'], 'sette-stelle': ['🌠', '🌌'], 'polvere-e-piombo': ['🐎', '🏜️'],
-    'stalla-matta': ['🦄', '🌈']
+    'stalla-matta': ['🦄', '🌈'], 'valanga': ['🏔️', '🌨️']
   };
   var XP_LOCALE = 10, XP_FINITA = 20, XP_VITTORIA = 30, XP_SFIDA = 40, XP_TUTTE = 60;
   var MOLT = { facile: 0.5, medio: 0.75, difficile: 1 }, RANGO = { facile: 1, medio: 2, difficile: 3 };
@@ -130,6 +131,7 @@
     var delGioco = [S('gioca-' + G.id, 'Gioca a ' + G.nome, 1, function (t) { return (t.giochi[G.id] || {}).partite || 0; })];
     if (G.bot) delGioco.push(S('vinci-' + G.id, 'Vinci a ' + G.nome, 1, function (t) { return (t.giochi[G.id] || {}).vittorie || 0; }));
     if (G.id === 'sette-stelle') delGioco.push(S('sette', 'Fai sette stelle in un round di Sette Stelle', 1, function (t) { return t.eventi.sette || 0; }));
+    if (G.id === 'valanga') delGioco.push(S('sommerso', 'Fai arrivare un avversario a 25 carte a Valanga', 1, function (t) { return t.eventi.sommerso || 0; }));
     return [pesca(r, quante), pesca(r, vittorie), pesca(r, delGioco)];
   }
   function statoSfide(p, g) {
@@ -176,7 +178,8 @@
     M('sceriffo', 'Stella di latta', 'Vinci da Sceriffo a Polvere e Piombo', '🤠', function (c) { return (c.T.eventi['vince-S'] || 0) >= 1; }),
     M('vice', 'Braccio destro', 'Vinci da Vice a Polvere e Piombo', '🛡️', function (c) { return (c.T.eventi['vince-V'] || 0) >= 1; }),
     M('fuorilegge', 'Banda del deserto', 'Vinci da Fuorilegge a Polvere e Piombo', '🌵', function (c) { return (c.T.eventi['vince-F'] || 0) >= 1; }),
-    M('rinnegato', 'Lupo solitario', 'Vinci da Rinnegato a Polvere e Piombo', '🐺', function (c) { return (c.T.eventi['vince-R'] || 0) >= 1; })
+    M('rinnegato', 'Lupo solitario', 'Vinci da Rinnegato a Polvere e Piombo', '🐺', function (c) { return (c.T.eventi['vince-R'] || 0) >= 1; }),
+    M('senza-pieta', 'Senza pietà', 'Fai arrivare un avversario a 25 carte a Valanga', '❄️', function (c) { return (c.T.eventi.sommerso || 0) >= 1; })
   );
   function contesto(p) {
     var n = 0, tutte = 0;

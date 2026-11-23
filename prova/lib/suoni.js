@@ -117,7 +117,11 @@
     // Stalla Matta: giostra in 3/4, maggiore e saltellante, campanelli sulla melodia.
     stalla: { bpm: 126, steps: 6, root: 65, scale: [0, 2, 4, 5, 7, 9, 11], prog: [[0, 4, 7], [5, 9, 12], [-3, 0, 4], [7, 11, 14]],
       bass: [1, 0, 0, 5, 0, 5], arp: [null, 1, 2, null, 1, 2], drums: ['k', '', 'h', 'w', 'h', ''],
-      lead: { type: 'triangle', gain: 0.28, decay: 0.32 }, arpI: { type: 'sine', gain: 0.13, decay: 0.18 }, bassI: { type: 'triangle', gain: 0.44, decay: 0.3 }, mel: 0.5, bell: true }
+      lead: { type: 'triangle', gain: 0.28, decay: 0.32 }, arpI: { type: 'sine', gain: 0.13, decay: 0.18 }, bassI: { type: 'triangle', gain: 0.44, decay: 0.3 }, mel: 0.5, bell: true },
+    // Valanga: ritmo incalzante in minore (dorico), basso che rotola e colpi di cassa.
+    valanga: { bpm: 118, steps: 8, root: 62, scale: [0, 2, 3, 5, 7, 9, 10], prog: [[0, 3, 7], [-2, 2, 5], [5, 9, 12], [3, 7, 10]],
+      bass: [1, 0, 1, 0, 5, 0, 1, 5], arp: [0, 1, 2, 1, null, 2, 1, 0], drums: ['k', '', 'h', 'k', 'w', '', 'h', 'h'],
+      lead: { type: 'square', gain: 0.12, decay: 0.25, filter: 2200, sweep: 400 }, arpI: { type: 'triangle', gain: 0.14, decay: 0.16 }, bassI: { type: 'triangle', gain: 0.48, decay: 0.25 }, mel: 0.5 }
   };
 
   // Melodia: un motivo di 2 battute ripetuto e poi variato, sulle note della scala vicine all'accordo.
