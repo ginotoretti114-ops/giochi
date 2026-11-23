@@ -11,6 +11,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script>
+  // Il tema scelto nella lobby («Temi» nello script in fondo) si mette subito, prima che la pagina si disegni.
+  (function () { try { if (window.localStorage.getItem('dv-tema') === 'grimorio') document.documentElement.setAttribute('data-tema', 'grimorio'); } catch (e) { /* niente memoria */ } })();
+</script>
 <style>
 :root {
   /* Diavolerie: la notte indaco della sala giochi con carte da caramella: rosa per i dolci, verde acido per le pesti,
@@ -319,11 +324,74 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   .desk .slot .lb { font-size: 13px; }
   .desk .slot .fx { font-size: 12px; }
 }
+
+/* ---------- temi ---------- */
+.temi { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+/* «Grimorio»: le pagine di un vecchio libro di evocazioni. Carta ingiallita, inchiostro bruno, titoli rossi come le
+   rubriche dei manoscritti e un filo d'oro; le carte diventano sigilli d'inchiostro. Si accende con data-tema="grimorio"
+   sull'elemento html e cambia solo l'aspetto: regole, partite e memoria sono le stesse. */
+html[data-tema="grimorio"] {
+  --table: #efe3c6; --panel: #f9f1de; --raise: #efe0bf; --line: #bfa274;
+  --text: #2d1f14; --muted: #6c5741; --saffron: #a3261c; --on-saffron: #fff4df; --crimson: #6e3a8a;
+  --bad: #b3261e; --good: #2e7448; --focus: #2d1f14; --soul-eyes: #f9f1de;
+  color-scheme: light;
+}
+html[data-tema="grimorio"] body {
+  background-color: var(--table);
+  background-image:
+    radial-gradient(ellipse 140% 60% at 50% 0%, rgba(255, 251, 238, .9), rgba(255, 251, 238, 0) 70%),
+    radial-gradient(circle, rgba(120, 80, 35, .11) 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(120, 80, 35, .06) 1.5px, transparent 2.4px),
+    repeating-linear-gradient(90deg, rgba(120, 80, 35, .028) 0 1px, transparent 1px 9px);
+  background-size: 100% 1000px, 17px 17px, 43px 43px, auto;
+  background-repeat: no-repeat, repeat, repeat, repeat;
+  background-position: 0 0, 0 0, 9px 5px, 0 0;
+}
+html[data-tema="grimorio"] .brand h1 span { color: var(--saffron); }
+html[data-tema="grimorio"] .brand .tag::after { content: "❦"; display: block; margin-top: 6px; color: var(--saffron); font-size: 20px; line-height: 1; }
+/* cornice a doppio filo, come le pagine miniate */
+html[data-tema="grimorio"] .panel, html[data-tema="grimorio"] .opp, html[data-tema="grimorio"] .mine, html[data-tema="grimorio"] .sheet {
+  box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px rgba(163, 38, 28, .3), 0 2px 8px rgba(80, 50, 20, .12); }
+html[data-tema="grimorio"] .opp.turn { box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px rgba(163, 38, 28, .3), 0 0 0 1px var(--saffron); }
+html[data-tema="grimorio"] .opp.ask { box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px rgba(163, 38, 28, .3), 0 0 0 1px var(--crimson); }
+html[data-tema="grimorio"] .status.is-ask { color: var(--crimson); }
+html[data-tema="grimorio"] .altar { background: radial-gradient(ellipse at 50% 12%, #fcf3e1, #f1e1bf 78%); }
+html[data-tema="grimorio"] .die.ghost { background: rgba(110, 75, 35, .08); }
+html[data-tema="grimorio"] .cron li { background: rgba(110, 75, 35, .075); }
+html[data-tema="grimorio"] .actions { background: rgba(239, 227, 198, .97); box-shadow: 0 -4px 12px rgba(80, 50, 20, .1); }
+html[data-tema="grimorio"] .desk .actions { background: var(--panel); box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px rgba(163, 38, 28, .3); }
+html[data-tema="grimorio"] .overlay { background: rgba(45, 28, 12, .55); }
+html[data-tema="grimorio"] .field { background: #fffaf0; }
+html[data-tema="grimorio"] .btn { box-shadow: 0 1px 0 rgba(70, 40, 15, .16); }
+html[data-tema="grimorio"] .btn.primary { box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .22), 0 2px 5px rgba(120, 30, 20, .25); }
+html[data-tema="grimorio"] .btn.hell { background: linear-gradient(160deg, #7c1f14, #3f0c08); border-color: #c8952e; color: #fbe6b8; }
+html[data-tema="grimorio"] .souls svg { color: #4a3b8c; filter: none; }
+html[data-tema="grimorio"] *:focus-visible { outline-color: var(--focus); }
+/* le carte: sigilli d'inchiostro su carta */
+html[data-tema="grimorio"] .dc { box-shadow: inset 0 0 0 calc(var(--w) * .06) var(--ring), inset 0 0 0 calc(var(--w) * .078) rgba(255, 250, 235, .8), 0 1px 0 rgba(70, 40, 15, .35), 0 4px 10px rgba(70, 40, 15, .22); }
+html[data-tema="grimorio"] .dc::after { background: linear-gradient(155deg, rgba(255, 252, 240, .45) 0%, rgba(255, 252, 240, 0) 32%); }
+html[data-tema="grimorio"] .dc::before { border-style: dotted; border-color: rgba(70, 40, 15, .4); }
+html[data-tema="grimorio"] .dc.demon::before, html[data-tema="grimorio"] .dc.candle::before, html[data-tema="grimorio"] .dc.back::before { border-color: rgba(240, 200, 120, .5); }
+html[data-tema="grimorio"] .dc.sweet { --ring: #b33a62; background: radial-gradient(circle at 50% 46%, #fffaf0, rgba(255, 250, 240, 0) 46%), linear-gradient(165deg, #fbe8e4 0%, #e5a0ae 100%); }
+html[data-tema="grimorio"] .dc.rotten { --ring: #5c791b; background: radial-gradient(circle at 50% 46%, #fffbea, rgba(255, 251, 234, 0) 46%), linear-gradient(165deg, #eff1cf 0%, #afbe66 100%); }
+html[data-tema="grimorio"] .dc.kid { --ring: #304f8a; background: radial-gradient(circle at 50% 46%, #fdfbf4, rgba(253, 251, 244, 0) 46%), linear-gradient(165deg, #e8edf2 0%, #9cb2d1 100%); }
+html[data-tema="grimorio"] .dc.animal { --ring: #a4601b; background: radial-gradient(circle at 50% 46%, #fffaf0, rgba(255, 250, 240, 0) 46%), linear-gradient(165deg, #f8ecd2 0%, #daa865 100%); }
+html[data-tema="grimorio"] .dc.demon { --ring: #c8952e; background: radial-gradient(circle at 50% 46%, #e8663f 0%, #b02a1c 24%, #6a1010 52%, #2c0705 86%);
+  box-shadow: inset 0 0 0 calc(var(--w) * .06) var(--ring), 0 1px 0 rgba(70, 40, 15, .35), 0 0 calc(var(--w) * .16) rgba(176, 42, 28, .35); }
+html[data-tema="grimorio"] .dc.candle { --ring: #6a4a96; background: radial-gradient(circle at 50% 30%, #fff6cf 0%, #f0b45a 14%, #74509e 48%, #2f1f48 90%); }
+html[data-tema="grimorio"] .dc.back { --ring: #c8952e; background: radial-gradient(circle at 50% 50%, #e2b45a 0 9%, #8c1d14 10% 17%, transparent 18%), repeating-conic-gradient(from 0deg, #3b1d12 0 15deg, #2a130b 15deg 30deg); }
+/* profilo e avvisi (lib/profilo.js) sulla carta */
+html[data-tema="grimorio"] .pf-chip { background: var(--raise); border-color: var(--line); color: var(--text); }
+html[data-tema="grimorio"] .pf-chip i { background: conic-gradient(var(--saffron) var(--p), var(--line) 0); }
+html[data-tema="grimorio"] .pf-chip i span { background: var(--raise); }
+html[data-tema="grimorio"] #sala-avviso { background: var(--panel); color: var(--text); border-color: var(--saffron); box-shadow: 0 12px 32px rgba(60, 35, 10, .35); }
+html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avviso a { color: var(--saffron); }
 </style>
 </head>
 <body>
 <svg class="defs" aria-hidden="true" focusable="false">
-  <symbol id="i-soul" viewBox="0 0 24 24"><path d="M12 3.2c-4 0-7 3.1-7 7.2v9.4l2.3-1.6 2.4 1.6 2.3-1.6 2.3 1.6 2.4-1.6 2.3 1.6v-9.4c0-4.1-3-7.2-7-7.2z" fill="currentColor"/><circle cx="9.4" cy="10.4" r="1.4" fill="#131833"/><circle cx="14.6" cy="10.4" r="1.4" fill="#131833"/></symbol>
+  <symbol id="i-soul" viewBox="0 0 24 24"><path d="M12 3.2c-4 0-7 3.1-7 7.2v9.4l2.3-1.6 2.4 1.6 2.3-1.6 2.3 1.6 2.4-1.6 2.3 1.6v-9.4c0-4.1-3-7.2-7-7.2z" fill="currentColor"/><circle cx="9.4" cy="10.4" r="1.4" style="fill: var(--soul-eyes, #131833)"/><circle cx="14.6" cy="10.4" r="1.4" style="fill: var(--soul-eyes, #131833)"/></symbol>
   <symbol id="i-girl" viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="3.6" fill="currentColor"/><path d="M12 10.5 6.5 20.5h11z" fill="currentColor"/></symbol>
   <symbol id="i-boy" viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="3.6" fill="currentColor"/><rect x="7.6" y="11" width="8.8" height="9.5" rx="2.2" fill="currentColor"/></symbol>
   <symbol id="i-paw" viewBox="0 0 24 24"><ellipse cx="12" cy="16" rx="5" ry="4.2" fill="currentColor"/><circle cx="6" cy="10.5" r="2.2" fill="currentColor"/><circle cx="9.8" cy="6.6" r="2.3" fill="currentColor"/><circle cx="14.2" cy="6.6" r="2.3" fill="currentColor"/><circle cx="18" cy="10.5" r="2.2" fill="currentColor"/></symbol>
@@ -332,7 +400,6 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -377,6 +444,18 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   if (!ui.device) { ui.device = 'd' + rnd36(14); LS.set('dv-device', ui.device); }
   ui.myKey = 'd:' + ui.device;
   S.tema('diavolerie');
+
+  /* ---------- temi ---------- */
+  // Solo l'aspetto cambia (attributo data-tema su <html>, stile in fondo al CSS); la scelta resta in questo browser.
+  var TEMI = [['notte', '🌙 Notte'], ['grimorio', '📜 Grimorio']];
+  var TEMA_SFONDO = { notte: '#131833', grimorio: '#efe3c6' };
+  ui.tema = LS.get('dv-tema') === 'grimorio' ? 'grimorio' : 'notte';
+  function applicaTema() {
+    var d = document.documentElement, m = document.querySelector('meta[name="theme-color"]');
+    if (ui.tema === 'notte') d.removeAttribute('data-tema'); else d.setAttribute('data-tema', ui.tema);
+    if (m) m.setAttribute('content', TEMA_SFONDO[ui.tema]);
+  }
+  applicaTema();
 
   function validState(s) {
     return !!(s && s.app === 'diavolerie' && typeof s.v === 'number' && Array.isArray(s.seats) && s.seats.length >= 1 &&
@@ -799,7 +878,8 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
     return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Diavole<span>rie</span></h1>' +
-      '<p class="tag">Raccogli anime, compra amici nel Quartiere e poi spegnili per evocare i demoni: vince chi ne ha 3 insieme a 10 anime. Da 2 a 5 giocatori.</p></header>' +
+      '<p class="tag">Raccogli anime, compra amici nel Quartiere e poi spegnili per evocare i demoni: vince chi ne ha 3 insieme a 10 anime. Da 2 a 5 giocatori.</p>' +
+      '<div class="temi"><span class="lab">Tema</span>' + segHTML('tema', ui.tema, TEMI, 'Tema del tavolo') + '</div></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
       '<input id="nm" class="field" maxlength="20" autocomplete="nickname" placeholder="Come ti chiamano?" value="' + esc(ui.name) + '">' +
       '<button type="button" class="btn primary wide" data-act="new"' + (ui.online === 'up' ? '' : ' disabled') + '>' + label + '</button>' +
@@ -1275,6 +1355,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     'bot-n': function (el) { ui.botN = +el.dataset.v; LS.set('dv-botn', String(ui.botN)); render(); },
     'bot-lv': function (el) { ui.botLv = el.dataset.v; LS.set('dv-botlv', ui.botLv); render(); },
     'bot-fast': function (el) { ui.botFast = el.dataset.v === '1'; LS.set('dv-botfast', ui.botFast ? '1' : '0'); render(); },
+    tema: function (el) { ui.tema = el.dataset.v === 'grimorio' ? 'grimorio' : 'notte'; LS.set('dv-tema', ui.tema); applicaTema(); S.effetto('click'); render(); },
     'bot-start': function () {
       var me = (ui.name || '').trim() || 'Tu';
       ui.bot = K.startBots([me].concat(BOT_NAMES.slice(0, ui.botN)), ui.botLv);
