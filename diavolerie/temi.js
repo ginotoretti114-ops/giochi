@@ -9,20 +9,8 @@
 (function (root) {
   'use strict';
 
-  var TEMI = [
-    { id: 'notte', nome: 'Notte', desc: 'Il tavolo di sempre, scuro', sfondo: '#131833', disegni: false },
-    { id: 'cemento', nome: 'Cemento', desc: 'Graffiti sul muro, chiaro', sfondo: '#b4b1ab', disegni: true,
-      font: 'family=Permanent+Marker&family=Rubik+Wet+Paint' },
-    { id: 'vecchia', nome: 'Vecchia scuola', desc: 'Tatuaggi da marinaio, scuro', sfondo: '#171414', disegni: true,
-      font: 'family=Sancreek' },
-    { id: 'gesso', nome: 'Gessetto', desc: 'Gesso sulla lavagna, scuro', sfondo: '#26332c', disegni: true,
-      font: 'family=Cabin+Sketch:wght@400;700' },
-    { id: 'neon', nome: 'Neon', desc: 'Insegne luminose, scuro', sfondo: '#120d18', tinta: '#ff4fd8', disegni: true,
-      font: 'family=Tilt+Neon' },
-    { id: 'fumetto', nome: 'Fumetto', desc: 'Pop art coi puntini, chiaro', sfondo: '#ffe14d', disegni: true, font: 'family=Bangers' },
-    { id: 'spettrale', nome: 'Spettrale', desc: 'Ombre sulla luna piena, scuro', sfondo: '#160c1f', disegni: true, font: 'family=Creepster',
-      anteprima: 'radial-gradient(circle at 50% 50%, #ffd27a 0 54%, #160c1f 57%)' }
-  ];
+  // I temi coi disegni (nomi, colori e caratteri dei temi stanno in lib/temi.js, uguali per tutti i giochi).
+  var TEMI = ['notte', 'cemento', 'vecchia', 'gesso', 'neon', 'fumetto', 'spettrale'].map(function (id) { return { id: id, disegni: id !== 'notte' }; });
 
   // pelle: [senza tono, 🏻, 🏼, 🏽, 🏾, 🏿]
   var PAL = {
