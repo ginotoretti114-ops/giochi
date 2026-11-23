@@ -19,7 +19,9 @@
       font: 'family=Cabin+Sketch:wght@400;700' },
     { id: 'neon', nome: 'Neon', desc: 'Insegne luminose, scuro', sfondo: '#120d18', tinta: '#ff4fd8', disegni: true,
       font: 'family=Tilt+Neon' },
-    { id: 'fumetto', nome: 'Fumetto', desc: 'Pop art coi puntini, chiaro', sfondo: '#ffe14d', disegni: true, font: 'family=Bangers' }
+    { id: 'fumetto', nome: 'Fumetto', desc: 'Pop art coi puntini, chiaro', sfondo: '#ffe14d', disegni: true, font: 'family=Bangers' },
+    { id: 'spettrale', nome: 'Spettrale', desc: 'Ombre sulla luna piena, scuro', sfondo: '#160c1f', disegni: true, font: 'family=Creepster',
+      anteprima: 'radial-gradient(circle at 50% 50%, #ffd27a 0 54%, #160c1f 57%)' }
   ];
 
   // pelle: [senza tono, 🏻, 🏼, 🏽, 🏾, 🏿]
@@ -85,6 +87,13 @@
     };
     var piatti = ['o', 'sw', 'occhio', 'luce', 'bianco', 'crema', 'fantasma', 'guance', 'lingua', 'nero', 'marrone2', 'grigio2', 'pipi'], p = {};
     for (var k in base) p[k] = piatti.indexOf(k) >= 0 ? base[k] : Array.isArray(base[k]) ? base[k].map(retino) : retino(base[k]);
+    return p;
+  })();
+  // Spettrale: ombre nere contro la luna piena (il gettone), solo gli occhi accesi; i fantasmi bianchi, le fiamme vive.
+  PAL.spettrale = (function () {
+    var p = {}, ombra = '#160c18';
+    for (var k in PAL.cemento) p[k] = Array.isArray(PAL.cemento[k]) ? PAL.cemento[k].map(function () { return ombra; }) : ombra;
+    p.sw = 2.2; p.occhio = '#ffe066'; p.luce = 'none'; p.fantasma = '#f1ecf7'; p.fiamma = '#fff1a8'; p.fiamma2 = '#9dff6a';
     return p;
   })();
   // Il filtro del gesso e i retini, da mettere una volta sola nella pagina (un <svg> nascosto): i disegni li usano con url(#...).
@@ -389,8 +398,8 @@
   /* ---------- candele ---------- */
   var CERA = { principiante: 'crema', malvagia: 'nero', buona: 'blu', gentile: 'rosa', marcia: 'verde2' };
   function candela(I, p) {
-    var cera = p[CERA[I.id] || 'crema'], fiamma = I.id === 'malvagia' ? p.verde : p.giallo;
-    return pa('M32 7c3 4 5 7 5 10a5 5 0 0 1-10 0c0-3 2-6 5-10z', fiamma) + pa('M32 13c1.4 2 2 3.4 2 4.4a2 2 0 0 1-4 0c0-1 .6-2.4 2-4.4z', p.arancio, NS) +
+    var cera = p[CERA[I.id] || 'crema'], fiamma = I.id === 'malvagia' ? (p.fiamma2 || p.verde) : (p.fiamma || p.giallo);
+    return pa('M32 7c3 4 5 7 5 10a5 5 0 0 1-10 0c0-3 2-6 5-10z', fiamma) + pa('M32 13c1.4 2 2 3.4 2 4.4a2 2 0 0 1-4 0c0-1 .6-2.4 2-4.4z', p.fiamma ? fiamma : p.arancio, NS) +
       pa('M32 22v4') + pa('M23 26h18v24H23z', cera) + pa('M23 26h18v4c-2 0-2 5-4 5s-2-3-4-3-2 6-4 6-2-5-4-5-2 3-2 3z', cera, ' fill-opacity=".7"') +
       pa('M19 50h26v5H19z', p.giallo);
   }
