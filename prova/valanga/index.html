@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Valanga: la notte indaco della sala giochi; carte piene di colore con un simbolo per chi non distingue i colori. */
@@ -259,6 +262,30 @@ table.score td.z { color: var(--bad); }
   .seg button:not([aria-pressed="true"]):hover { color: var(--text); }
   .linkbtn:hover { color: var(--text); }
 }
+/* ---------- temi (lib/temi.css): le carte di Valanga coi gettoni --t-* ---------- */
+html[data-tema] .vc {
+  --cc: var(--c); --t-c: color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-col-fondo, var(--t-c)); color: var(--t-col-testo, var(--t-c)); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), var(--t-col-alone, var(--t-ombra));
+  font-family: var(--t-font); text-shadow: var(--t-col-glow, none);
+}
+html[data-tema] .vc::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--t-retino, none); background-size: var(--t-retino-size, auto); }
+html[data-tema] .vc .v, html[data-tema] .vc.g .v { text-shadow: var(--t-col-glow, none); }
+html[data-tema] .vc .k, html[data-tema] .vc .s { font-family: var(--t-font); font-weight: 400; }
+html[data-tema] .vc.j { --cc: #ffffff;
+  background: radial-gradient(circle at 50% 50%, var(--t-col-fondo, #232a5c) 0 25%, transparent 26%),
+    conic-gradient(from 45deg, color-mix(in srgb, var(--cr) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff)) 0 25%,
+      color-mix(in srgb, var(--cg) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff)) 0 50%,
+      color-mix(in srgb, var(--cv) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff)) 0 75%,
+      color-mix(in srgb, var(--cb) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff)) 0); }
+html[data-tema] .vc.j::after { box-shadow: none; }
+html[data-tema] .vc.back { background: var(--t-dorso); color: var(--t-carta-testo); text-shadow: none;
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .vc.back::before { display: none; }
+html[data-tema="cemento"] .chip.uno, html[data-tema="vecchia"] .chip.uno, html[data-tema="fumetto"] .chip.uno { color: #b45309; }
+html[data-tema="cemento"] .chip.out, html[data-tema="vecchia"] .chip.out, html[data-tema="fumetto"] .chip.out { color: #c0262d; }
+html[data-tema] .vc.ring { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), 0 0 0 4px var(--ring), var(--t-ombra); }
 </style>
 </head>
 <body>
@@ -267,7 +294,6 @@ table.score td.z { color: var(--bad); }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -281,6 +307,9 @@ table.score td.z { color: var(--bad); }
   var K = window.Valanga;
   var BOT = window.ValangaBot;
   var S = window.Suoni || { tema: function () {}, effetto: function () {}, sequenza: function () {}, bottone: function () { return ''; } };
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  var TM = window.Temi || { bottone: function () { return ''; }, attuale: function () { return 'notte'; } };
+  document.addEventListener('temi:cambio', function () { render(); });
   var $app = document.getElementById('app');
   var $layer = document.getElementById('layer');
 
@@ -427,7 +456,7 @@ table.score td.z { color: var(--bad); }
     var off = P.local || P.bot;
     return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (off ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (off ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Valanga' + (off ? '' : netDot()) + '</span>' +
-      '<span class="right">' + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -456,7 +485,7 @@ table.score td.z { color: var(--bad); }
     var c = K.top(s), last = null;
     for (var i = s.log.length - 1; i >= 0 && !last; i--) { var l = line(s.log[i], s, P); if (l) last = l; }
     var giro = s.dir > 0 ? '↻ si gira avanti' : '↺ si gira indietro';
-    return '<section class="centro" aria-label="Il tavolo"><div class="pile">' + backHTML(50) + '<span class="cnt">' + s.deck.length + ' nel mazzo</span></div>' +
+    return '<section class="centro t-pannello" aria-label="Il tavolo"><div class="pile">' + backHTML(50) + '<span class="cnt">' + s.deck.length + ' nel mazzo</span></div>' +
       '<div class="scarti">' + cardHTML(c, { cls: (fresh ? 'new ' : '') + 'ring', ring: s.color }) + '</div>' +
       '<div class="stato"><span class="colore" style="--dot:' + COL_HEX[s.color] + '"><i></i>' + colNome(s.color) + ' ' + SIMBOLO[s.color] + '</span>' +
       '<span class="giro">' + giro + '</span>' + (s.pen > 0 ? '<span class="pena">Penalità +' + s.pen + '</span>' : '') +
@@ -474,7 +503,7 @@ table.score td.z { color: var(--bad); }
       tags += '<span class="cnt-b">' + h + ' <small>/ ' + K.LIMITE + '</small></span>';
     }
     var pct = out ? 100 : Math.min(100, Math.round(h / K.LIMITE * 100));
-    return '<section class="lane' + (turn ? ' turn' : '') + (out ? ' out' : '') + (isMe(P, p) ? ' me' : '') + '" aria-label="' + hn(s, p) + ': ' + (out ? 'fuori' : carteTxt(h)) + '">' +
+    return '<section class="lane t-pannello' + (turn ? ' turn' : '') + (out ? ' out' : '') + (isMe(P, p) ? ' me' : '') + '" aria-label="' + hn(s, p) + ': ' + (out ? 'fuori' : carteTxt(h)) + '">' +
       '<span class="nm">' + (isMe(P, p) ? 'Tu' : hn(s, p)) + botTag(s, p) + '</span>' +
       '<span class="tags">' + tags + '</span><span class="bar" aria-hidden="true"><i style="width:' + (100 - pct) + '%"></i></span></section>';
   }
@@ -619,7 +648,7 @@ table.score td.z { color: var(--bad); }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + TM.bottone() + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Valan<span>ga</span></h1>' +
       '<p class="tag">Il gioco dei colori senza pietà: le carte pesca si sommano, le mani si scambiano e chi arriva a 25 carte è fuori. Vince chi resta senza carte. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -643,7 +672,7 @@ table.score td.z { color: var(--bad); }
       return '<div class="row"><input id="ln-' + i + '" class="field" maxlength="20" placeholder="Giocatore ' + (i + 1) + '" value="' + esc(nm) + '" aria-label="Nome del giocatore ' + (i + 1) + '">' +
         (ui.localNames.length > 2 ? '<button type="button" class="icon-btn" data-act="ln-del" data-i="' + i + '" aria-label="Togli il giocatore ' + (i + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</div>';
     }).join('');
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span>' + S.bottone() + '</header>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span class="right">' + TM.bottone() + S.bottone() + '</span></header>' +
       '<section class="panel"><h2 class="h2">Chi gioca?</h2><p class="muted small" style="margin:0">Scrivete i nomi nell\'ordine in cui siete seduti.</p><div class="names">' + rows + '</div>' +
       (ui.localNames.length < K.MAX_PLAYERS ? '<button type="button" class="btn sm" data-act="ln-add">+ Aggiungi un giocatore</button>' : '') +
       '<button type="button" class="btn primary wide" data-act="local-start">Dai le carte</button>' +
@@ -655,7 +684,7 @@ table.score td.z { color: var(--bad); }
   }
   function waitingHTML(s) {
     var seat = K.seatOf(s, ui.myKey), host = seat === s.host;
-    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
     var list = '<ul class="seated">' + s.seats.map(function (x, i) {
       var tag = isBot(s, i) ? 'bot ' + esc(s.bots[i]) : (i === s.host ? 'ha creato la partita' : '') + (i === seat ? (i === s.host ? ' · tu' : 'tu') : '');
       return '<li><span class="n">' + (i + 1) + '</span><span>' + hn(s, i) + botTag(s, i) + '</span><span class="tag">' + tag + '</span>' +
