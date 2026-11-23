@@ -15,9 +15,10 @@ https://ginotoretti114-ops.github.io/giochi/
 - **Diavolerie** (`diavolerie/`): da 2 a 5 giocatori, carte e dadi. Si raccolgono anime, si comprano bambini
   e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online, sullo
   stesso telefono (l'unica cosa segreta sono i demoni in mano) o contro il computer: da 1 a 4 bot, livello
-  facile, medio o difficile. Sei temi, dal pulsantino con la tavolozza in alto: «Notte», come gli altri giochi,
+  facile, medio o difficile. Sette temi, dal pulsantino con la tavolozza in alto: «Notte», come gli altri giochi,
   «Cemento» (graffiti su un muro, chiaro), «Vecchia scuola» (tatuaggi da marinaio, scuro), «Gessetto» (lavagna di
-  scuola, scuro), «Neon» (insegne luminose, scuro) e «Fumetto» (pop art coi puntini, chiaro): tutti tranne «Notte»
+  scuola, scuro), «Neon» (insegne luminose, scuro), «Fumetto» (pop art coi puntini, chiaro) e «Spettrale» (ombre sulla luna
+  piena, scuro): tutti tranne «Notte»
   ridisegnano anche le carte.
 - **Sette Stelle** (`sette-stelle/`): da 2 a 8 giocatori, «pesca o fermati». Si pescano stelle numerate da 0 a 12:
   con un doppione si sballa, con sette numeri diversi si chiude il round con 15 punti in più; vince chi arriva a 200.
@@ -124,7 +125,7 @@ browser (`dv-bot`) e non passano dai server.
 
 I temi di Diavolerie cambiano solo l'aspetto. Si scelgono da un pulsantino con la tavolozza nella barra in alto
 (lobby e tavolo), che apre un foglio coi temi; la scelta resta nel browser (`dv-tema`). Ogni tema diverso da
-«Notte» è un blocco di regole CSS in fondo allo stile, attive con `data-tema="..."` (`cemento`, `vecchia`, `gesso`, `neon`, `fumetto`)
+«Notte» è un blocco di regole CSS in fondo allo stile, attive con `data-tema="..."` (`cemento`, `vecchia`, `gesso`, `neon`, `fumetto`, `spettrale`)
 sull'elemento `html` (colori, sfondo, cornici, caratteri, gettoni delle carte), più i disegni delle carte:
 `diavolerie/temi.js` disegna in SVG ogni bambino, animale, demone e candela al posto delle emoji, con le stesse
 forme in tutti i temi (i bambini cambiano capelli, carnagione e faccia da dolce, peste o normale) ma disegnate in modo
