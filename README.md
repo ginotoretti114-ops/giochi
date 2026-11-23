@@ -28,12 +28,15 @@ https://ginotoretti114-ops.github.io/giochi/
   carte) e le cinque espansioni da accendere nella lobby: Brutti sogni (53 carte), Miti e leggende (54), Avventure
   (54), Draghi (54) e Diluvio arcobaleno (54).
   Online, sullo stesso telefono o contro il computer (da 1 a 5 bot).
+- **Valanga** (`valanga/`): da 2 a 8 giocatori, carte a colori senza pietà: le carte pesca (fino a +10) si sommano,
+  il 7 scambia le mani, lo 0 le fa girare tutte e chi arriva a 25 carte è fuori. Vince chi finisce le carte, o
+  l'ultimo rimasto. Online, sullo stesso telefono (che dice a chi passarlo) o contro il computer (da 1 a 5 bot).
 
 Tutte le pagine hanno musica di sottofondo ed effetti sonori, con un pulsante per scegliere tra musica ed
 effetti, solo effetti o niente (la scelta vale per tutti i giochi).
 
 Ogni giocatore ha un profilo nella pagina iniziale: le partite finite danno esperienza e fanno salire di livello
-(di più se si vince, contro persone o contro il computer al livello difficile), ci sono 31 medaglie da sbloccare e
+(di più se si vince, contro persone o contro il computer al livello difficile), ci sono 36 medaglie da sbloccare e
 ogni giorno tre sfide nuove, uguali per tutti. Alla fine di una partita un avviso mostra cosa si è guadagnato.
 Senza account i progressi restano nel browser (`lib/profilo.js`). Con un account (accesso con Google o con un
 link via email, `lib/conti.js` su Supabase) sono salvati nell'account e uguali su tutti i dispositivi; si possono
@@ -69,13 +72,13 @@ Non c'è niente da compilare: quello che finisce sul ramo `main` va online da so
 2. Aggiungi una voce all'array `GIOCHI` in `index.html`.
 3. Tutti i giochi stanno sullo stesso sito, quindi condividono la memoria del browser:
    - usa un prefisso tuo per `localStorage` (Gran Bazar usa `gb-…`, Sottozero `sz-…`, Piccante `pc-…`,
-     Diavolerie `dv-…`, Sette Stelle `ss-…`, Polvere e Piombo `pp-…`, Stalla Matta `sm-…`; la scelta dell'audio è `sala-audio`, comune a tutti);
+     Diavolerie `dv-…`, Sette Stelle `ss-…`, Polvere e Piombo `pp-…`, Stalla Matta `sm-…`, Valanga `va-…`; la scelta dell'audio è `sala-audio`, comune a tutti);
    - per l'online usa argomenti MQTT tuoi (Gran Bazar usa `granbazar/v1/<partita>/state`, Sottozero `sottozero/v1/…`,
      Piccante `piccante/v1/…`, Diavolerie `diavolerie/v1/…`, Sette Stelle `settestelle/v1/…`, Polvere e Piombo `polvereepiombo/v1/…`,
-     Stalla Matta `stallamatta/v1/…`).
+     Stalla Matta `stallamatta/v1/…`, Valanga `valanga/v1/…`).
 4. Per un gioco online a turni conviene partire da `lib/stanze.js`, come fa Sottozero.
 5. Per i suoni includi `../lib/suoni.js`, scegli la musica con `Suoni.tema('nome')` (temi: `sala`, `bazar`,
-   `sottozero`, `piccante`, `diavolerie`, `settestelle`, `polvere`, `stalla`; per aggiungerne uno basta una voce in `THEMES`), metti il pulsante con
+   `sottozero`, `piccante`, `diavolerie`, `settestelle`, `polvere`, `stalla`, `valanga`; per aggiungerne uno basta una voce in `THEMES`), metti il pulsante con
    `Suoni.bottone()` e suona gli effetti con `Suoni.effetto('carta')` o `Suoni.sequenza([...])`
    (effetti: `click`, `carta`, `mescola`, `dadi`, `anima`, `moneta`, `compra`, `evoca`, `ruba`, `scarta`, `turno`,
    `vittoria`, `errore`, `punti`, `fuoco`). I browser fanno partire l'audio solo dopo il primo tocco sulla pagina.
@@ -157,6 +160,21 @@ e gli effetti «ogni giocatore» chiedono a più giocatori insieme (`prompt.wait
 telefono (se due risposte si incrociano, la pagina rimanda la propria). Chi non ha Nitriti lascia passare da solo,
 dopo una pausa a caso. I bot (`StallaBot`) usano solo quello che si vede al tavolo e la propria mano.
 
+## Valanga
+
+Segue il regolamento della versione «senza pietà» del classico gioco a colori, con nome e grafica nuovi. Il mazzo è
+quello della scatola, 168 carte: 80 numeri, 12 Salta, 12 Inverti, 12 Pesca 2, 8 Pesca 4, 12 Scarta tutto, 8 Salta
+tutti, 8 Jolly Inverti Pesca 4, 4 Jolly Pesca 6, 4 Jolly Pesca 10 e 8 Jolly Roulette (`TIPI` in `valanga/motore.js`).
+Ogni colore ha anche un simbolo (rosso ◆, giallo ★, verde ▲, blu ●), per chi non distingue bene i colori.
+A una carta pesca si risponde con una carta pesca di valore uguale o più alto, di qualsiasi colore (`pen` e `penMin`);
+chi non ha niente da giocare pesca finché trova una carta giocabile e la deve giocare (`forzata`); chi arriva a 25
+carte è fuori e le sue carte restano da parte fino al rimescolo (`parked`). Il Jolly Roulette fa scegliere un colore al
+giocatore dopo (`prompt`). «Valanga!» si dice insieme alla penultima carta; chi se ne dimentica può essere beccato da
+chiunque finché non c'è un'altra mossa (`unoP`, `beccabile`) e pesca 2 carte. Si gioca una mano sola: vince chi
+finisce le carte o l'ultimo rimasto; il conteggio a punti fino a 1000, facoltativo nel regolamento, non c'è.
+I bot (`ValangaBot` in `valanga/bot.js`) guardano solo la propria mano, quante carte hanno gli altri e gli scarti;
+online li muove il telefono di chi ha creato la partita, che decide anche se un bot becca chi non ha detto «Valanga!».
+
 ## Collaudo
 
 ```
@@ -171,5 +189,8 @@ node polvere-e-piombo/test/motore.test.js      # ruoli, distanze, carte e person
 node polvere-e-piombo/test/bot.test.js         # i bot dei tre livelli: vittorie per posto, ruoli a caso
 node stalla-matta/test/motore.test.js          # una prova per ogni carta + 350 partite da 2 a 8 giocatori (base e con espansioni)
 node stalla-matta/test/bot.test.js             # i bot dei tre livelli uno contro l'altro, col mazzo base e con le espansioni
+node valanga/test/motore.test.js               # mazzo, penalità che si sommano, 0 e 7, roulette, 25 carte + 210 partite da 2 a 8 giocatori
+node valanga/test/bot.test.js                  # i bot dei tre livelli uno contro l'altro
+node lib/test/profilo.test.js                  # esperienza, medaglie, sfide del giorno e unione tra dispositivi
 PARTITE=3000 node gran-bazar/test/motore.test.js
 ```
