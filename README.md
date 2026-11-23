@@ -15,9 +15,10 @@ https://ginotoretti114-ops.github.io/giochi/
 - **Diavolerie** (`diavolerie/`): da 2 a 5 giocatori, carte e dadi. Si raccolgono anime, si comprano bambini
   e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online, sullo
   stesso telefono (l'unica cosa segreta sono i demoni in mano) o contro il computer: da 1 a 4 bot, livello
-  facile, medio o difficile. Tre temi, dal pulsantino con la tavolozza in alto: «Notte», come gli altri giochi,
-  «Cemento» (graffiti su un muro, chiaro) e «Vecchia scuola» (tatuaggi da marinaio, scuro), che ridisegnano anche
-  tutte le carte.
+  facile, medio o difficile. Sei temi, dal pulsantino con la tavolozza in alto: «Notte», come gli altri giochi,
+  «Cemento» (graffiti su un muro, chiaro), «Vecchia scuola» (tatuaggi da marinaio, scuro), «Gessetto» (lavagna di
+  scuola, scuro), «Neon» (insegne luminose, scuro) e «Fumetto» (pop art coi puntini, chiaro): tutti tranne «Notte»
+  ridisegnano anche le carte.
 - **Sette Stelle** (`sette-stelle/`): da 2 a 8 giocatori, «pesca o fermati». Si pescano stelle numerate da 0 a 12:
   con un doppione si sballa, con sette numeri diversi si chiude il round con 15 punti in più; vince chi arriva a 200.
   Online (con bot per riempire il tavolo), sullo stesso telefono o contro il computer (da 1 a 5 bot).
@@ -122,11 +123,14 @@ per vincere, colpisce chi è in testa e ritira i dadi quando conviene. Le partit
 browser (`dv-bot`) e non passano dai server.
 
 I temi di Diavolerie cambiano solo l'aspetto. Si scelgono da un pulsantino con la tavolozza nella barra in alto
-(lobby e tavolo), che apre un foglio coi tre temi; la scelta resta nel browser (`dv-tema`). Ogni tema diverso da
-«Notte» è un blocco di regole CSS in fondo allo stile, attive con `data-tema="cemento"` o `data-tema="vecchia"`
+(lobby e tavolo), che apre un foglio coi temi; la scelta resta nel browser (`dv-tema`). Ogni tema diverso da
+«Notte» è un blocco di regole CSS in fondo allo stile, attive con `data-tema="..."` (`cemento`, `vecchia`, `gesso`, `neon`, `fumetto`)
 sull'elemento `html` (colori, sfondo, cornici, caratteri, gettoni delle carte), più i disegni delle carte:
 `diavolerie/temi.js` disegna in SVG ogni bambino, animale, demone e candela al posto delle emoji, con le stesse
-forme nei due temi e tavolozze diverse (i bambini cambiano capelli, carnagione e faccia da dolce, peste o normale).
+forme in tutti i temi (i bambini cambiano capelli, carnagione e faccia da dolce, peste o normale) ma disegnate in modo
+diverso: ogni tema ha la sua tavolozza, il gesso ha un filtro SVG che sporca il tratto, il neon tiene solo i contorni
+del colore del tipo di carta (CSS `color`), il fumetto ha il retino a puntini. Filtro e retini stanno una volta sola
+nella pagina, in un `<svg id="dv-defs">` nascosto (`DiavolerieTemi.defs()`).
 I caratteri dei temi arrivano da Google Fonts solo quando il tema è acceso. Uno script in testa alla pagina, subito
 dopo `lib/ambiente.js`, applica il tema prima che la pagina si disegni.
 
