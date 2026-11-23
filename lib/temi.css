@@ -306,3 +306,6 @@ html[data-tema="spettrale"] {
   --t-dorso: radial-gradient(circle, #8ae65c 0 10%, rgba(138, 230, 92, 0) 11%), repeating-conic-gradient(#21152b 0 15deg, #2c1d38 15deg 30deg);
   --t-col-fondo: #1d1226; --t-col-mix: 85%; --t-col-mixcon: #ff8a1f; --t-col-glow: 0 0 8px currentColor; --t-col-alone: 0 0 10px rgba(255, 138, 31, .3);
 }
+
+/* sul telefono stretto i due pulsantini della barra del tavolo (tema e audio) si stringono: il titolo resta su una riga */
+@media (max-width: 430px) { .topbar .tema-btn, .topbar .snd-btn { width: 32px; } }

@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Sottozero: la notte indaco della sala giochi, carte a tinta piena con un simbolo per colore, zafferano per il turno. */
@@ -272,6 +275,28 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   .desk .opps.one { grid-template-columns: minmax(0, 520px); }
   .desk .opps.one .mg .zc.mini { --w: 56px; }
 }
+/* ---------- temi (lib/temi.css): le carte di Sottozero coi gettoni --t-* ---------- */
+html[data-tema] .zc {
+  --cc: var(--k); --t-c: color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-col-fondo, var(--t-c)); color: var(--t-col-testo, var(--t-c)); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), var(--t-col-alone, var(--t-ombra));
+  font-family: var(--t-font); text-shadow: var(--t-col-glow, none);
+}
+html[data-tema] .zc::before { border: 1px solid currentColor; opacity: .3; }
+html[data-tema] .zc::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--t-retino, none); background-size: var(--t-retino-size, auto); }
+html[data-tema] .zc .lb, html[data-tema] .zc .pt { text-shadow: none; }
+html[data-tema] .zc.dbl { color: var(--t-col-testo, #ffffff);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--k1) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff)) 0 49.5%,
+    color-mix(in srgb, var(--k2) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff)) 50.5% 100%);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, rgba(255, 255, 255, .7)), var(--t-ombra); }
+html[data-tema="neon"] .zc.dbl, html[data-tema="spettrale"] .zc.dbl { text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
+html[data-tema] .zc.back { background: var(--t-dorso); color: var(--t-carta-testo); text-shadow: none;
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .zc.back::after, html[data-tema] .zc.empty::after { display: none; }
+html[data-tema] .zc.mini { box-shadow: inset 0 0 0 1px var(--t-col-tratto, var(--t-c)); }
+html[data-tema] .zc.empty { background: none; box-shadow: none; }
+html[data-tema] button.zc.pick { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), 0 0 0 3px var(--saffron), 0 8px 16px rgba(0, 0, 0, .35); }
 </style>
 </head>
 <body>
@@ -286,7 +311,6 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -822,7 +846,9 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   }
 
   /* ---------- suoni (lib/suoni.js): musica del gioco ed effetti quando cambia il tavolo ---------- */
-  function snd() { return window.Suoni ? Suoni.bottone() : ''; }
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  function snd() { return (window.Temi ? Temi.bottone() : '') + (window.Suoni ? Suoni.bottone() : ''); }
+  document.addEventListener('temi:cambio', function () { render(); });
   if (window.Suoni) Suoni.tema('sottozero');
   var sfxSeen = { key: null, snap: null };
   function sfxSnap(s, P) { return { v: s.v, nonce: s.nonce || '', round: s.round, status: s.status, turn: s.turn, last: JSON.stringify(s.last || null), tail: JSON.stringify((s.log || [])[(s.log || []).length - 1] || null), mine: s.status === 'playing' && !P.local && P.seated && s.turn === P.me }; }
