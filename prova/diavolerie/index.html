@@ -13,8 +13,16 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
 <script src="../lib/ambiente.js"></script>
 <script>
-  // Il tema scelto nella lobby («Temi» nello script in fondo) si mette subito, prima che la pagina si disegni.
-  (function () { try { if (window.localStorage.getItem('dv-tema') === 'grimorio') document.documentElement.setAttribute('data-tema', 'grimorio'); } catch (e) { /* niente memoria */ } })();
+  // Il tema scelto (pulsantino in alto, vedi temi.js) si mette subito, coi suoi caratteri, prima che la pagina si disegni.
+  (function () {
+    var FONT = { cemento: 'family=Permanent+Marker&family=Rubik+Wet+Paint', vecchia: 'family=Sancreek' }, t = null;
+    try { t = window.localStorage.getItem('dv-tema'); } catch (e) { /* niente memoria */ }
+    if (!FONT[t]) return;
+    document.documentElement.setAttribute('data-tema', t);
+    var l = document.createElement('link');
+    l.id = 'font-' + t; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?' + FONT[t] + '&display=swap';
+    document.head.appendChild(l);
+  })();
 </script>
 <style>
 :root {
@@ -228,7 +236,7 @@ button.dc:disabled { cursor: default; filter: saturate(.5) brightness(.65); }
 .altar .meta { font-size: 13px; color: var(--muted); margin: 0; }
 .sec { margin-top: 14px; }
 .sechd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-.sechd h2 { font: 20px/1.1 var(--font-display); margin: 0; }
+.sechd h2 { font: 20px/1.1 var(--font-display); margin: 0; white-space: nowrap; }
 .sechd .muted { font-size: 13px; }
 .block { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .slot { display: grid; justify-items: center; gap: 4px; min-width: 0; }
@@ -326,67 +334,170 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
 }
 
 /* ---------- temi ---------- */
-.temi { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+/* Si sceglie col pulsantino a forma di tavolozza in alto (data-tema sull'elemento html, vedi temi.js). «Notte» è lo
+   stile qui sopra; «Cemento» e «Vecchia scuola» cambiano colori, caratteri e anche i disegni delle carte. */
+.tema-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; flex: none; -webkit-tap-highlight-color: transparent; }
+.tema-btn svg { width: 21px; height: 21px; }
+.tema-btn:focus-visible { outline: 3px solid var(--focus, #fff); outline-offset: 1px; }
+.tema-list { display: grid; gap: 8px; }
+.tema-opt { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 6px 14px 6px 6px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--raise); color: var(--text); text-align: left; cursor: pointer; font: inherit; }
+.tema-opt[aria-pressed="true"] { border-color: var(--saffron); box-shadow: 0 0 0 1px var(--saffron); }
+.tema-opt:focus-visible { outline: 3px solid var(--focus, #fff); outline-offset: 2px; }
+.tema-prev { width: 52px; height: 52px; border-radius: 11px; display: grid; place-items: center; overflow: hidden; }
+.tema-prev svg { width: 44px; height: 44px; }
+.tema-prev .e { font: 28px/1 var(--emoji); }
+.tema-txt { display: grid; gap: 2px; min-width: 0; }
+.tema-txt b { font-size: 16px; }
+.tema-txt span { font-size: 13px; color: var(--muted); }
+.tema-ok { width: 22px; height: 22px; color: var(--saffron); }
+/* le carte disegnate dei temi al posto delle emoji */
+.dc .art.v { font: inherit; margin: 0; filter: none; display: grid; place-items: center; }
+.dc .art.v svg { display: block; width: calc(var(--w) * .8); height: calc(var(--w) * .8); }
+.dc.tiny .art.v { margin: 0; }
+.dc.tiny .art.v svg { width: calc(var(--w) * .86); height: calc(var(--w) * .86); }
+.dc.big .art.v { margin-top: calc(var(--w) * .12); }
+.dc.big .art.v svg { width: calc(var(--w) * .64); height: calc(var(--w) * .64); }
+.dc.candle .art.v svg { margin-top: calc(var(--w) * -.1); }
+.mini { display: inline-block; width: 1.3em; height: 1.3em; vertical-align: -.3em; }
+.mini svg { display: block; width: 100%; height: 100%; }
 
-/* «Grimorio»: le pagine di un vecchio libro di evocazioni. Carta ingiallita, inchiostro bruno, titoli rossi come le
-   rubriche dei manoscritti e un filo d'oro; le carte diventano sigilli d'inchiostro. Si accende con data-tema="grimorio"
-   sull'elemento html e cambia solo l'aspetto: regole, partite e memoria sono le stesse. */
-html[data-tema="grimorio"] {
-  --table: #efe3c6; --panel: #f9f1de; --raise: #efe0bf; --line: #bfa274;
-  --text: #2d1f14; --muted: #6c5741; --saffron: #a3261c; --on-saffron: #fff4df; --crimson: #6e3a8a;
-  --bad: #b3261e; --good: #2e7448; --focus: #2d1f14; --soul-eyes: #f9f1de;
+/* «Cemento»: graffiti sul muro. Cemento grigio, manifesti di carta attaccati con lo scotch, pennarello nero e spray
+   rosso; le carte sono adesivi bianchi con l'ombra del colore del tipo. Chiaro. */
+html[data-tema="cemento"] {
+  --table: #b4b1ab; --panel: #f4f1ea; --raise: #ffffff; --line: #151515; --text: #141414; --muted: #3a3a3a;
+  --saffron: #d31f26; --on-saffron: #ffffff; --crimson: #1a5fb8; --bad: #b3141a; --good: #1d7a3a; --focus: #151515; --soul-eyes: #f4f1ea;
+  --font-display: 'Permanent Marker', 'Marker Felt', 'Comic Sans MS', cursive;
   color-scheme: light;
 }
-html[data-tema="grimorio"] body {
-  background-color: var(--table);
+html[data-tema="cemento"] body {
+  background-color: #b4b1ab;
   background-image:
-    radial-gradient(ellipse 140% 60% at 50% 0%, rgba(255, 251, 238, .9), rgba(255, 251, 238, 0) 70%),
-    radial-gradient(circle, rgba(120, 80, 35, .11) 1px, transparent 1.7px),
-    radial-gradient(circle, rgba(120, 80, 35, .06) 1.5px, transparent 2.4px),
-    repeating-linear-gradient(90deg, rgba(120, 80, 35, .028) 0 1px, transparent 1px 9px);
-  background-size: 100% 1000px, 17px 17px, 43px 43px, auto;
-  background-repeat: no-repeat, repeat, repeat, repeat;
-  background-position: 0 0, 0 0, 9px 5px, 0 0;
+    radial-gradient(circle at 15% 12%, rgba(255, 255, 255, .22) 0 70px, rgba(255, 255, 255, 0) 150px),
+    radial-gradient(circle at 85% 40%, rgba(0, 0, 0, .1) 0 90px, rgba(0, 0, 0, 0) 190px),
+    radial-gradient(rgba(0, 0, 0, .14) 1px, transparent 1.6px),
+    radial-gradient(rgba(255, 255, 255, .2) 1px, transparent 1.6px),
+    linear-gradient(rgba(0, 0, 0, 0) 0 419px, rgba(0, 0, 0, .14) 419px 421px, rgba(0, 0, 0, 0) 421px);
+  background-size: 100% 900px, 100% 900px, 9px 9px, 13px 13px, 100% 422px;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+  background-position: 0 0, 0 0, 0 0, 4px 6px, 0 0;
 }
-html[data-tema="grimorio"] .brand h1 span { color: var(--saffron); }
-html[data-tema="grimorio"] .brand .tag::after { content: "❦"; display: block; margin-top: 6px; color: var(--saffron); font-size: 20px; line-height: 1; }
-/* cornice a doppio filo, come le pagine miniate */
-html[data-tema="grimorio"] .panel, html[data-tema="grimorio"] .opp, html[data-tema="grimorio"] .mine, html[data-tema="grimorio"] .sheet {
-  box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px rgba(163, 38, 28, .3), 0 2px 8px rgba(80, 50, 20, .12); }
-html[data-tema="grimorio"] .opp.turn { box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px rgba(163, 38, 28, .3), 0 0 0 1px var(--saffron); }
-html[data-tema="grimorio"] .opp.ask { box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px rgba(163, 38, 28, .3), 0 0 0 1px var(--crimson); }
-html[data-tema="grimorio"] .status.is-ask { color: var(--crimson); }
-html[data-tema="grimorio"] .altar { background: radial-gradient(ellipse at 50% 12%, #fcf3e1, #f1e1bf 78%); }
-html[data-tema="grimorio"] .die.ghost { background: rgba(110, 75, 35, .08); }
-html[data-tema="grimorio"] .cron li { background: rgba(110, 75, 35, .075); }
-html[data-tema="grimorio"] .actions { background: rgba(239, 227, 198, .97); box-shadow: 0 -4px 12px rgba(80, 50, 20, .1); }
-html[data-tema="grimorio"] .desk .actions { background: var(--panel); box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px rgba(163, 38, 28, .3); }
-html[data-tema="grimorio"] .overlay { background: rgba(45, 28, 12, .55); }
-html[data-tema="grimorio"] .field { background: #fffaf0; }
-html[data-tema="grimorio"] .btn { box-shadow: 0 1px 0 rgba(70, 40, 15, .16); }
-html[data-tema="grimorio"] .btn.primary { box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .22), 0 2px 5px rgba(120, 30, 20, .25); }
-html[data-tema="grimorio"] .btn.hell { background: linear-gradient(160deg, #7c1f14, #3f0c08); border-color: #c8952e; color: #fbe6b8; }
-html[data-tema="grimorio"] .souls svg { color: #4a3b8c; filter: none; }
-html[data-tema="grimorio"] *:focus-visible { outline-color: var(--focus); }
-/* le carte: sigilli d'inchiostro su carta */
-html[data-tema="grimorio"] .dc { box-shadow: inset 0 0 0 calc(var(--w) * .06) var(--ring), inset 0 0 0 calc(var(--w) * .078) rgba(255, 250, 235, .8), 0 1px 0 rgba(70, 40, 15, .35), 0 4px 10px rgba(70, 40, 15, .22); }
-html[data-tema="grimorio"] .dc::after { background: linear-gradient(155deg, rgba(255, 252, 240, .45) 0%, rgba(255, 252, 240, 0) 32%); }
-html[data-tema="grimorio"] .dc::before { border-style: dotted; border-color: rgba(70, 40, 15, .4); }
-html[data-tema="grimorio"] .dc.demon::before, html[data-tema="grimorio"] .dc.candle::before, html[data-tema="grimorio"] .dc.back::before { border-color: rgba(240, 200, 120, .5); }
-html[data-tema="grimorio"] .dc.sweet { --ring: #b33a62; background: radial-gradient(circle at 50% 46%, #fffaf0, rgba(255, 250, 240, 0) 46%), linear-gradient(165deg, #fbe8e4 0%, #e5a0ae 100%); }
-html[data-tema="grimorio"] .dc.rotten { --ring: #5c791b; background: radial-gradient(circle at 50% 46%, #fffbea, rgba(255, 251, 234, 0) 46%), linear-gradient(165deg, #eff1cf 0%, #afbe66 100%); }
-html[data-tema="grimorio"] .dc.kid { --ring: #304f8a; background: radial-gradient(circle at 50% 46%, #fdfbf4, rgba(253, 251, 244, 0) 46%), linear-gradient(165deg, #e8edf2 0%, #9cb2d1 100%); }
-html[data-tema="grimorio"] .dc.animal { --ring: #a4601b; background: radial-gradient(circle at 50% 46%, #fffaf0, rgba(255, 250, 240, 0) 46%), linear-gradient(165deg, #f8ecd2 0%, #daa865 100%); }
-html[data-tema="grimorio"] .dc.demon { --ring: #c8952e; background: radial-gradient(circle at 50% 46%, #e8663f 0%, #b02a1c 24%, #6a1010 52%, #2c0705 86%);
-  box-shadow: inset 0 0 0 calc(var(--w) * .06) var(--ring), 0 1px 0 rgba(70, 40, 15, .35), 0 0 calc(var(--w) * .16) rgba(176, 42, 28, .35); }
-html[data-tema="grimorio"] .dc.candle { --ring: #6a4a96; background: radial-gradient(circle at 50% 30%, #fff6cf 0%, #f0b45a 14%, #74509e 48%, #2f1f48 90%); }
-html[data-tema="grimorio"] .dc.back { --ring: #c8952e; background: radial-gradient(circle at 50% 50%, #e2b45a 0 9%, #8c1d14 10% 17%, transparent 18%), repeating-conic-gradient(from 0deg, #3b1d12 0 15deg, #2a130b 15deg 30deg); }
-/* profilo e avvisi (lib/profilo.js) sulla carta */
-html[data-tema="grimorio"] .pf-chip { background: var(--raise); border-color: var(--line); color: var(--text); }
-html[data-tema="grimorio"] .pf-chip i { background: conic-gradient(var(--saffron) var(--p), var(--line) 0); }
-html[data-tema="grimorio"] .pf-chip i span { background: var(--raise); }
-html[data-tema="grimorio"] #sala-avviso { background: var(--panel); color: var(--text); border-color: var(--saffron); box-shadow: 0 12px 32px rgba(60, 35, 10, .35); }
-html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avviso a { color: var(--saffron); }
+html[data-tema="cemento"] .brand h1 { font-family: 'Rubik Wet Paint', Impact, sans-serif; color: #151515; transform: rotate(-3deg); }
+html[data-tema="cemento"] .brand h1 span { color: var(--saffron); }
+html[data-tema="cemento"] .brand .tag { color: #1f1f1f; }
+html[data-tema="cemento"] .status { font-family: 'Rubik Wet Paint', Impact, sans-serif; }
+html[data-tema="cemento"] .status.is-turn { color: var(--saffron); text-shadow: 2px 2px 0 #151515; }
+html[data-tema="cemento"] .status.is-ask { color: var(--crimson); }
+html[data-tema="cemento"] .panel, html[data-tema="cemento"] .opp, html[data-tema="cemento"] .mine, html[data-tema="cemento"] .altar,
+html[data-tema="cemento"] .sheet, html[data-tema="cemento"] .banner { background: #f4f1ea; border: 3px solid #151515; border-radius: 4px; box-shadow: 4px 4px 0 rgba(0, 0, 0, .25); }
+html[data-tema="cemento"] .panel { position: relative; transform: rotate(-.4deg); }
+html[data-tema="cemento"] .panel:nth-child(even) { transform: rotate(.4deg); }
+html[data-tema="cemento"] .panel::before { content: ""; position: absolute; top: -10px; left: 24px; width: 66px; height: 18px; background: rgba(236, 214, 120, .85); transform: rotate(-6deg); pointer-events: none; }
+html[data-tema="cemento"] .opp.turn, html[data-tema="cemento"] .mine.turn { border-color: #151515; box-shadow: 0 0 0 3px var(--saffron), 6px 6px 0 3px rgba(0, 0, 0, .3); }
+html[data-tema="cemento"] .opp.ask { border-color: #151515; box-shadow: 0 0 0 3px var(--crimson), 6px 6px 0 3px rgba(0, 0, 0, .3); }
+html[data-tema="cemento"] .sheet { border-bottom: 3px solid #151515; }
+html[data-tema="cemento"] .overlay { background: rgba(20, 20, 20, .6); }
+html[data-tema="cemento"] .btn { border: 3px solid #151515; border-radius: 6px; background: #ffffff; color: #151515; font-family: 'Permanent Marker', 'Marker Felt', cursive; font-weight: 400; font-size: 17px; box-shadow: 3px 3px 0 #151515; }
+html[data-tema="cemento"] .btn.sm { font-size: 15px; }
+html[data-tema="cemento"] .btn.primary { background: var(--saffron); color: #ffffff; }
+html[data-tema="cemento"] .btn.hell { background: #ffffff; color: #151515; box-shadow: 3px 3px 0 var(--saffron); }
+html[data-tema="cemento"] .field { background: #ffffff; border: 3px solid #151515; border-radius: 4px; }
+html[data-tema="cemento"] .seg { border: 3px solid #151515; border-radius: 6px; background: #ffffff; }
+html[data-tema="cemento"] .seg button { color: #151515; }
+html[data-tema="cemento"] .seg button[aria-pressed="true"] { background: #151515; color: #ffffff; }
+html[data-tema="cemento"] .die { background: #ffffff; box-shadow: inset 0 0 0 3px #151515, 3px 3px 0 #151515; }
+html[data-tema="cemento"] .die i { background: #151515; }
+html[data-tema="cemento"] .die.ghost { background: rgba(21, 21, 21, .06); box-shadow: inset 0 0 0 2px rgba(21, 21, 21, .35); }
+html[data-tema="cemento"] .cron li { background: rgba(21, 21, 21, .06); border-left: 4px solid #151515; border-radius: 2px; }
+html[data-tema="cemento"] .actions { --text: #f4f1ea; --muted: #d8d4cc; --raise: #3a3936; --line: #151515; color: var(--text); border-top: 0;
+  background-color: #242321; background-image: repeating-linear-gradient(90deg, #ffd23f 0 28px, rgba(255, 210, 63, 0) 28px 46px); background-size: 100% 4px; background-repeat: no-repeat; }
+html[data-tema="cemento"] .desk .actions { border: 3px solid #151515; border-radius: 6px; }
+html[data-tema="cemento"] .souls svg { color: #1a5fb8; filter: none; }
+html[data-tema="cemento"] *:focus-visible { outline-color: #151515; }
+html[data-tema="cemento"] .actions *:focus-visible { outline-color: #ffd23f; }
+html[data-tema="cemento"] .dc { background: #ffffff; box-shadow: inset 0 0 0 calc(var(--w) * .05) #151515, calc(var(--w) * .07) calc(var(--w) * .07) 0 var(--ring); }
+html[data-tema="cemento"] .dc::before, html[data-tema="cemento"] .dc::after { display: none; }
+html[data-tema="cemento"] .dc.sweet { --ring: #ff4f9a; }
+html[data-tema="cemento"] .dc.rotten { --ring: #7ad83b; }
+html[data-tema="cemento"] .dc.kid { --ring: #1fb5e8; }
+html[data-tema="cemento"] .dc.animal { --ring: #ff9f1c; }
+html[data-tema="cemento"] .dc.demon { --ring: #e3262d; background: #151515; animation: none; }
+html[data-tema="cemento"] .dc.candle { --ring: #151515; }
+html[data-tema="cemento"] .dc.back { --ring: #e3262d; background: radial-gradient(circle, #e3262d 0 16%, rgba(227, 38, 45, 0) 17%), repeating-linear-gradient(45deg, #151515 0 6px, #2a2a2a 6px 12px); }
+/* nei temi coi caratteri da insegna, i numeri piccoli (candele, carte minuscole) restano nel carattere del testo, che si legge */
+html[data-tema] .dc.tiny .nb, html[data-tema] .dc.candle .nb { font-family: var(--font-body); font-weight: 700; }
+html[data-tema="cemento"] .dc .nb { border-radius: 4px; background: #151515; color: #ffffff; box-shadow: none; transform: rotate(-8deg); }
+html[data-tema="cemento"] .dc.demon .nb { background: var(--saffron); }
+html[data-tema="cemento"] .dc.candle .nb { background: #151515; color: #ffd23f; transform: translateX(50%) rotate(-3deg); }
+html[data-tema="cemento"] .dc.tiny.candle .nb { background: none; color: #151515; transform: translate(50%, 50%); }
+html[data-tema="cemento"] .pf-chip { background: #ffffff; border: 2px solid #151515; color: #151515; }
+html[data-tema="cemento"] .pf-chip i { background: conic-gradient(var(--saffron) var(--p), #d0cdc6 0); }
+html[data-tema="cemento"] .pf-chip i span { background: #ffffff; }
+html[data-tema="cemento"] #sala-avviso { background: #f4f1ea; color: #141414; border: 3px solid #151515; box-shadow: 5px 5px 0 #151515; }
+html[data-tema="cemento"] #sala-avviso b, html[data-tema="cemento"] #sala-avviso a { color: var(--saffron); }
+
+/* «Vecchia scuola»: i vecchi tatuaggi da marinaio. Muro scuro, fogli color crema col bordo nero spesso appesi con le
+   puntine, rosso, giallo, verde e blu pieni; le carte sono medaglioni col bordo del colore del tipo. Scuro.
+   Sul muro il testo è chiaro, sui fogli scuro: i fogli ridefiniscono --text, --muted, --raise e --line. */
+html[data-tema="vecchia"] {
+  --table: #171414; --panel: #f3ead3; --raise: #2a2424; --line: #4a4038; --text: #f3ead3; --muted: #cfc3a8;
+  --saffron: #c8372d; --on-saffron: #fbf3dc; --crimson: #2a7f8f; --bad: #ff9f8a; --good: #8fd16a; --focus: #f0c43c; --soul-eyes: #f3ead3;
+  --font-display: 'Sancreek', Georgia, serif;
+  color-scheme: dark;
+}
+html[data-tema="vecchia"] body {
+  background-color: #171414;
+  background-image: radial-gradient(ellipse 110% 50% at 50% 0%, rgba(240, 196, 60, .1), rgba(240, 196, 60, 0) 70%), repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 46px, rgba(0, 0, 0, .3) 46px 48px);
+  background-size: 100% 900px, auto; background-repeat: no-repeat, repeat;
+}
+html[data-tema="vecchia"] .panel, html[data-tema="vecchia"] .opp, html[data-tema="vecchia"] .mine, html[data-tema="vecchia"] .altar, html[data-tema="vecchia"] .sheet {
+  --text: #1b1b1b; --muted: #5d5346; --raise: #e9dcbc; --line: #1b1b1b; --bad: #b3261e; --good: #2d6e3c; --focus: #1b1b1b;
+  background: #f3ead3; color: var(--text); border: 3px solid #1b1b1b; border-radius: 4px; box-shadow: 0 10px 22px rgba(0, 0, 0, .5); }
+html[data-tema="vecchia"] .panel { position: relative; }
+html[data-tema="vecchia"] .panel::before, html[data-tema="vecchia"] .panel::after { content: ""; position: absolute; top: 5px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid #1b1b1b; pointer-events: none; }
+html[data-tema="vecchia"] .panel::before { left: 6px; background: #c8372d; }
+html[data-tema="vecchia"] .panel::after { right: 6px; background: #f0c43c; }
+html[data-tema="vecchia"] .opp.turn, html[data-tema="vecchia"] .mine.turn { box-shadow: 0 0 0 3px var(--saffron), 0 10px 22px rgba(0, 0, 0, .5); }
+html[data-tema="vecchia"] .opp.ask { box-shadow: 0 0 0 3px #2a7f8f, 0 10px 22px rgba(0, 0, 0, .5); }
+html[data-tema="vecchia"] .sheet { border-bottom: 3px solid #1b1b1b; }
+html[data-tema="vecchia"] .overlay { background: rgba(10, 8, 8, .7); }
+html[data-tema="vecchia"] .brand h1 { display: inline-block; margin-top: 8px; padding: 6px 38px 10px; background: var(--saffron); color: #fbf3dc; font-size: 42px; text-shadow: 0 2px 0 #1b1b1b; clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); }
+html[data-tema="vecchia"] .brand h1 span { color: #fbf3dc; }
+html[data-tema="vecchia"] .status { width: fit-content; max-width: calc(100% - 24px); margin: 12px auto 4px; padding: 7px 34px 9px; background: #f3ead3; color: #1b1b1b; font-size: 22px; clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); }
+html[data-tema="vecchia"] .status.is-turn { background: var(--saffron); color: #fbf3dc; }
+html[data-tema="vecchia"] .status.is-ask { background: #2a7f8f; color: #fbf3dc; }
+html[data-tema="vecchia"] .sechd h2, html[data-tema="vecchia"] .topbar .round { color: #f0c43c; }
+html[data-tema="vecchia"] .btn { border: 3px solid #1b1b1b; border-radius: 8px; box-shadow: 0 4px 0 #000; }
+html[data-tema="vecchia"] .btn.primary { background: var(--saffron); border-color: #1b1b1b; color: #fbf3dc; }
+html[data-tema="vecchia"] .btn.hell { background: #f3ead3; border-color: #1b1b1b; color: #1b1b1b; }
+html[data-tema="vecchia"] .field { background: #fffaf0; color: #1b1b1b; border: 2px solid #1b1b1b; }
+html[data-tema="vecchia"] .seg { border: 2px solid #1b1b1b; }
+html[data-tema="vecchia"] .seg button[aria-pressed="true"] { background: #1b1b1b; color: #f3ead3; }
+html[data-tema="vecchia"] .die { background: #fffaf0; box-shadow: inset 0 0 0 3px #1b1b1b, 0 3px 0 #1b1b1b; }
+html[data-tema="vecchia"] .die i { background: #c8372d; }
+html[data-tema="vecchia"] .die.ghost { background: rgba(27, 27, 27, .07); box-shadow: inset 0 0 0 2px rgba(27, 27, 27, .3); }
+html[data-tema="vecchia"] .cron li { background: rgba(27, 27, 27, .07); }
+html[data-tema="vecchia"] .actions { background: rgba(23, 20, 20, .97); border-top: 2px solid #f0c43c; }
+html[data-tema="vecchia"] .desk .actions { border: 2px solid #f0c43c; border-radius: 8px; }
+html[data-tema="vecchia"] .souls svg { color: #2a7f8f; filter: none; }
+html[data-tema="vecchia"] *:focus-visible { outline-color: var(--focus); }
+html[data-tema="vecchia"] .dc { background: radial-gradient(circle closest-side, #f8f1de 0 74%, var(--ring) 75%); box-shadow: inset 0 0 0 calc(var(--w) * .05) #1b1b1b, 0 0 0 calc(var(--w) * .03) #f3ead3, 0 calc(var(--w) * .06) 0 calc(var(--w) * .03) rgba(0, 0, 0, .45); }
+html[data-tema="vecchia"] .dc::before, html[data-tema="vecchia"] .dc::after { display: none; }
+html[data-tema="vecchia"] .dc.sweet { --ring: #e46a8a; }
+html[data-tema="vecchia"] .dc.rotten { --ring: #3f8a4e; }
+html[data-tema="vecchia"] .dc.kid { --ring: #2a7f8f; }
+html[data-tema="vecchia"] .dc.animal { --ring: #f0c43c; }
+html[data-tema="vecchia"] .dc.demon { --ring: #c8372d; background: radial-gradient(circle closest-side, #2a1a1a 0 74%, var(--ring) 75%); animation: none; }
+html[data-tema="vecchia"] .dc.candle { --ring: #1b1b1b; }
+html[data-tema="vecchia"] .dc.back { background: radial-gradient(circle, #f0c43c 0 13%, #c8372d 14% 28%, rgba(200, 55, 45, 0) 29%), #1b1b1b; }
+html[data-tema="vecchia"] .dc .nb { background: #1b1b1b; color: #f3ead3; box-shadow: 0 0 0 calc(var(--w) * .025) #f3ead3; }
+html[data-tema="vecchia"] .dc.demon .nb { background: var(--saffron); color: #fbf3dc; }
+html[data-tema="vecchia"] .dc.candle .nb { background: #f0c43c; color: #1b1b1b; box-shadow: 0 0 0 calc(var(--w) * .025) #1b1b1b; }
+html[data-tema="vecchia"] .dc.tiny.candle .nb { background: none; box-shadow: none; color: #1b1b1b; }
+html[data-tema="vecchia"] .pf-chip { background: #f3ead3; border: 2px solid #1b1b1b; color: #1b1b1b; }
+html[data-tema="vecchia"] .pf-chip i { background: conic-gradient(var(--saffron) var(--p), #cdbf9f 0); }
+html[data-tema="vecchia"] .pf-chip i span { background: #f3ead3; }
+html[data-tema="vecchia"] #sala-avviso { background: #f3ead3; color: #1b1b1b; border: 3px solid #1b1b1b; box-shadow: 0 12px 28px rgba(0, 0, 0, .55); }
+html[data-tema="vecchia"] #sala-avviso b, html[data-tema="vecchia"] #sala-avviso a { color: var(--saffron); }
 </style>
 </head>
 <body>
@@ -404,6 +515,7 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
 <script src="bot.js"></script>
+<script src="temi.js"></script>
 <script src="../lib/mqtt.min.js"></script>
 <script src="../lib/stanze.js"></script>
 <script src="../lib/suoni.js"></script>
@@ -446,16 +558,33 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
   S.tema('diavolerie');
 
   /* ---------- temi ---------- */
-  // Solo l'aspetto cambia (attributo data-tema su <html>, stile in fondo al CSS); la scelta resta in questo browser.
-  var TEMI = [['notte', '🌙 Notte'], ['grimorio', '📜 Grimorio']];
-  var TEMA_SFONDO = { notte: '#131833', grimorio: '#efe3c6' };
-  ui.tema = LS.get('dv-tema') === 'grimorio' ? 'grimorio' : 'notte';
+  // Cambia solo l'aspetto: attributo data-tema su <html> (stile in fondo al CSS) e, nei temi coi disegni, le carte
+  // disegnate da temi.js al posto delle emoji. La scelta resta in questo browser (dv-tema).
+  var T = window.DiavolerieTemi || { TEMI: [{ id: 'notte', nome: 'Notte', desc: '', sfondo: '#131833' }], arte: function () { return ''; }, disegni: function () { return false; } };
+  function temaDi(id) { for (var i = 0; i < T.TEMI.length; i++) if (T.TEMI[i].id === id) return T.TEMI[i]; return null; }
+  ui.tema = temaDi(LS.get('dv-tema')) ? LS.get('dv-tema') : 'notte';
   function applicaTema() {
-    var d = document.documentElement, m = document.querySelector('meta[name="theme-color"]');
+    var d = document.documentElement, m = document.querySelector('meta[name="theme-color"]'), t = temaDi(ui.tema);
     if (ui.tema === 'notte') d.removeAttribute('data-tema'); else d.setAttribute('data-tema', ui.tema);
-    if (m) m.setAttribute('content', TEMA_SFONDO[ui.tema]);
+    if (m) m.setAttribute('content', t.sfondo);
+    if (t.font && !document.getElementById('font-' + t.id)) {
+      var l = document.createElement('link');
+      l.id = 'font-' + t.id; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?' + t.font + '&display=swap';
+      document.head.appendChild(l);
+    }
   }
   applicaTema();
+  function disegnate() { return T.disegni(ui.tema); }
+  // Il disegno piccolo di una carta dentro il testo (cronaca, risultati): l'emoji, o il disegno del tema.
+  function emo(I) {
+    if (!I) return '';
+    if (disegnate()) return '<span class="mini">' + T.arte(I, ui.tema) + '</span>';
+    return I.cat === 'candle' ? '🕯️' : I.art;
+  }
+  var ICONA_TEMA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M12 3.5a8.5 8.5 0 0 0 0 17c1.4 0 2-.9 2-1.9 0-1.4-1.2-1.6-1.2-3 0-1 .8-1.6 1.8-1.6h2.2c2.4 0 4.7-1.8 4.7-4.6 0-3.6-4-5.9-9.5-5.9z"/>' +
+    '<circle cx="7.6" cy="11" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.4" cy="7.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="7.6" r="1.1" fill="currentColor" stroke="none"/></svg>';
+  function temaBtn() { return '<button type="button" class="tema-btn" data-act="tema-open" aria-label="Tema: ' + esc(temaDi(ui.tema).nome) + '. Tocca per cambiare" title="Tema">' + ICONA_TEMA + '</button>'; }
 
   function validState(s) {
     return !!(s && s.app === 'diavolerie' && typeof s.v === 'number' && Array.isArray(s.seats) && s.seats.length >= 1 &&
@@ -475,7 +604,7 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
   function andList(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' e ' + a[a.length - 1] : (a[0] || ''); }
   function soulsTxt(n) { return n + ' ' + plural(n, 'anima', 'anime'); }
   function cname(uid) { var I = K.info(uid); return I ? esc(I.name) : ''; }
-  function cemo(uid) { var I = K.info(uid); return I ? (I.art || '🕯️') : ''; }
+  function cemo(uid) { return emo(K.info(uid)); }
   var KIND = { G: 'Bambina', B: 'Bambino', A: 'Animale' };
   function kindLine(I) {
     if (I.cat === 'demon') return I.n ? 'Demone · si attiva col ' + I.n + ', solo quando tiri tu' : 'Demone · potere sempre attivo';
@@ -544,13 +673,14 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
   function cardHTML(uid, opts) {
     opts = opts || {};
     var I = K.info(uid);
-    var art = I.cat === 'candle' ? '🕯️' : I.art;
+    var art = I.cat === 'candle' ? '🕯️' : I.art, svg = disegnate() ? T.arte(I, ui.tema) : '';
     var cls = 'dc ' + catClass(I) + (opts.size ? ' ' + opts.size : '') + (opts.cls ? ' ' + opts.cls : '');
     var tag = opts.tag || 'span';
     var a11y = /aria-label=/.test(opts.attrs || '') ? '' : ' aria-label="' + esc(cardLabel(I)) + '"';
     if (tag !== 'button') a11y += ' role="img"';
     return '<' + tag + ' class="' + cls + '"' + (opts.style ? ' style="' + opts.style + '"' : '') + ' ' + (opts.attrs || '') + a11y + '>' +
-      badge(I) + kindIcon(I) + '<span class="art" aria-hidden="true">' + art + (I.prop ? '<span class="pr">' + I.prop + '</span>' : '') + '</span>' +
+      badge(I) + kindIcon(I) + (svg ? '<span class="art v" aria-hidden="true">' + svg + '</span>'
+        : '<span class="art" aria-hidden="true">' + art + (I.prop ? '<span class="pr">' + I.prop + '</span>' : '') + '</span>') +
       (opts.size === 'big' ? arcName(I.name) : '') + '</' + tag + '>';
   }
   // Il nome scritto ad arco in alto, come sui sottobicchieri.
@@ -601,7 +731,7 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
     var src = e.c && K.info(e.c) ? K.info(e.c) : null;
     var by = function (p) { return ' <span class="muted">· ' + (isMe(P, p) ? 'tu' : hn(s, p)) + '</span>'; };
     var card = src ? (src.cat === 'candle' ? 'Candela' : esc(src.name)) : '';
-    var ico = src ? (src.cat === 'candle' ? '🕯️' : src.art) : '';
+    var ico = src ? emo(src) : '';
     switch (e.t) {
       case 'turn': return { e: '⏳', t: isMe(P, e.s) ? (e.extra ? 'Turno extra: tocca ancora a te' : 'Tocca a te') : (e.extra ? 'Turno extra di ' : 'Turno di ') + hn(s, e.s) };
       case 'roll': return { e: '🎲', t: (isMe(P, e.s) ? 'Hai tirato ' : hn(s, e.s) + ' tira ') + e.a + ' + ' + e.b + ' = <b>' + (e.a + e.b) + '</b>' };
@@ -629,7 +759,7 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
       case 'replace': return { e: '🦉', t: 'Gufo' + by(e.s) + ': ' + e.n + ' ' + plural(e.n, 'carta cambiata', 'carte cambiate') + ' nel Quartiere' };
       case 'summon': {
         var how = e.how === 'goat' ? ' col Caprone' : e.how === 'egg' ? ': l\'Uovo si è schiuso' : e.how === 'damian' ? ' con Damiano' : '';
-        return { e: K.info(e.d).art, t: (isMe(P, e.s) ? 'Hai evocato ' : hn(s, e.s) + ' evoca ') + '<b>' + esc(K.info(e.d).name) + '</b>' + how + '!' };
+        return { e: emo(K.info(e.d)), t: (isMe(P, e.s) ? 'Hai evocato ' : hn(s, e.s) + ' evoca ') + '<b>' + esc(K.info(e.d).name) + '</b>' + how + '!' };
       }
       case 'reshuffle': return { e: '🔄', t: 'Gli scarti tornano nel mazzo' };
       case 'redraw': return { e: '🃏', t: (isMe(P, e.s) ? 'Peschi' : hn(s, e.s) + ' pesca') + ' un nuovo demone in mano' };
@@ -647,7 +777,7 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
     var off = P.local || P.bot;
     return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (off ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (off ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Turno ' + s.turnNo + (off ? '' : netDot()) + '</span>' +
-      '<span class="right">' + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + temaBtn() + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -876,10 +1006,9 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + temaBtn() + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Diavole<span>rie</span></h1>' +
-      '<p class="tag">Raccogli anime, compra amici nel Quartiere e poi spegnili per evocare i demoni: vince chi ne ha 3 insieme a 10 anime. Da 2 a 5 giocatori.</p>' +
-      '<div class="temi"><span class="lab">Tema</span>' + segHTML('tema', ui.tema, TEMI, 'Tema del tavolo') + '</div></header>' +
+      '<p class="tag">Raccogli anime, compra amici nel Quartiere e poi spegnili per evocare i demoni: vince chi ne ha 3 insieme a 10 anime. Da 2 a 5 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
       '<input id="nm" class="field" maxlength="20" autocomplete="nickname" placeholder="Come ti chiamano?" value="' + esc(ui.name) + '">' +
       '<button type="button" class="btn primary wide" data-act="new"' + (ui.online === 'up' ? '' : ' disabled') + '>' + label + '</button>' +
@@ -916,7 +1045,7 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
       return '<div class="row"><input id="ln-' + i + '" class="field" maxlength="20" placeholder="Giocatore ' + (i + 1) + '" value="' + esc(n) + '" aria-label="Nome del giocatore ' + (i + 1) + '">' +
         (ui.localNames.length > 2 ? '<button type="button" class="icon-btn" data-act="ln-del" data-i="' + i + '" aria-label="Togli il giocatore ' + (i + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</div>';
     }).join('');
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span>' + S.bottone() + '</header>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span class="right">' + temaBtn() + S.bottone() + '</span></header>' +
       '<section class="panel"><h2 class="h2">Chi gioca?</h2><p class="muted small" style="margin:0">Scrivete i nomi nell\'ordine in cui siete seduti.</p><div class="names">' + rows + '</div>' +
       (ui.localNames.length < 5 ? '<button type="button" class="btn sm" data-act="ln-add">+ Aggiungi un giocatore</button>' : '') +
       '<button type="button" class="btn primary wide" data-act="local-start">Accendi le candele</button>' +
@@ -928,7 +1057,7 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
   }
   function waitingHTML(s) {
     var seat = K.seatOf(s, ui.myKey);
-    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + temaBtn() + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
     var list = '<ul class="seated">' + s.seats.map(function (x, i) {
       return '<li><span class="n">' + (i + 1) + '</span><span>' + hn(s, i) + '</span><span class="tag">' + (i === s.host ? 'ha creato la partita' : '') + (i === seat ? (i === s.host ? ' · tu' : 'tu') : '') + '</span></li>';
     }).join('') + '</ul>';
@@ -1006,7 +1135,7 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
     var w = s.result.winner, n = s.seats.length;
     var order = range(n).sort(function (a, b) { return (s.demons[b].length - s.demons[a].length) || (s.souls[b] - s.souls[a]); });
     var rows = order.map(function (i) {
-      return '<tr class="' + (i === w ? 'win' : '') + '"><td>' + (isMe(P, i) ? 'Tu' : hn(s, i)) + '</td><td>' + s.demons[i].map(function (d) { return K.info(d).art; }).join(' ') + ' ' + s.demons[i].length + '</td><td>' + s.souls[i] + '</td></tr>';
+      return '<tr class="' + (i === w ? 'win' : '') + '"><td>' + (isMe(P, i) ? 'Tu' : hn(s, i)) + '</td><td>' + s.demons[i].map(function (d) { return emo(K.info(d)); }).join(' ') + ' ' + s.demons[i].length + '</td><td>' + s.souls[i] + '</td></tr>';
     }).join('');
     var btns = (P.local || P.seated ? '<button type="button" class="btn primary wide" data-act="rematch">Rivincita</button>' : '') +
       (P.local ? '<button type="button" class="btn wide" data-act="local-reset">Nuovi giocatori</button>' : '') +
@@ -1061,8 +1190,20 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
       '<h2 id="del-t">Togliere la partita dalla lista?</h2><p>' + label + ': sparisce solo da questo telefono. Se riapri il link, la ritrovi.</p>' +
       '<div class="btnrow"><button type="button" class="btn" data-act="close">Tienila</button><button type="button" class="btn primary" data-act="del">Togli</button></div></div></div>';
   }
+  function temaHTML() {
+    var ok = '<svg class="tema-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    var esempio = K.info('cucu');
+    var opts = T.TEMI.map(function (t) {
+      var on = ui.tema === t.id, prev = t.disegni ? T.arte(esempio, t.id) : '<span class="e">' + esempio.art + '</span>';
+      return '<button type="button" class="tema-opt" data-act="tema" data-v="' + t.id + '" aria-pressed="' + on + '">' +
+        '<span class="tema-prev" style="background:' + t.sfondo + '">' + prev + '</span>' +
+        '<span class="tema-txt"><b>' + esc(t.nome) + '</b><span>' + esc(t.desc) + '</span></span>' + (on ? ok : '<span></span>') + '</button>';
+    }).join('');
+    return sheetWrap('Tema', '<p class="muted small">Cambia solo l\'aspetto del tavolo e delle carte: regole e partite restano le stesse.</p><div class="tema-list">' + opts + '</div>');
+  }
   function layerHTML() {
     var s = ui.route === 'lobby' ? null : cur();
+    if (ui.sheet === 'tema') return temaHTML();
     if (ui.sheet === 'rules') return rulesHTML();
     if (ui.sheet === 'del') return delHTML();
     if (ui.sheet === 'detail') return detailHTML(s);
@@ -1355,7 +1496,8 @@ html[data-tema="grimorio"] #sala-avviso b, html[data-tema="grimorio"] #sala-avvi
     'bot-n': function (el) { ui.botN = +el.dataset.v; LS.set('dv-botn', String(ui.botN)); render(); },
     'bot-lv': function (el) { ui.botLv = el.dataset.v; LS.set('dv-botlv', ui.botLv); render(); },
     'bot-fast': function (el) { ui.botFast = el.dataset.v === '1'; LS.set('dv-botfast', ui.botFast ? '1' : '0'); render(); },
-    tema: function (el) { ui.tema = el.dataset.v === 'grimorio' ? 'grimorio' : 'notte'; LS.set('dv-tema', ui.tema); applicaTema(); S.effetto('click'); render(); },
+    'tema-open': function () { ui.sheet = 'tema'; render(); },
+    tema: function (el) { if (temaDi(el.dataset.v)) ui.tema = el.dataset.v; LS.set('dv-tema', ui.tema); applicaTema(); ui.sheet = null; S.effetto('click'); render(); },
     'bot-start': function () {
       var me = (ui.name || '').trim() || 'Tu';
       ui.bot = K.startBots([me].concat(BOT_NAMES.slice(0, ui.botN)), ui.botLv);
