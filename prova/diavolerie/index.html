@@ -15,7 +15,8 @@
 <script>
   // Il tema scelto (pulsantino in alto, vedi temi.js) si mette subito, coi suoi caratteri, prima che la pagina si disegni.
   (function () {
-    var FONT = { cemento: 'family=Permanent+Marker&family=Rubik+Wet+Paint', vecchia: 'family=Sancreek' }, t = null;
+    var FONT = { cemento: 'family=Permanent+Marker&family=Rubik+Wet+Paint', vecchia: 'family=Sancreek', gesso: 'family=Cabin+Sketch:wght@400;700',
+      neon: 'family=Tilt+Neon', fumetto: 'family=Bangers' }, t = null;
     try { t = window.localStorage.getItem('dv-tema'); } catch (e) { /* niente memoria */ }
     if (!FONT[t]) return;
     document.documentElement.setAttribute('data-tema', t);
@@ -498,6 +499,162 @@ html[data-tema="vecchia"] .pf-chip i { background: conic-gradient(var(--saffron)
 html[data-tema="vecchia"] .pf-chip i span { background: #f3ead3; }
 html[data-tema="vecchia"] #sala-avviso { background: #f3ead3; color: #1b1b1b; border: 3px solid #1b1b1b; box-shadow: 0 12px 28px rgba(0, 0, 0, .55); }
 html[data-tema="vecchia"] #sala-avviso b, html[data-tema="vecchia"] #sala-avviso a { color: var(--saffron); }
+
+/* «Gessetto»: gesso su una lavagna di scuola; i personaggi hanno il tratto sporco del gesso e colori pastello. Scuro. */
+html[data-tema="gesso"] {
+  --table: #26332c; --panel: #2d3c34; --raise: #35463d; --line: rgba(238, 234, 224, .45); --text: #eeeae0; --muted: #b8c2bb;
+  --saffron: #f3d36b; --on-saffron: #26332c; --crimson: #f29bb0; --bad: #f28b82; --good: #a8d8a0; --focus: #f3d36b; --soul-eyes: #26332c;
+  --font-display: 'Cabin Sketch', 'Chalkboard SE', 'Comic Sans MS', cursive;
+  color-scheme: dark;
+}
+html[data-tema="gesso"] body { background-color: #26332c;
+  background-image: radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0) 45%),
+    radial-gradient(ellipse at 85% 55%, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 40%),
+    repeating-linear-gradient(168deg, rgba(255, 255, 255, .028) 0 3px, rgba(255, 255, 255, 0) 3px 17px);
+  background-size: 100% 900px, 100% 900px, auto; background-repeat: no-repeat, no-repeat, repeat; background-position: 0 0; }
+html[data-tema="gesso"] .brand h1, html[data-tema="gesso"] .status, html[data-tema="gesso"] .sechd h2, html[data-tema="gesso"] .h2, html[data-tema="gesso"] .sheet h2, html[data-tema="gesso"] .mine .nm, html[data-tema="gesso"] .topbar .round { font-weight: 700; }
+html[data-tema="gesso"] .brand h1 { color: #f6f3ea; }
+html[data-tema="gesso"] .brand h1 span { color: var(--saffron); }
+html[data-tema="gesso"] .status.is-turn { color: var(--saffron); }
+html[data-tema="gesso"] .status.is-ask { color: var(--crimson); }
+html[data-tema="gesso"] .panel, html[data-tema="gesso"] .opp, html[data-tema="gesso"] .mine, html[data-tema="gesso"] .altar, html[data-tema="gesso"] .sheet, html[data-tema="gesso"] .banner { background: rgba(255, 255, 255, .04); border: 2px solid rgba(238, 234, 224, .7);
+  border-radius: 16px 9px 18px 8px / 9px 17px 8px 15px; box-shadow: none; }
+html[data-tema="gesso"] .sheet { background: #2d3c34; }
+html[data-tema="gesso"] .opp.turn, html[data-tema="gesso"] .mine.turn { border-color: var(--saffron); box-shadow: 0 0 0 1px var(--saffron); }
+html[data-tema="gesso"] .opp.ask { border-color: var(--crimson); box-shadow: 0 0 0 1px var(--crimson); }
+html[data-tema="gesso"] .btn { background: transparent; border: 2px solid rgba(238, 234, 224, .85); border-radius: 14px 8px 15px 7px / 8px 14px 7px 15px; color: #f1eee4;
+  font-family: var(--font-display); font-weight: 700; font-size: 19px; box-shadow: none; }
+html[data-tema="gesso"] .btn.primary { background: var(--saffron); border-color: var(--saffron); color: #26332c; }
+html[data-tema="gesso"] .btn.hell { border-color: var(--crimson); color: var(--crimson); }
+html[data-tema="gesso"] .field { background: rgba(0, 0, 0, .2); border: 2px solid rgba(238, 234, 224, .6); }
+html[data-tema="gesso"] .seg { background: transparent; border: 2px solid rgba(238, 234, 224, .7); }
+html[data-tema="gesso"] .seg button { color: #eeeae0; }
+html[data-tema="gesso"] .seg button[aria-pressed="true"] { background: #eeeae0; color: #26332c; }
+html[data-tema="gesso"] .die { background: transparent; box-shadow: inset 0 0 0 2px #eeeae0; }
+html[data-tema="gesso"] .die i { background: #eeeae0; }
+html[data-tema="gesso"] .actions { background: linear-gradient(#6d4c2e, #57391f); border-top: 5px solid #3f2915; }
+html[data-tema="gesso"] .dc { background: radial-gradient(circle at 50% 42%, #364840 0, #26332c 72%); box-shadow: inset 0 0 0 calc(var(--w) * .045) var(--ring); }
+html[data-tema="gesso"] .dc::after { display: none; }
+html[data-tema="gesso"] .dc::before { border-color: rgba(238, 234, 224, .22); }
+html[data-tema="gesso"] .dc .ty { color: rgba(238, 234, 224, .75); }
+html[data-tema="gesso"] .dc.sweet { --ring: #f4a8c6; }
+html[data-tema="gesso"] .dc.rotten { --ring: #b9e3a0; }
+html[data-tema="gesso"] .dc.kid { --ring: #8ecae6; }
+html[data-tema="gesso"] .dc.animal { --ring: #f5b17a; }
+html[data-tema="gesso"] .dc.demon { --ring: #f28b82; background: radial-gradient(circle at 50% 42%, #3d3a3a 0, #26332c 72%); animation: none; }
+html[data-tema="gesso"] .dc.candle { --ring: #f3d36b; }
+html[data-tema="gesso"] .dc.back { --ring: #eeeae0; background: repeating-linear-gradient(45deg, #2d3c34 0 5px, #35463d 5px 10px); }
+html[data-tema="gesso"] .dc .nb { background: #eeeae0; color: #26332c; box-shadow: none; }
+html[data-tema="gesso"] .dc.demon .nb { background: #f28b82; color: #26332c; box-shadow: none; }
+html[data-tema="gesso"] .dc.candle .nb { background: #f3d36b; color: #26332c; box-shadow: none; }
+html[data-tema="gesso"] .dc.tiny.candle .nb { background: none; color: #eeeae0; }
+html[data-tema="gesso"] .pf-chip { background: transparent; border: 2px solid rgba(238, 234, 224, .7); }
+
+/* «Neon»: insegne luminose di notte; i personaggi sono tubi di luce del colore del loro tipo. Scuro. */
+html[data-tema="neon"] {
+  --table: #120d18; --panel: #18111f; --raise: #231a2d; --line: #3b2d4d; --text: #f6effc; --muted: #ab9cc0;
+  --saffron: #ff3fc8; --on-saffron: #1a0614; --crimson: #2ef2ff; --bad: #ff4f6b; --good: #7dff4f; --focus: #2ef2ff; --soul-eyes: #120d18;
+  --font-display: 'Tilt Neon', 'Trebuchet MS', sans-serif;
+  color-scheme: dark;
+}
+html[data-tema="neon"] body { background-color: #120d18;
+  background-image: radial-gradient(ellipse at 50% -10%, rgba(255, 63, 200, .2), rgba(255, 63, 200, 0) 60%),
+    radial-gradient(ellipse at 100% 70%, rgba(46, 242, 255, .1), rgba(46, 242, 255, 0) 50%),
+    radial-gradient(rgba(255, 255, 255, .035) 1px, transparent 1.5px);
+  background-size: 100% 900px, 100% 900px, 7px 7px; background-repeat: no-repeat, no-repeat, repeat; background-position: 0 0; }
+html[data-tema="neon"] .brand h1 { color: #ffe9f9; text-shadow: 0 0 2px #fff, 0 0 8px #ff3fc8, 0 0 20px #ff3fc8, 0 0 40px #ff3fc8; }
+html[data-tema="neon"] .brand h1 span { color: #e9feff; text-shadow: 0 0 2px #fff, 0 0 8px #2ef2ff, 0 0 20px #2ef2ff, 0 0 40px #2ef2ff; }
+html[data-tema="neon"] .status, html[data-tema="neon"] .sechd h2, html[data-tema="neon"] .topbar .round, html[data-tema="neon"] .h2, html[data-tema="neon"] .sheet h2 { text-shadow: 0 0 10px currentColor; }
+html[data-tema="neon"] .status.is-turn { color: #ffd9f5; text-shadow: 0 0 4px #ff3fc8, 0 0 16px #ff3fc8; }
+html[data-tema="neon"] .status.is-ask { color: #e9feff; text-shadow: 0 0 4px #2ef2ff, 0 0 16px #2ef2ff; }
+html[data-tema="neon"] .sechd h2 { color: #e9feff; }
+html[data-tema="neon"] .panel, html[data-tema="neon"] .opp, html[data-tema="neon"] .mine, html[data-tema="neon"] .altar, html[data-tema="neon"] .sheet, html[data-tema="neon"] .banner { background: rgba(24, 17, 31, .94); border: 2px solid #2ef2ff; border-radius: 18px;
+  box-shadow: 0 0 10px rgba(46, 242, 255, .45), inset 0 0 10px rgba(46, 242, 255, .2); }
+html[data-tema="neon"] .opp.turn, html[data-tema="neon"] .mine.turn { border-color: #ff3fc8; box-shadow: 0 0 14px #ff3fc8, inset 0 0 10px rgba(255, 63, 200, .3); }
+html[data-tema="neon"] .opp.ask { border-color: #fff36b; box-shadow: 0 0 14px #fff36b, inset 0 0 10px rgba(255, 243, 107, .25); }
+html[data-tema="neon"] .btn { background: transparent; border: 2px solid #ff3fc8; border-radius: 999px; color: #ffe9f9; text-shadow: 0 0 6px #ff3fc8;
+  box-shadow: 0 0 10px rgba(255, 63, 200, .55), inset 0 0 8px rgba(255, 63, 200, .3); }
+html[data-tema="neon"] .btn.primary { background: #ff3fc8; color: #1a0614; text-shadow: none; box-shadow: 0 0 18px #ff3fc8; }
+html[data-tema="neon"] .btn.hell { border-color: #2ef2ff; color: #e9feff; text-shadow: 0 0 6px #2ef2ff; box-shadow: 0 0 10px rgba(46, 242, 255, .55), inset 0 0 8px rgba(46, 242, 255, .3); }
+html[data-tema="neon"] .field { background: #0d0912; border: 2px solid #3b2d4d; }
+html[data-tema="neon"] .seg { background: transparent; border: 2px solid #2ef2ff; box-shadow: 0 0 8px rgba(46, 242, 255, .45); }
+html[data-tema="neon"] .seg button[aria-pressed="true"] { background: #2ef2ff; color: #06181a; }
+html[data-tema="neon"] .die { background: #0d0912; box-shadow: inset 0 0 0 2px #2ef2ff, 0 0 10px rgba(46, 242, 255, .6); }
+html[data-tema="neon"] .die i { background: #2ef2ff; box-shadow: 0 0 4px #2ef2ff; }
+html[data-tema="neon"] .actions { background: #0b0810; border-top: 2px solid #ff3fc8; box-shadow: 0 -6px 18px rgba(255, 63, 200, .3); }
+html[data-tema="neon"] .dc { background: #0f0a14; box-shadow: inset 0 0 0 calc(var(--w) * .03) var(--ring), 0 0 calc(var(--w) * .12) var(--ring); }
+html[data-tema="neon"] .dc::before, html[data-tema="neon"] .dc::after { display: none; }
+html[data-tema="neon"] .dc .art.v svg { color: var(--ring); filter: drop-shadow(0 0 1px var(--ring)) drop-shadow(0 0 calc(var(--w) * .05) var(--ring)); }
+html[data-tema="neon"] .dc .ty { color: var(--ring); }
+html[data-tema="neon"] .dc.sweet { --ring: #ff4fd8; }
+html[data-tema="neon"] .dc.rotten { --ring: #7dff4f; }
+html[data-tema="neon"] .dc.kid { --ring: #2ef2ff; }
+html[data-tema="neon"] .dc.animal { --ring: #ffb02e; }
+html[data-tema="neon"] .dc.demon { --ring: #ff3b3b; background: #0f0a14; animation: none; }
+html[data-tema="neon"] .dc.candle { --ring: #fff36b; }
+html[data-tema="neon"] .dc.back { --ring: #ff3fc8; background: repeating-radial-gradient(circle, #0f0a14 0 5px, #24142e 5px 7px); }
+html[data-tema="neon"] .dc .nb { background: #0f0a14; color: var(--ring); box-shadow: 0 0 0 calc(var(--w) * .025) var(--ring); text-shadow: 0 0 6px var(--ring); }
+html[data-tema="neon"] .dc.tiny.candle .nb { background: none; box-shadow: none; }
+html[data-tema="neon"] .souls svg { color: #e9feff; filter: drop-shadow(0 0 4px #2ef2ff); }
+html[data-tema="neon"] .mini svg { filter: drop-shadow(0 0 2px currentColor); }
+html[data-tema="neon"] .pf-chip { background: #18111f; border-color: #2ef2ff; box-shadow: 0 0 8px rgba(46, 242, 255, .45); }
+
+/* «Fumetto»: pop art; personaggi col retino a puntini, bordi neri spessi, nuvolette e raggi. Chiaro. */
+html[data-tema="fumetto"] {
+  --table: #ffe14d; --panel: #ffffff; --raise: #fff7d1; --line: #111111; --text: #111111; --muted: #3d3d3d;
+  --saffron: #ff2a2a; --on-saffron: #ffffff; --crimson: #1e6fff; --bad: #d01010; --good: #1b8a2b; --focus: #111111; --soul-eyes: #ffffff;
+  --font-display: 'Bangers', Impact, 'Arial Black', sans-serif;
+  color-scheme: light;
+}
+html[data-tema="fumetto"] body { background-color: #ffe14d;
+  background-image: repeating-conic-gradient(from 0deg at 50% 130px, rgba(255, 255, 255, .3) 0 7deg, rgba(255, 255, 255, 0) 7deg 14deg),
+    radial-gradient(rgba(255, 110, 0, .25) 27%, transparent 31%);
+  background-size: 100% 560px, 12px 12px; background-repeat: no-repeat, repeat; background-position: 0 0; }
+html[data-tema="fumetto"] .brand h1, html[data-tema="fumetto"] .status, html[data-tema="fumetto"] .sechd h2, html[data-tema="fumetto"] .h2, html[data-tema="fumetto"] .sheet h2, html[data-tema="fumetto"] .btn, html[data-tema="fumetto"] .topbar .round, html[data-tema="fumetto"] .mine .nm { letter-spacing: .04em; }
+html[data-tema="fumetto"] .brand h1 { color: #ff2a2a; -webkit-text-stroke: 2px #111; paint-order: stroke fill; text-shadow: 4px 4px 0 #111; transform: rotate(-2deg); }
+html[data-tema="fumetto"] .brand h1 span { color: #1e6fff; }
+html[data-tema="fumetto"] .status { width: fit-content; margin-inline: auto; padding: 6px 20px 4px; background: #fff; border: 3px solid #111; border-radius: 999px; box-shadow: 3px 3px 0 #111; }
+html[data-tema="fumetto"] .status.is-turn { color: #ff2a2a; }
+html[data-tema="fumetto"] .status.is-ask { color: #1e6fff; }
+html[data-tema="fumetto"] .panel, html[data-tema="fumetto"] .opp, html[data-tema="fumetto"] .mine, html[data-tema="fumetto"] .altar, html[data-tema="fumetto"] .sheet, html[data-tema="fumetto"] .banner { background: #fff; border: 3px solid #111; border-radius: 3px; box-shadow: 5px 5px 0 #111; }
+html[data-tema="fumetto"] .sheet { box-shadow: none; }
+html[data-tema="fumetto"] .opp.turn, html[data-tema="fumetto"] .mine.turn { box-shadow: 5px 5px 0 #ff2a2a; }
+html[data-tema="fumetto"] .opp.ask { box-shadow: 5px 5px 0 #1e6fff; }
+html[data-tema="fumetto"] .overlay { background: rgba(17, 17, 17, .55); }
+html[data-tema="fumetto"] .btn { background: #fff; border: 3px solid #111; border-radius: 4px; color: #111; font-family: var(--font-display); font-weight: 400; font-size: 21px; box-shadow: 3px 3px 0 #111; }
+html[data-tema="fumetto"] .btn.sm { font-size: 18px; }
+html[data-tema="fumetto"] .btn.primary { background: #ff2a2a; color: #fff; }
+html[data-tema="fumetto"] .btn.hell { background: #1e6fff; color: #fff; }
+html[data-tema="fumetto"] .field { background: #fff; border: 3px solid #111; border-radius: 3px; }
+html[data-tema="fumetto"] .seg { background: #fff; border: 3px solid #111; border-radius: 4px; }
+html[data-tema="fumetto"] .seg button { color: #111; }
+html[data-tema="fumetto"] .seg button[aria-pressed="true"] { background: #1e6fff; color: #fff; }
+html[data-tema="fumetto"] .die { background: #fff; box-shadow: inset 0 0 0 3px #111, 3px 3px 0 #111; }
+html[data-tema="fumetto"] .die i { background: #111; }
+html[data-tema="fumetto"] .die.ghost { background: rgba(255, 255, 255, .5); box-shadow: inset 0 0 0 2px rgba(17, 17, 17, .4); }
+html[data-tema="fumetto"] .cron li { background: #fff7d1; border-left: 4px solid #111; border-radius: 2px; }
+html[data-tema="fumetto"] .actions { --text: #ffffff; --muted: #e3ebff; --raise: #3d82ff; --line: #111111; color: var(--text); border-top: 3px solid #111;
+  background-color: #1e6fff; background-image: radial-gradient(rgba(0, 30, 120, .35) 27%, transparent 31%); background-size: 10px 10px; }
+html[data-tema="fumetto"] .dc { background: repeating-conic-gradient(color-mix(in srgb, var(--ring) 45%, #fff) 0 11deg, #ffffff 11deg 22deg);
+  box-shadow: inset 0 0 0 calc(var(--w) * .05) #111, calc(var(--w) * .05) calc(var(--w) * .05) 0 #111; }
+html[data-tema="fumetto"] .dc::before, html[data-tema="fumetto"] .dc::after { display: none; }
+html[data-tema="fumetto"] .dc .ty { color: #111; }
+html[data-tema="fumetto"] .dc.sweet { --ring: #ff4fa3; }
+html[data-tema="fumetto"] .dc.rotten { --ring: #2ecc40; }
+html[data-tema="fumetto"] .dc.kid { --ring: #1e90ff; }
+html[data-tema="fumetto"] .dc.animal { --ring: #ff9a2a; }
+html[data-tema="fumetto"] .dc.demon { --ring: #ff2a2a; background: repeating-conic-gradient(#111 0 11deg, #4a0d0d 11deg 22deg); animation: none; }
+html[data-tema="fumetto"] .dc.candle { --ring: #ffe03a; }
+html[data-tema="fumetto"] .dc.back { --ring: #ff2a2a; background: repeating-conic-gradient(#ff2a2a 0 11deg, #ffe03a 11deg 22deg); }
+html[data-tema="fumetto"] .dc .nb { background: #fff; color: #111; box-shadow: 0 0 0 calc(var(--w) * .03) #111; }
+html[data-tema="fumetto"] .dc.demon .nb { background: #ff2a2a; color: #fff; }
+html[data-tema="fumetto"] .dc.candle .nb { background: #ffe03a; color: #111; }
+html[data-tema="fumetto"] .dc.tiny.candle .nb { background: none; box-shadow: none; }
+html[data-tema="fumetto"] .souls svg { color: #1e6fff; filter: none; }
+html[data-tema="fumetto"] .pf-chip { background: #fff; border: 2px solid #111; color: #111; }
+html[data-tema="fumetto"] .pf-chip i { background: conic-gradient(var(--saffron) var(--p), #dddddd 0); }
+html[data-tema="fumetto"] .pf-chip i span { background: #fff; }
+html[data-tema="fumetto"] #sala-avviso { background: #fff; color: #111; border: 3px solid #111; box-shadow: 5px 5px 0 #111; }
 </style>
 </head>
 <body>
@@ -564,6 +721,12 @@ html[data-tema="vecchia"] #sala-avviso b, html[data-tema="vecchia"] #sala-avviso
   function temaDi(id) { for (var i = 0; i < T.TEMI.length; i++) if (T.TEMI[i].id === id) return T.TEMI[i]; return null; }
   ui.tema = temaDi(LS.get('dv-tema')) ? LS.get('dv-tema') : 'notte';
   function applicaTema() {
+    // il filtro del gesso e i retini del fumetto: una volta sola, in un <svg> nascosto
+    if (T.defs && !document.getElementById('dv-defs')) {
+      var w = document.createElement('div');
+      w.innerHTML = '<svg id="dv-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>' + T.defs() + '</defs></svg>';
+      document.body.appendChild(w.firstChild);
+    }
     var d = document.documentElement, m = document.querySelector('meta[name="theme-color"]'), t = temaDi(ui.tema);
     if (ui.tema === 'notte') d.removeAttribute('data-tema'); else d.setAttribute('data-tema', ui.tema);
     if (m) m.setAttribute('content', t.sfondo);
@@ -1196,7 +1359,7 @@ html[data-tema="vecchia"] #sala-avviso b, html[data-tema="vecchia"] #sala-avviso
     var opts = T.TEMI.map(function (t) {
       var on = ui.tema === t.id, prev = t.disegni ? T.arte(esempio, t.id) : '<span class="e">' + esempio.art + '</span>';
       return '<button type="button" class="tema-opt" data-act="tema" data-v="' + t.id + '" aria-pressed="' + on + '">' +
-        '<span class="tema-prev" style="background:' + t.sfondo + '">' + prev + '</span>' +
+        '<span class="tema-prev" style="background:' + t.sfondo + (t.tinta ? ';color:' + t.tinta : '') + '">' + prev + '</span>' +
         '<span class="tema-txt"><b>' + esc(t.nome) + '</b><span>' + esc(t.desc) + '</span></span>' + (on ? ok : '<span></span>') + '</button>';
     }).join('');
     return sheetWrap('Tema', '<p class="muted small">Cambia solo l\'aspetto del tavolo e delle carte: regole e partite restano le stesse.</p><div class="tema-list">' + opts + '</div>');

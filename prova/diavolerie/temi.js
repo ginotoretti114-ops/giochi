@@ -14,7 +14,12 @@
     { id: 'cemento', nome: 'Cemento', desc: 'Graffiti sul muro, chiaro', sfondo: '#b4b1ab', disegni: true,
       font: 'family=Permanent+Marker&family=Rubik+Wet+Paint' },
     { id: 'vecchia', nome: 'Vecchia scuola', desc: 'Tatuaggi da marinaio, scuro', sfondo: '#171414', disegni: true,
-      font: 'family=Sancreek' }
+      font: 'family=Sancreek' },
+    { id: 'gesso', nome: 'Gessetto', desc: 'Gesso sulla lavagna, scuro', sfondo: '#26332c', disegni: true,
+      font: 'family=Cabin+Sketch:wght@400;700' },
+    { id: 'neon', nome: 'Neon', desc: 'Insegne luminose, scuro', sfondo: '#120d18', tinta: '#ff4fd8', disegni: true,
+      font: 'family=Tilt+Neon' },
+    { id: 'fumetto', nome: 'Fumetto', desc: 'Pop art coi puntini, chiaro', sfondo: '#ffe14d', disegni: true, font: 'family=Bangers' }
   ];
 
   // pelle: [senza tono, 🏻, 🏼, 🏽, 🏾, 🏿]
@@ -40,6 +45,60 @@
       acqua: '#bdf2ff', gatto: '#7ad83b', pipi: '#5a3d8a', pallido: '#e8f0dc'
     }
   };
+
+  /* ---------- Gessetto, Neon e Fumetto: stesse forme, ma disegnate in un altro modo ----------
+     fo: trasparenza dei colori (il gesso lascia vedere la lavagna); filtro: un filtro di defs() sopra tutto il disegno. */
+  PAL.gesso = {
+    o: '#f1eee4', sw: 2.4, fo: 0.9, filtro: 'dvf-gesso', occhio: '#26332c', luce: 'none', bianco: '#ecebe4', crema: '#efe6cf', fantasma: '#ecebe4',
+    pelle: ['#f2c6a2', '#f6d6bd', '#f1c7a3', '#d8a479', '#b48662', '#94674b'],
+    capelli: ['#f6df86', '#8d9893', '#c79a6b', '#f0a06a', '#a47a5a'],
+    maglie: ['#f28b82', '#8ecae6', '#a8d8a0', '#f6df86', '#f4a8c6', '#c3a6e8'],
+    rosso: '#f28b82', giallo: '#f6df86', verde: '#a8d8a0', verde2: '#c5d98a', blu: '#8ecae6', rosa: '#f4a8c6', viola: '#c3a6e8',
+    guance: '#f4a8a8', lingua: '#f28b9a', arancio: '#f5b17a', arancio2: '#f7c48e', marrone: '#d9b38c', marrone2: '#a88468',
+    marrone3: '#c09a76', beige: '#efd9b0', grigio: '#c4c9c6', grigio2: '#8d9893', nero: '#5f6a65', osso: '#f1e8c8',
+    acqua: '#d6eef5', gatto: '#b9e3a0', pipi: '#9b8fb3', pallido: '#e2ead8'
+  };
+  // Neon: tutto pieno del colore del gettone, così restano solo i contorni, che sono «tubi» del colore del tipo (CSS: color).
+  PAL.neon = (function () {
+    var p = {}, buio = '#0f0a14';
+    for (var k in PAL.cemento) p[k] = Array.isArray(PAL.cemento[k]) ? PAL.cemento[k].map(function () { return buio; }) : buio;
+    p.o = 'currentColor'; p.sw = 2.2; p.occhio = 'currentColor'; p.luce = 'none';
+    return p;
+  })();
+  // Fumetto: i colori grandi hanno il retino (puntini più scuri), come nella stampa dei fumetti.
+  var RETINI = {};
+  function scuro(c, k) {
+    var v = parseInt(c.slice(1), 16);
+    return '#' + [v >> 16, (v >> 8) & 255, v & 255].map(function (x) { return ('0' + Math.round(x * (1 - k)).toString(16)).slice(-2); }).join('');
+  }
+  function retino(c) { var id = 'dvr-' + c.slice(1); RETINI[id] = c; return 'url(#' + id + ')'; }
+  PAL.fumetto = (function () {
+    var base = {
+      o: '#111111', sw: 3.2, occhio: '#111111', luce: '#ffffff', bianco: '#ffffff', crema: '#fffdf2', fantasma: '#ffffff',
+      pelle: ['#ffd0b0', '#ffe0c8', '#ffd0b0', '#e8a878', '#b97a4c', '#8d5634'],
+      capelli: ['#ffe03a', '#1a1a1a', '#b5651d', '#ff6b1a', '#6b3a1a'],
+      maglie: ['#ff2a2a', '#1e90ff', '#2ecc40', '#ffe03a', '#ff4fa3', '#9b4dff'],
+      rosso: '#ff2a2a', giallo: '#ffe03a', verde: '#2ecc40', verde2: '#a3d12e', blu: '#1e90ff', rosa: '#ff4fa3', viola: '#9b4dff',
+      guance: '#ff8fb1', lingua: '#ff4f7a', arancio: '#ff7a1a', arancio2: '#ff9a2a', marrone: '#d9893a', marrone2: '#7a4520',
+      marrone3: '#a0602a', beige: '#ffe0a8', grigio: '#a8a8a8', grigio2: '#4a4a4a', nero: '#1a1a1a', osso: '#fff3c4',
+      acqua: '#c4f0ff', gatto: '#2ecc40', pipi: '#5a3d8a', pallido: '#eef5e0'
+    };
+    var piatti = ['o', 'sw', 'occhio', 'luce', 'bianco', 'crema', 'fantasma', 'guance', 'lingua', 'nero', 'marrone2', 'grigio2', 'pipi'], p = {};
+    for (var k in base) p[k] = piatti.indexOf(k) >= 0 ? base[k] : Array.isArray(base[k]) ? base[k].map(retino) : retino(base[k]);
+    return p;
+  })();
+  // Il filtro del gesso e i retini, da mettere una volta sola nella pagina (un <svg> nascosto): i disegni li usano con url(#...).
+  function defs() {
+    var s = '<filter id="dvf-gesso" x="-8%" y="-8%" width="116%" height="116%">' +
+        '<feTurbulence type="fractalNoise" baseFrequency=".35" numOctaves="2" seed="4" result="r"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="r" scale="1.4" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
+        '<feTurbulence type="fractalNoise" baseFrequency="2.2" numOctaves="1" seed="9" result="g"/>' +
+        '<feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.5 0 0 0 1.72" result="m"/>' +
+        '<feComposite in="d" in2="m" operator="in"/></filter>';
+    for (var id in RETINI) s += '<pattern id="' + id + '" width="3.4" height="3.4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+      '<rect width="3.4" height="3.4" fill="' + RETINI[id] + '"/><circle cx="1.7" cy="1.7" r="1" fill="' + scuro(RETINI[id], 0.22) + '"/></pattern>';
+    return s;
+  }
 
   /* ---------- pezzi ---------- */
   var NS = ' stroke="none"';
@@ -345,10 +404,12 @@
       : I.cat === 'demon' ? (DEMONI[I.id] || DEMONI.cucu)(p)
       : I.k === 'A' ? (ANIMALI[I.id] || ANIMALI.fido)(p)
       : bimbo(I, p);
-    return '<svg viewBox="0 0 64 64" fill="none" stroke="' + p.o + '" stroke-width="' + p.sw + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + dentro + '</svg>';
+    if (p.filtro) dentro = '<g filter="url(#' + p.filtro + ')">' + dentro + '</g>';
+    return '<svg viewBox="0 0 64 64" fill="none" stroke="' + p.o + '" stroke-width="' + p.sw + '"' + (p.fo ? ' fill-opacity="' + p.fo + '"' : '') +
+      ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + dentro + '</svg>';
   }
 
-  var api = { TEMI: TEMI, PAL: PAL, arte: arte, disegni: disegni, ANIMALI: ANIMALI, DEMONI: DEMONI };
+  var api = { TEMI: TEMI, PAL: PAL, arte: arte, disegni: disegni, defs: defs, ANIMALI: ANIMALI, DEMONI: DEMONI };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.DiavolerieTemi = api;
 })(typeof window !== 'undefined' ? window : this);
