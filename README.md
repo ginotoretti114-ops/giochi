@@ -15,7 +15,8 @@ https://ginotoretti114-ops.github.io/giochi/
 - **Diavolerie** (`diavolerie/`): da 2 a 5 giocatori, carte e dadi. Si raccolgono anime, si comprano bambini
   e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online, sullo
   stesso telefono (l'unica cosa segreta sono i demoni in mano) o contro il computer: da 1 a 4 bot, livello
-  facile, medio o difficile.
+  facile, medio o difficile. Due temi da scegliere nella lobby: «Notte», come gli altri giochi, e «Grimorio», carta
+  antica e inchiostro.
 - **Sette Stelle** (`sette-stelle/`): da 2 a 8 giocatori, «pesca o fermati». Si pescano stelle numerate da 0 a 12:
   con un doppione si sballa, con sette numeri diversi si chiude il round con 15 punti in più; vince chi arriva a 200.
   Online (con bot per riempire il tavolo), sullo stesso telefono o contro il computer (da 1 a 5 bot).
@@ -118,6 +119,11 @@ restituisce una mossa per il motore. Il facile sceglie quasi a caso; il medio d�
 (effetto per probabilità del numero) e spegne quelle che valgono meno; il difficile in più tiene da parte le anime
 per vincere, colpisce chi è in testa e ritira i dadi quando conviene. Le partite contro il computer restano nel
 browser (`dv-bot`) e non passano dai server.
+
+I temi di Diavolerie cambiano solo l'aspetto. Il tema «Grimorio» è un blocco di regole CSS in fondo allo stile, attive
+con `data-tema="grimorio"` sull'elemento `html`: cambia le variabili dei colori, lo sfondo, le cornici, le carte e
+l'avviso del profilo. La scelta resta nel browser (`dv-tema`). Uno script in testa alla pagina, subito dopo
+`lib/ambiente.js`, la applica prima che la pagina si disegni.
 
 ## Sette Stelle e Polvere e Piombo
 
