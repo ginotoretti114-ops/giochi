@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Polvere e Piombo: la notte indaco della sala giochi con carte di cartoncino come i manifesti del saloon:
@@ -266,6 +269,18 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   .desk .saloon { grid-template-columns: auto 1fr; }
   .desk .piles .pc { --w: 56px; }
 }
+/* ---------- temi (lib/temi.css): le carte di Polvere e Piombo coi gettoni --t-* ---------- */
+html[data-tema] .pc { background: var(--t-carta); color: var(--t-carta-testo); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .pc .ic { filter: var(--t-emo); }
+html[data-tema] .pc .rk, html[data-tema] .pc .rg { color: var(--t-carta-testo); }
+html[data-tema] .pc .rk.red { color: var(--t-rosso); }
+html[data-tema] .pc .rg { font-family: var(--t-font); }
+html[data-tema] .pc.blue { box-shadow: inset 0 0 0 var(--t-tratto-w) #3d7fd6, inset 0 0 0 calc(var(--t-tratto-w) + 3px) rgba(61, 127, 214, .25), var(--t-ombra); }
+html[data-tema] .pc.back { background: var(--t-dorso); }
+html[data-tema] .pc.back::after { color: var(--t-tratto); }
+html[data-tema] button.pc[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), 0 0 0 3px var(--saffron), 0 10px 18px rgba(0, 0, 0, .45); }
+html[data-tema="cemento"] .hp i.off, html[data-tema="vecchia"] .hp i.off, html[data-tema="fumetto"] .hp i.off { background: rgba(0, 0, 0, .14); }
 </style>
 </head>
 <body>
@@ -274,7 +289,6 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -288,6 +302,9 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   var K = window.Polvere;
   var BOT = window.PolvereBot;
   var S = window.Suoni || { tema: function () {}, effetto: function () {}, sequenza: function () {}, bottone: function () { return ''; } };
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  var TM = window.Temi || { bottone: function () { return ''; }, attuale: function () { return 'notte'; } };
+  document.addEventListener('temi:cambio', function () { render(); });
   var $app = document.getElementById('app');
   var $layer = document.getElementById('layer');
 
@@ -448,7 +465,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     var off = P.local || P.bot;
     return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (off ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (off ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Turno ' + s.turnNo + (off ? '' : netDot()) + '</span>' +
-      '<span class="right">' + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -505,7 +522,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     }
     ui.cronNext = Math.max(ui.cronNext || 0, seen);
     var topD = s.discard.length ? cardHTML(s.discard[s.discard.length - 1], { w: 46 }) : '<span class="pc" style="--w:46px;opacity:.15"></span>';
-    return '<section class="saloon" aria-label="Il saloon"><div class="piles">' + topD + '<span>scarti</span><span>' + s.deck.length + ' nel mazzo</span></div>' +
+    return '<section class="saloon t-pannello" aria-label="Il saloon"><div class="piles">' + topD + '<span>scarti</span><span>' + s.deck.length + ' nel mazzo</span></div>' +
       '<ul class="cron" aria-live="polite">' + items.join('') + '</ul></section>';
   }
   function mineHTML(s, P) {
@@ -659,7 +676,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + TM.bottone() + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Polvere e <span>Piombo</span></h1>' +
       '<p class="tag">Duelli nel vecchio West con ruoli segreti: lo Sceriffo e i Vice contro i Fuorilegge, e un Rinnegato che vuole restare l\'ultimo. Da 4 a 7 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -683,7 +700,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       return '<div class="row"><input id="ln-' + i + '" class="field" maxlength="20" placeholder="Giocatore ' + (i + 1) + '" value="' + esc(nm) + '" aria-label="Nome del giocatore ' + (i + 1) + '">' +
         (ui.localNames.length > K.MIN_PLAYERS ? '<button type="button" class="icon-btn" data-act="ln-del" data-i="' + i + '" aria-label="Togli il giocatore ' + (i + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</div>';
     }).join('');
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span>' + S.bottone() + '</header>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span class="right">' + TM.bottone() + S.bottone() + '</span></header>' +
       '<section class="panel"><h2 class="h2">Chi gioca?</h2><p class="muted small" style="margin:0">Da 4 a 7 giocatori, nell\'ordine in cui siete seduti.</p><div class="names">' + rows + '</div>' +
       (ui.localNames.length < K.MAX_PLAYERS ? '<button type="button" class="btn sm" data-act="ln-add">+ Aggiungi un giocatore</button>' : '') +
       '<button type="button" class="btn primary wide" data-act="local-start">Distribuisci ruoli e carte</button>' +
@@ -695,7 +712,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   }
   function waitingHTML(s) {
     var seat = K.seatOf(s, ui.myKey), host = seat === s.host;
-    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
     var list = '<ul class="seated">' + s.seats.map(function (x, i) {
       var tag = isBot(s, i) ? 'bot ' + esc(s.bots[i]) : (i === s.host ? 'ha creato la partita' : '') + (i === seat ? (i === s.host ? ' · tu' : 'tu') : '');
       return '<li><span class="n">' + (i + 1) + '</span><span>' + hn(s, i) + botTag(s, i) + '</span><span class="tag">' + tag + '</span>' +

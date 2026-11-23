@@ -252,7 +252,7 @@ html[data-tema="spettrale"] .actions { background: linear-gradient(rgba(190, 170
    Ogni gioco li usa nel suo CSS (html[data-tema] .carta { ... }), così una regola sola vale per tutti i temi.
    --t-font: carattere dei numeri e dei nomi sulle carte;  --t-raggio: angoli;  --t-ombra: ombra della carta.
    Carte senza colore proprio: fondo --t-carta, testo --t-carta-testo, contorno --t-tratto largo --t-tratto-w.
-   Dorso: --t-dorso (un intero «background»).  Emoji dei disegni: filter: var(--t-emo) (lo mette lib/temi.js).
+   Dorso: --t-dorso (un intero «background»). --t-rosso: inchiostro rosso sulla carta (cuori e quadri).  Emoji dei disegni: filter: var(--t-emo) (lo mette lib/temi.js).
    Carte col loro colore (--cc, dato dal gioco): il colore del tema è
      color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff))   (pastello nel gesso, antico nei tatuaggi)
    e poi fondo var(--t-col-fondo, colore), testo var(--t-col-testo, colore), contorno var(--t-col-tratto, colore),
@@ -260,6 +260,7 @@ html[data-tema="spettrale"] .actions { background: linear-gradient(rgba(190, 170
    scuola, Fumetto) danno contorno e testo e lasciano il fondo del colore, quelli «a contorno» (Gessetto, Neon,
    Spettrale) danno il fondo scuro e lasciano il colore a testo e contorno. --t-retino: puntini sopra il colore. */
 html[data-tema="cemento"] {
+  --t-rosso: #d31f26;
   --t-font: 'Permanent Marker', 'Comic Sans MS', cursive; --t-raggio: 8px; --t-ombra: 3px 3px 0 #151515;
   --t-carta: #ffffff; --t-carta-testo: #151515; --t-tratto: #151515; --t-tratto-w: 3px;
   --t-dorso: repeating-linear-gradient(45deg, #151515 0 7px, #ffffff 7px 14px);
@@ -267,6 +268,7 @@ html[data-tema="cemento"] {
   --t-col-glow: -1.5px -1.5px 0 #151515, 1.5px -1.5px 0 #151515, -1.5px 1.5px 0 #151515, 1.5px 1.5px 0 #151515, 2.5px 3px 0 #151515;
 }
 html[data-tema="vecchia"] {
+  --t-rosso: #b8322a;
   --t-font: 'Sancreek', Georgia, serif; --t-raggio: 10px; --t-ombra: 0 0 0 2px #f3ead3, 0 5px 10px rgba(0, 0, 0, .5);
   --t-carta: #f4e9cf; --t-carta-testo: #1b1b1b; --t-tratto: #1b1b1b; --t-tratto-w: 3px;
   --t-dorso: radial-gradient(circle, #f0c43c 0 16%, rgba(240, 196, 60, 0) 18%) 0 0 / 14px 14px, #c8372d;
@@ -274,18 +276,21 @@ html[data-tema="vecchia"] {
   --t-col-glow: -1.5px -1.5px 0 #1b1b1b, 1.5px -1.5px 0 #1b1b1b, -1.5px 1.5px 0 #1b1b1b, 1.5px 1.5px 0 #1b1b1b;
 }
 html[data-tema="gesso"] {
+  --t-rosso: #f28b82;
   --t-font: 'Cabin Sketch', 'Chalkboard SE', cursive; --t-raggio: 12px 8px 13px 7px / 8px 12px 7px 13px; --t-ombra: none;
   --t-carta: #2d3c34; --t-carta-testo: #eeeae0; --t-tratto: rgba(238, 234, 224, .85); --t-tratto-w: 2px;
   --t-dorso: repeating-linear-gradient(45deg, #2d3c34 0 5px, #3a4b42 5px 10px);
   --t-col-fondo: #2d3c34; --t-col-mix: 55%; --t-col-mixcon: #ffffff;
 }
 html[data-tema="neon"] {
+  --t-rosso: #ff4f6b;
   --t-font: 'Tilt Neon', 'Trebuchet MS', sans-serif; --t-raggio: 12px; --t-ombra: 0 0 10px rgba(46, 242, 255, .45);
   --t-carta: #0f0a14; --t-carta-testo: #f6effc; --t-tratto: #2ef2ff; --t-tratto-w: 2px;
   --t-dorso: repeating-radial-gradient(circle, #0f0a14 0 5px, #24142e 5px 7px);
   --t-col-fondo: #0f0a14; --t-col-glow: 0 0 4px currentColor, 0 0 12px currentColor; --t-col-alone: 0 0 12px currentColor;
 }
 html[data-tema="fumetto"] {
+  --t-rosso: #e81c1c;
   --t-font: 'Bangers', Impact, sans-serif; --t-raggio: 5px; --t-ombra: 3px 3px 0 #111111;
   --t-carta: #ffffff; --t-carta-testo: #111111; --t-tratto: #111111; --t-tratto-w: 3px;
   --t-dorso: repeating-conic-gradient(#ff2a2a 0 11deg, #ffe03a 11deg 22deg);
@@ -294,6 +299,7 @@ html[data-tema="fumetto"] {
   --t-retino: radial-gradient(rgba(0, 0, 0, .2) 24%, rgba(0, 0, 0, 0) 28%); --t-retino-size: 7px 7px;
 }
 html[data-tema="spettrale"] {
+  --t-rosso: #b0122f;
   --t-font: 'Creepster', 'Chiller', fantasy; --t-raggio: 12px; --t-ombra: 0 0 14px rgba(255, 138, 31, .25);
   --t-carta: radial-gradient(circle at 50% 42%, #fff0c2 0, #ffcf6e 38%, #f59a32 78%, #a3470f 100%); --t-carta-testo: #1a0d05;
   --t-tratto: #ff8a1f; --t-tratto-w: 2px;

@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Stalla Matta: la notte indaco della sala giochi con carte color confetto: lilla gli unicorni magici,
@@ -283,6 +286,20 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   .seg button:not([aria-pressed="true"]):hover { color: var(--text); }
   .linkbtn:hover { color: var(--text); }
 }
+/* ---------- temi (lib/temi.css): le carte di Stalla Matta coi gettoni --t-* ---------- */
+html[data-tema] .uc {
+  --cc: var(--edge); --t-c: color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-carta); color: var(--t-carta-testo); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 calc(var(--t-tratto-w) + 1px) var(--t-c), var(--t-ombra);
+}
+html[data-tema] .uc.t-cucciolo::before, html[data-tema] .uc.t-semplice::before { opacity: .25; }
+html[data-tema] .uc .ty { color: var(--t-c); }
+html[data-tema] .uc .ic { filter: var(--t-emo); }
+html[data-tema="neon"] .uc { color: var(--t-c); box-shadow: inset 0 0 0 2px var(--t-c), 0 0 12px var(--t-c); }
+html[data-tema="neon"] .uc .nm { text-shadow: 0 0 6px currentColor; }
+html[data-tema] .uc.back { background: var(--t-dorso); box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .uc.back::after { color: var(--t-tratto); }
+html[data-tema] button.uc[aria-pressed="true"] { box-shadow: inset 0 0 0 calc(var(--t-tratto-w) + 1px) var(--t-c), 0 0 0 3px var(--saffron), 0 10px 18px rgba(0, 0, 0, .45); }
 </style>
 </head>
 <body>
@@ -291,7 +308,6 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -305,6 +321,9 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   var K = window.StallaMatta;
   var BOT = window.StallaBot;
   var S = window.Suoni || { tema: function () {}, effetto: function () {}, sequenza: function () {}, bottone: function () { return ''; } };
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  var TM = window.Temi || { bottone: function () { return ''; }, attuale: function () { return 'notte'; } };
+  document.addEventListener('temi:cambio', function () { render(); });
   var $app = document.getElementById('app');
   var $layer = document.getElementById('layer');
 
@@ -533,7 +552,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     var off = P.local || P.bot;
     return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (off ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (off ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Turno ' + s.turnNo + (off ? '' : netDot()) + '</span>' +
-      '<span class="right">' + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -595,7 +614,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     }
     ui.cronNext = Math.max(ui.cronNext || 0, seen);
     var topD = s.discard.length ? cardHTML(s.discard[s.discard.length - 1], { w: 44 }) : '<span class="uc ghost" style="--w:44px"></span>';
-    return '<section class="tavolo" aria-label="Il tavolo"><div class="piles">' +
+    return '<section class="tavolo t-pannello" aria-label="Il tavolo"><div class="piles">' +
       '<span class="pile">' + backHTML(44) + '<span>' + s.deck.length + ' nel mazzo</span></span>' +
       '<button type="button" class="pile" data-act="pile" data-p="scarti">' + topD + '<span>' + s.discard.length + ' scarti</span></button>' +
       '<button type="button" class="pile" data-act="pile" data-p="nido"><span class="nido" aria-hidden="true">🍼</span><span>' + s.nursery.length + ' nel Nido</span></button>' +
@@ -892,7 +911,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + TM.bottone() + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Stalla <span>Matta</span></h1>' +
       '<p class="tag">Riempi la tua stalla di unicorni e rovina quella degli altri. Vince chi ne ha 7. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -917,7 +936,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       return '<div class="row"><input id="ln-' + i + '" class="field" maxlength="20" placeholder="Giocatore ' + (i + 1) + '" value="' + esc(nm) + '" aria-label="Nome del giocatore ' + (i + 1) + '">' +
         (ui.localNames.length > K.MIN_PLAYERS ? '<button type="button" class="icon-btn" data-act="ln-del" data-i="' + i + '" aria-label="Togli il giocatore ' + (i + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</div>';
     }).join('');
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span>' + S.bottone() + '</header>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span class="right">' + TM.bottone() + S.bottone() + '</span></header>' +
       '<section class="panel"><h2 class="h2">Chi gioca?</h2><p class="muted small" style="margin:0">Da 2 a 8 giocatori, nell\'ordine in cui siete seduti.</p><div class="names">' + rows + '</div>' +
       (ui.localNames.length < K.MAX_PLAYERS ? '<button type="button" class="btn sm" data-act="ln-add">+ Aggiungi un giocatore</button>' : '') +
       '<button type="button" class="btn primary wide" data-act="local-start">Distribuisci le carte</button>' +
@@ -929,7 +948,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   }
   function waitingHTML(s) {
     var seat = K.seatOf(s, ui.myKey), host = seat === s.host;
-    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
     var list = '<ul class="seated">' + s.seats.map(function (x, i) {
       var tag = isBot(s, i) ? 'bot ' + esc(s.bots[i]) : (i === s.host ? 'ha creato la partita' : '') + (i === seat ? (i === s.host ? ' · tu' : 'tu') : '');
       return '<li><span class="n">' + (i + 1) + '</span><span>' + hn(s, i) + botTag(s, i) + '</span><span class="tag">' + tag + '</span>' +

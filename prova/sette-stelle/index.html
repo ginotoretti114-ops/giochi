@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Sette Stelle: la notte indaco della sala giochi con carte color crema e numeri che cambiano colore come le stelle. */
@@ -268,6 +271,29 @@ table.score td.z { color: var(--bad); }
   .desk .lanes.two .lc .sc, .desk .lanes.two .lane.me .lc .sc { --w: 33px; }
   .desk .lanes.two .lc { min-height: 48px; }
 }
+/* ---------- temi (lib/temi.css): le carte di Sette Stelle coi gettoni --t-* ---------- */
+html[data-tema] .sc {
+  --cc: hsl(var(--h) 72% 50%); --t-c: color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-col-fondo, var(--t-c)); color: var(--t-col-testo, var(--t-c)); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), var(--t-col-alone, var(--t-ombra));
+  font-family: var(--t-font); text-shadow: var(--t-col-glow, none);
+}
+html[data-tema] .sc::before { color: currentColor; opacity: .16; text-shadow: none; }
+html[data-tema] .sc::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--t-retino, none); background-size: var(--t-retino-size, auto); }
+html[data-tema] .sc.n0 { --cc: #7a80a8; }
+html[data-tema] .sc.bonus { --cc: #f5aa3e; }
+html[data-tema] .sc.x2 { --cc: #8fa3f0; }
+html[data-tema] .sc.gelo { --cc: #2e9fd6; }
+html[data-tema] .sc.pioggia { --cc: #7a4be0; }
+html[data-tema] .sc.desiderio { --cc: #e0438f; }
+html[data-tema] .sc .moon, html[data-tema] .sc .e { filter: var(--t-emo); text-shadow: none; }
+html[data-tema] .sc .l { text-shadow: none; }
+html[data-tema] .sc.back { background: var(--t-dorso); color: var(--t-carta-testo); text-shadow: none;
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .sc.back::before { opacity: .9; }
+html[data-tema] .sc.back::after { display: none; }
+html[data-tema] .sc.dup { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), 0 0 0 3px #ff5a5a, var(--t-ombra); }
 </style>
 </head>
 <body>
@@ -276,7 +302,6 @@ table.score td.z { color: var(--bad); }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -290,6 +315,9 @@ table.score td.z { color: var(--bad); }
   var K = window.SetteStelle;
   var BOT = window.SetteStelleBot;
   var S = window.Suoni || { tema: function () {}, effetto: function () {}, sequenza: function () {}, bottone: function () { return ''; } };
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  var TM = window.Temi || { bottone: function () { return ''; }, attuale: function () { return 'notte'; } };
+  document.addEventListener('temi:cambio', function () { render(); });
   var $app = document.getElementById('app');
   var $layer = document.getElementById('layer');
 
@@ -417,7 +445,7 @@ table.score td.z { color: var(--bad); }
     var turn = s.status === 'playing' && s.phase === 'turn' && s.turn === p && !s.prompt;
     var ask = s.prompt && s.prompt.s === p;
     var pct = Math.min(100, Math.round(s.score[p] / K.TARGET * 100));
-    return '<section class="lane' + (turn ? ' turn' : '') + (ask ? ' ask' : '') + (isMe(P, p) ? ' me' : '') + (st !== 'in' ? ' out' : '') + '" aria-label="' + hn(s, p) + '">' +
+    return '<section class="lane t-pannello' + (turn ? ' turn' : '') + (ask ? ' ask' : '') + (isMe(P, p) ? ' me' : '') + (st !== 'in' ? ' out' : '') + '" aria-label="' + hn(s, p) + '">' +
       '<div class="lh"><span class="nm">' + (isMe(P, p) ? 'Tu' : hn(s, p)) + botTag(s, p) + '</span>' + (s.dealer === p ? '<span class="dl" title="Dà le carte">🃏</span>' : '') +
       '<span class="chip ' + chip[0] + '">' + chip[1] + '</span>' +
       '<span class="tot"><b>' + s.score[p] + ' <small>/ ' + K.TARGET + '</small></b><span class="bar"><i style="width:' + pct + '%"></i></span></span></div>' +
@@ -448,14 +476,14 @@ table.score td.z { color: var(--bad); }
     var msg = l ? l.e + ' ' + l.t : '';
     var sub = s.status === 'playing' && s.phase === 'turn' ? 'Ancora in gioco: ' + K.active(s).length + ' di ' + s.seats.length : '';
     if (s.phase === 'between' && s.last) sub = 'Tocca «Prossimo round» per continuare';
-    return '<section class="sky" aria-label="Il mazzo e l\'ultima carta"><div class="pile">' + backHTML(54) + '<span class="cnt">' + s.deck.length + ' nel mazzo</span></div>' +
+    return '<section class="sky t-pannello" aria-label="Il mazzo e l\'ultima carta"><div class="pile">' + backHTML(54) + '<span class="cnt">' + s.deck.length + ' nel mazzo</span></div>' +
       '<div class="reveal">' + big + '<p class="msg" aria-live="polite">' + msg + (sub ? '<span class="sub">' + sub + '</span>' : '') + '</p></div></section>';
   }
   function topbarHTML(s, P) {
     var off = P.local || P.bot;
     return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (off ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (off ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Round ' + s.round + (off ? '' : netDot()) + '</span>' +
-      '<span class="right">' + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -564,7 +592,7 @@ table.score td.z { color: var(--bad); }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + TM.bottone() + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Sette <span>Stelle</span></h1>' +
       '<p class="tag">Pesca stelle numerate e fermati in tempo: con un doppione sballi e perdi il round. Sette numeri diversi valgono 15 punti in più. Vince chi arriva a 200. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -588,7 +616,7 @@ table.score td.z { color: var(--bad); }
       return '<div class="row"><input id="ln-' + i + '" class="field" maxlength="20" placeholder="Giocatore ' + (i + 1) + '" value="' + esc(nm) + '" aria-label="Nome del giocatore ' + (i + 1) + '">' +
         (ui.localNames.length > 2 ? '<button type="button" class="icon-btn" data-act="ln-del" data-i="' + i + '" aria-label="Togli il giocatore ' + (i + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</div>';
     }).join('');
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span>' + S.bottone() + '</header>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span class="right">' + TM.bottone() + S.bottone() + '</span></header>' +
       '<section class="panel"><h2 class="h2">Chi gioca?</h2><p class="muted small" style="margin:0">Scrivete i nomi nell\'ordine in cui siete seduti.</p><div class="names">' + rows + '</div>' +
       (ui.localNames.length < K.MAX_PLAYERS ? '<button type="button" class="btn sm" data-act="ln-add">+ Aggiungi un giocatore</button>' : '') +
       '<button type="button" class="btn primary wide" data-act="local-start">Dai le carte</button>' +
@@ -600,7 +628,7 @@ table.score td.z { color: var(--bad); }
   }
   function waitingHTML(s) {
     var seat = K.seatOf(s, ui.myKey), host = seat === s.host;
-    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
     var list = '<ul class="seated">' + s.seats.map(function (x, i) {
       var tag = isBot(s, i) ? 'bot ' + esc(s.bots[i]) : (i === s.host ? 'ha creato la partita' : '') + (i === seat ? (i === s.host ? ' · tu' : 'tu') : '');
       return '<li><span class="n">' + (i + 1) + '</span><span>' + hn(s, i) + botTag(s, i) + '</span><span class="tag">' + tag + '</span>' +
