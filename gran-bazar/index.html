@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Bazar di notte: tavolo indaco stampato a blocchi, carte smaltate con filo d'oro, accento zafferano. */
@@ -298,6 +301,22 @@ table.vals-t td, table.vals-t th { text-align: left; }
   .desk .market { max-width: 640px; margin: 0 auto; }
   .desk .col-l > .seat:first-child { margin-top: 8px; }
 }
+/* ---------- temi (lib/temi.css): le carte di Gran Bazar coi gettoni --t-* ---------- */
+html[data-tema] .card, html[data-tema] .chip {
+  --cc: var(--c); --t-c: color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-col-fondo, var(--t-c)); color: var(--ink);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), var(--t-col-alone, var(--t-ombra));
+}
+html[data-tema] .card { border-radius: var(--t-raggio); }
+html[data-tema] .chip { box-shadow: inset 0 0 0 1.5px var(--t-col-tratto, var(--t-c)); }
+html[data-tema="gesso"] .card, html[data-tema="neon"] .card, html[data-tema="spettrale"] .card,
+html[data-tema="gesso"] .chip, html[data-tema="neon"] .chip, html[data-tema="spettrale"] .chip { color: var(--t-c); }
+html[data-tema="neon"] .card svg, html[data-tema="neon"] .chip svg { filter: drop-shadow(0 0 2px currentColor) drop-shadow(0 0 5px currentColor); }
+html[data-tema] .card::before { border-color: currentColor; opacity: .35; }
+html[data-tema] .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--t-retino, none); background-size: var(--t-retino-size, auto); }
+html[data-tema] .card .lbl { font-family: var(--t-font); font-weight: 400; letter-spacing: .02em; }
+html[data-tema] .card[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), 0 0 0 3px var(--saffron), 0 12px 20px rgba(0, 0, 0, .45); }
 </style>
 </head>
 <body>
@@ -366,7 +385,6 @@ table.vals-t td, table.vals-t th { text-align: left; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -567,7 +585,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
     return '<span class="fact' + (lead ? ' lead' : '') + '" title="Cammelli nella mandria">' + ico('cam').replace('<svg', '<svg class="gi"') + ' <b>' + s.herds[p] + '</b></span>' + money;
   }
   function oppHTML(s, p) {
-    return '<section class="seat opp" aria-label="Avversario">' +
+    return '<section class="seat t-pannello opp" aria-label="Avversario">' +
       '<div class="seat-top"><span class="nm">' + hname(s, p) + '</span>' + sealsHTML(s.seals[p]) +
       '<span class="facts"><span class="fact"><b>' + s.hands[p].length + '</b> ' + plural(s.hands[p].length, 'carta', 'carte') + '</span>' + seatFacts(s, p, false) + '</span></div>' +
       '</section>';
@@ -634,7 +652,7 @@ table.vals-t td, table.vals-t th { text-align: left; }
       }).join('');
     }
     var label = P.local ? hname(s, me) : (P.seated ? 'Tu' : hname(s, me));
-    return '<section class="seat me" aria-label="La tua mano">' +
+    return '<section class="seat t-pannello me" aria-label="La tua mano">' +
       '<div class="seat-top"><span class="nm">' + label + '</span>' + sealsHTML(s.seals[me]) +
       '<span class="facts">' + seatFacts(s, me, showHand) + '</span></div>' +
       '<div class="hand">' + cards + '</div><div id="give-row" class="give-row">' + (showHand ? giveRowHTML(s, P) : '') + '</div></section>';
@@ -922,7 +940,9 @@ table.vals-t td, table.vals-t th { text-align: left; }
     document.title = mine ? '● Tocca a te · Gran Bazar' : 'Gran Bazar';
   }
   /* ---------- suoni (lib/suoni.js): musica del gioco ed effetti quando cambia il tavolo ---------- */
-  function snd() { return window.Suoni ? Suoni.bottone() : ''; }
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  function snd() { return (window.Temi ? Temi.bottone() : '') + (window.Suoni ? Suoni.bottone() : ''); }
+  document.addEventListener('temi:cambio', function () { render(); });
   if (window.Suoni) Suoni.tema('bazar');
   var sfxSeen = { key: null, snap: null };
   function sfxSnap(s, P) { return { v: s.v, nonce: s.nonce || '', round: s.round, status: s.status, turn: s.turn, last: JSON.stringify(s.last || null), mine: s.status === 'playing' && !P.local && P.seated && s.turn === P.me }; }

@@ -309,3 +309,6 @@ html[data-tema="spettrale"] {
 
 /* sul telefono stretto i due pulsantini della barra del tavolo (tema e audio) si stringono: il titolo resta su una riga */
 @media (max-width: 430px) { .topbar .tema-btn, .topbar .snd-btn { width: 32px; } }
+
+/* il sipario del gioco in locale (Gran Bazar) copre la mano dell'altro: resta pieno anche dove i fogli sono velati */
+html[data-tema] .overlay.curtain { background: var(--table); }
