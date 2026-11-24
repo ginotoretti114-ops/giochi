@@ -86,6 +86,9 @@ Non c'è niente da compilare: quello che finisce sul ramo `main` va online da so
    `Suoni.bottone()` e suona gli effetti con `Suoni.effetto('carta')` o `Suoni.sequenza([...])`
    (effetti: `click`, `carta`, `mescola`, `dadi`, `anima`, `moneta`, `compra`, `evoca`, `ruba`, `scarta`, `turno`,
    `vittoria`, `errore`, `punti`, `fuoco`). I browser fanno partire l'audio solo dopo il primo tocco sulla pagina.
+6. Per i temi includi nel `<head>`, subito dopo `../lib/ambiente.js`, `../lib/temi.js` e `../lib/temi.css` (prima del tuo
+   `<style>`), metti `Temi.bottone()` accanto a `Suoni.bottone()`, ridisegna su `document.addEventListener('temi:cambio', …)`
+   e in fondo al tuo CSS dai lo stile alle tue carte coi gettoni `--t-*` (vedi «Temi» più sotto).
 
 ## Come funziona l'online di Gran Bazar
 
@@ -123,17 +126,25 @@ restituisce una mossa per il motore. Il facile sceglie quasi a caso; il medio d�
 per vincere, colpisce chi è in testa e ritira i dadi quando conviene. Le partite contro il computer restano nel
 browser (`dv-bot`) e non passano dai server.
 
-I temi di Diavolerie cambiano solo l'aspetto. Si scelgono da un pulsantino con la tavolozza nella barra in alto
-(lobby e tavolo), che apre un foglio coi temi; la scelta resta nel browser (`dv-tema`). Ogni tema diverso da
-«Notte» è un blocco di regole CSS in fondo allo stile, attive con `data-tema="..."` (`cemento`, `vecchia`, `gesso`, `neon`, `fumetto`, `spettrale`)
-sull'elemento `html` (colori, sfondo, cornici, caratteri, gettoni delle carte), più i disegni delle carte:
-`diavolerie/temi.js` disegna in SVG ogni bambino, animale, demone e candela al posto delle emoji, con le stesse
-forme in tutti i temi (i bambini cambiano capelli, carnagione e faccia da dolce, peste o normale) ma disegnate in modo
-diverso: ogni tema ha la sua tavolozza, il gesso ha un filtro SVG che sporca il tratto, il neon tiene solo i contorni
-del colore del tipo di carta (CSS `color`), il fumetto ha il retino a puntini. Filtro e retini stanno una volta sola
-nella pagina, in un `<svg id="dv-defs">` nascosto (`DiavolerieTemi.defs()`).
-I caratteri dei temi arrivano da Google Fonts solo quando il tema è acceso. Uno script in testa alla pagina, subito
-dopo `lib/ambiente.js`, applica il tema prima che la pagina si disegni.
+I temi cambiano solo l'aspetto e sono gli stessi in tutti i giochi: «Notte» (lo stile di sempre), «Cemento»
+(graffiti, chiaro), «Vecchia scuola» (tatuaggi da marinaio, scuro), «Gessetto» (lavagna, scuro), «Neon» (insegne
+luminose, scuro), «Fumetto» (pop art, chiaro) e «Spettrale» (ombre sulla luna piena, scuro). Si scelgono da un
+pulsantino con la tavolozza accanto a quello dell'audio (lobby e tavolo) e la scelta vale per tutta la sala
+(`sala-tema`). `lib/temi.js`, nel `<head>` subito dopo `lib/ambiente.js`, mette `data-tema="..."` su `<html>` coi
+caratteri del tema prima che la pagina si disegni, dà il pulsantino (`Temi.bottone()`), apre il foglio per scegliere e
+manda l'evento `temi:cambio`, su cui il gioco ridisegna. `lib/temi.css` (prima dello stile del gioco) veste ciò che i
+giochi hanno in comune (sfondo, pannelli, pulsanti, fogli, barra delle azioni) e definisce i gettoni `--t-*` con cui
+ogni gioco, in fondo al suo CSS, dà lo stile alle sue carte: carta, contorno, ombra, dorso, carattere dei numeri, colori
+pieni o a contorno, pastello nel gesso, antichi nei tatuaggi, al neon; le emoji prendono il filtro `--t-emo` (adesivo,
+tatuaggio, gesso, tubo al neon, fumetto, ombra sulla luna). Un riquadro tutto del gioco prende l'aspetto dei pannelli
+con la classe `t-pannello`.
+
+Diavolerie in più disegna ogni carta in SVG nello stile del tema: `diavolerie/temi.js` disegna ogni bambino, animale,
+demone e candela al posto delle emoji, con le stesse forme in tutti i temi (i bambini cambiano capelli, carnagione e
+faccia da dolce, peste o normale) ma disegnate in modo diverso: ogni tema ha la sua tavolozza, il gesso ha un filtro
+SVG che sporca il tratto, il neon tiene solo i contorni del colore del tipo di carta (CSS `color`), il fumetto ha il
+retino a puntini, lo spettrale fa ombre nere con gli occhi accesi. Filtro e retini stanno una volta sola nella pagina,
+in un `<svg id="dv-defs">` nascosto (`DiavolerieTemi.defs()`).
 
 ## Sette Stelle e Polvere e Piombo
 
