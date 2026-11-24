@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
 <script src="../lib/ambiente.js"></script>
 <script src="../lib/temi.js"></script>
+<script src="mondi.js"></script>
 <link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
@@ -316,6 +317,46 @@ html[data-tema] .pc.mini { box-shadow: inset 0 0 0 1px var(--t-tratto); }
 html[data-tema] .pc.empty { background: none; box-shadow: none; }
 html[data-tema] button.pc.pick { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), 0 0 0 2px var(--saffron), 0 6px 14px rgba(0, 0, 0, .3); }
 html[data-tema] button.pc[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), 0 0 0 3px var(--saffron), 0 12px 20px rgba(0, 0, 0, .45); }
+/* ---------- mondi (piccante/mondi.js): Laboratorio pazzo e Draghi ---------- */
+/* Laboratorio pazzo: piastrelle verdi scure, etichette da provetta, liquidi sempre più instabili */
+html[data-mondo="lab"] {
+  --table: #0d1f1a; --panel: #13302a; --raise: #1a3f37; --line: #2a5e52; --text: #eafff6; --muted: #9fd6c4;
+  --saffron: #39d98a; --on-saffron: #03140d; --focus: #d7ff3a; --font-display: 'Bungee', 'Rozha One', sans-serif;
+}
+html[data-mondo="lab"] body { background-color: #0d1f1a;
+  background-image: radial-gradient(ellipse at 50% -10%, rgba(57, 217, 138, .2), rgba(57, 217, 138, 0) 55%),
+    linear-gradient(rgba(255, 255, 255, .05) 1px, rgba(255, 255, 255, 0) 1px), linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, rgba(255, 255, 255, 0) 1px);
+  background-size: 100% 700px, 28px 28px, 28px 28px; background-repeat: no-repeat, repeat, repeat; background-position: 0 0; }
+html[data-mondo="lab"] .brand h1 { font-size: 40px; color: #eafff6; text-shadow: 0 0 16px rgba(57, 217, 138, .55); }
+html[data-mondo="lab"] .brand h1 span { color: #39d98a; }
+html[data-mondo="lab"] .status, html[data-mondo="lab"] .h2, html[data-mondo="lab"] .sheet h2, html[data-mondo="lab"] .topbar .round { letter-spacing: .02em; }
+html[data-mondo="lab"] .pc { font-family: 'Bungee', var(--font-display); }
+html[data-mondo="lab"] .pc.h1 { --hb: #39d98a; --hi: #0f7a4a; } html[data-mondo="lab"] .pc.h2 { --hb: #2ec4ff; --hi: #0b6f99; }
+html[data-mondo="lab"] .pc.h3 { --hb: #a66bff; --hi: #5b2bb5; } html[data-mondo="lab"] .pc.h4 { --hb: #ff4fd8; --hi: #a3118a; }
+html[data-mondo="lab"] .pc.h5 { --hb: #c6f432; --hi: #4d6600; }
+html[data-mondo="lab"] .pc.joker { background: radial-gradient(circle at 50% 38%, #1f5c4b 0%, #0d1f1a 72%); color: #d7ff3a; box-shadow: inset 0 0 0 1.5px rgba(215, 255, 58, .6), 0 4px 12px rgba(0, 0, 0, .4); }
+html[data-mondo="lab"] .pc.back { background: radial-gradient(circle at 50% 50%, rgba(57, 217, 138, 0) 0 20%, rgba(57, 217, 138, .85) 21% 26%, rgba(57, 217, 138, 0) 27%),
+  repeating-linear-gradient(45deg, #163a32 0 5px, #10291f 5px 10px); box-shadow: inset 0 0 0 1.5px rgba(57, 217, 138, .45), 0 4px 10px rgba(0, 0, 0, .35); }
+/* Draghi: caverna con le squame e la brace; carte di pergamena coi colori dei draghi */
+html[data-mondo="draghi"] {
+  --table: #1a1210; --panel: #2a1d18; --raise: #36261f; --line: #57392b; --text: #f8ead8; --muted: #cfae92;
+  --saffron: #e76f51; --on-saffron: #1a0705; --focus: #f4a261; --font-display: 'MedievalSharp', 'Rozha One', serif;
+}
+html[data-mondo="draghi"] body { background-color: #1a1210;
+  background-image: radial-gradient(ellipse at 50% 120%, rgba(231, 111, 81, .4), rgba(231, 111, 81, 0) 60%),
+    radial-gradient(circle at 50% 0, rgba(255, 140, 60, 0) 9px, rgba(255, 140, 60, .08) 10px 11.5px, rgba(255, 140, 60, 0) 12.5px);
+  background-size: 100% 100%, 24px 13px; background-position: 0 0; }
+html[data-mondo="draghi"] .panel, html[data-mondo="draghi"] .opp, html[data-mondo="draghi"] .mine, html[data-mondo="draghi"] .sheet {
+  box-shadow: inset 0 0 0 1px rgba(255, 200, 150, .06), 0 8px 20px rgba(0, 0, 0, .4); }
+html[data-mondo="draghi"] .brand h1 { color: #f8ead8; text-shadow: 0 0 18px rgba(231, 111, 81, .6), 0 2px 0 #6a1a0c; }
+html[data-mondo="draghi"] .brand h1 span { color: #f4a261; }
+html[data-mondo="draghi"] .pc { font-family: 'MedievalSharp', var(--font-display); background: linear-gradient(172deg, #fbf1d9 0%, #e9d2a6 100%); }
+html[data-mondo="draghi"] .pc.h1 { --hb: #57cc99; --hi: #1f7a4d; } html[data-mondo="draghi"] .pc.h2 { --hb: #4ea8de; --hi: #1d5d8a; }
+html[data-mondo="draghi"] .pc.h3 { --hb: #f4a261; --hi: #9c5a17; } html[data-mondo="draghi"] .pc.h4 { --hb: #e76f51; --hi: #9d2f17; }
+html[data-mondo="draghi"] .pc.h5 { --hb: #3a2e3f; --hi: #1c1420; }
+html[data-mondo="draghi"] .pc.joker { background: radial-gradient(circle at 50% 38%, #6a3a2a 0%, #2a1712 72%); color: #f4a261; box-shadow: inset 0 0 0 1.5px rgba(244, 162, 97, .6), 0 4px 12px rgba(0, 0, 0, .4); }
+html[data-mondo="draghi"] .pc.back { background: radial-gradient(circle at 50% 0, rgba(231, 111, 81, 0) 6px, rgba(231, 111, 81, .5) 7px 8.5px, rgba(231, 111, 81, 0) 9.5px) 0 0 / 14px 8px, #2a1712;
+  box-shadow: inset 0 0 0 1.5px rgba(231, 111, 81, .5), 0 4px 10px rgba(0, 0, 0, .4); }
 </style>
 </head>
 <body>
@@ -431,7 +472,10 @@ html[data-tema] button.pc[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t
   /* ---------- carte ---------- */
   function heat(c) { return Math.min(5, Math.ceil(c / 11)); }
   function cardLabel(c, jv) { return c === J ? (jv != null ? 'Jolly, vale ' + jv : 'Jolly') : String(c); }
-  function chilis(n) { var o = ''; for (var i = 0; i < n; i++) o += '<svg aria-hidden="true" viewBox="0 0 20 20"><use href="#chili1"/></svg>'; return o; }
+  // Mondi (mondi.js): simboli e parole del mondo acceso; senza mondo, peperoncini e fiamme.
+  var PCM = window.PiccanteMondi || { parole: function (h) { return h; }, sym: function (id) { return id; }, simboli: function () { return ''; } };
+  (function () { var d = document.querySelector('svg.defs'); if (d) d.insertAdjacentHTML('beforeend', PCM.simboli()); })();
+  function chilis(n) { var o = ''; for (var i = 0; i < n; i++) o += '<svg aria-hidden="true" viewBox="0 0 20 20"><use href="#' + PCM.sym('chili1') + '"/></svg>'; return o; }
   // Una carta scoperta. opts: {mini, tag, attrs, cls, jv, style}
   function cardHTML(c, opts) {
     opts = opts || {};
@@ -440,7 +484,7 @@ html[data-tema] button.pc[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t
       cls += ' joker';
       if (opts.jv != null) inner = '<span class="num">' + opts.jv + '</span><span class="lb">jolly</span>';
       else if (opts.mini) inner = '<span class="num">J</span>';
-      else inner = '<span class="rg">0–56</span><svg class="fl" aria-hidden="true" viewBox="0 0 40 40"><use href="#flame"/></svg><span class="lb">jolly</span>';
+      else inner = '<span class="rg">0–56</span><svg class="fl" aria-hidden="true" viewBox="0 0 40 40"><use href="#' + PCM.sym('flame') + '"/></svg><span class="lb">jolly</span>';
     } else {
       cls += ' h' + heat(c);
       inner = '<span class="hl">' + chilis(heat(c)) + '</span><span class="num">' + c + '</span>';
@@ -460,7 +504,7 @@ html[data-tema] button.pc[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t
   }
   function minis(list) { return list.map(function (c) { return cardHTML(c, { mini: true }); }).join(''); }
   function piliHTML(n) {
-    return '<span class="pili' + (n >= 5 ? ' hot' : '') + '" title="Peperoncini"><svg aria-hidden="true" viewBox="0 0 20 20"><use href="#chili"/></svg><b>' + n + '</b><span class="sr"> ' + plural(n, 'peperoncino', 'peperoncini') + '</span></span>';
+    return '<span class="pili' + (n >= 5 ? ' hot' : '') + '" title="Peperoncini"><svg aria-hidden="true" viewBox="0 0 20 20"><use href="#' + PCM.sym('chili') + '"/></svg><b>' + n + '</b><span class="sr"> ' + plural(n, 'peperoncino', 'peperoncini') + '</span></span>';
   }
   function dealerBadge() { return '<span class="dl" title="Mazziere">M<span class="sr">azziere</span></span>'; }
 
@@ -1099,9 +1143,9 @@ html[data-tema] button.pc[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t
     if (ui.route === 'lobby') html = lobbyHTML();
     else if (ui.route === 'local') html = ui.local ? boardHTML(ui.local) : localSetupHTML();
     else html = onlineGameHTML();
-    $app.innerHTML = html;
+    $app.innerHTML = PCM.parole(html);
     $app.classList.toggle('wide', html.indexOf('<div class="desk') >= 0);
-    $layer.innerHTML = layerHTML();
+    $layer.innerHTML = PCM.parole(layerHTML());
     if (ui.pendingAnim) ui.animKey = ui.pendingAnim;
     restoreFocus(f);
     updateTitle();
