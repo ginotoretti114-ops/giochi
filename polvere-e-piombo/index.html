@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
 <script src="../lib/ambiente.js"></script>
 <script src="../lib/temi.js"></script>
+<script src="mondi.js"></script>
 <link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
@@ -280,6 +281,53 @@ html[data-tema] .pc.back { background: var(--t-dorso); }
 html[data-tema] .pc.back::after { color: var(--t-tratto); }
 html[data-tema] button.pc[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), 0 0 0 3px var(--saffron), 0 10px 18px rgba(0, 0, 0, .45); }
 html[data-tema="cemento"] .hp i.off, html[data-tema="vecchia"] .hp i.off, html[data-tema="fumetto"] .hp i.off { background: rgba(0, 0, 0, .14); }
+/* ---------- mondi (polvere-e-piombo/mondi.js): Samurai, Pirati e Gangster ---------- */
+/* Samurai: sera indaco col sole rosso e i petali; pannelli di lacca nera e oro; carte di carta di riso col sigillo rosso */
+html[data-mondo="samurai"] {
+  --table: #1b1424; --panel: #1d1517; --raise: #2a1f22; --line: #6b5326; --text: #f6efe2; --muted: #c8b9a6;
+  --saffron: #e63946; --on-saffron: #ffffff; --focus: #f2c14e; --font-display: 'Shojumaru', 'Rozha One', serif;
+}
+html[data-mondo="samurai"] body { background-color: #1b1424;
+  background-image: radial-gradient(circle at 50% 160px, #e63946 0 92px, rgba(230, 57, 70, .25) 94px, rgba(230, 57, 70, 0) 170px),
+    radial-gradient(ellipse 5px 3px at 20% 30%, rgba(255, 183, 197, .8) 99%, rgba(255, 183, 197, 0) 100%),
+    radial-gradient(ellipse 4px 2.5px at 70% 60%, rgba(255, 183, 197, .6) 99%, rgba(255, 183, 197, 0) 100%),
+    linear-gradient(#2b1b33, #120d16 900px);
+  background-size: 100% 600px, 110px 130px, 150px 170px, 100% 100%; background-repeat: no-repeat, repeat, repeat, no-repeat; background-position: 0 0; }
+html[data-mondo="samurai"] .panel, html[data-mondo="samurai"] .opp, html[data-mondo="samurai"] .mine, html[data-mondo="samurai"] .sheet,
+html[data-mondo="samurai"] .t-pannello { background: linear-gradient(180deg, #221a1c, #161112); border: 1px solid #6b5326; box-shadow: inset 0 0 0 3px #161112, inset 0 0 0 4px rgba(242, 193, 78, .35); }
+html[data-mondo="samurai"] .opp.turn, html[data-mondo="samurai"] .mine.turn { border-color: #e63946; box-shadow: inset 0 0 0 3px #161112, inset 0 0 0 4px #e63946; }
+html[data-mondo="samurai"] .brand h1 { color: #f6efe2; text-shadow: 0 3px 0 #7a1020; }
+html[data-mondo="samurai"] .brand h1 span { color: #f2c14e; }
+html[data-mondo="samurai"] .pc { background: linear-gradient(170deg, #fbf6ea, #ece0c6); color: #2a1a12; box-shadow: inset 0 0 0 calc(var(--w) * .04) #b3202e, inset 0 0 0 calc(var(--w) * .07) #fbf6ea, inset 0 0 0 calc(var(--w) * .08) rgba(179, 32, 46, .35), 0 4px 10px rgba(0, 0, 0, .35); }
+html[data-mondo="samurai"] .pc .rg { font-family: 'Shojumaru', var(--font-display); color: #b3202e; }
+html[data-mondo="samurai"] .pc.blue { box-shadow: inset 0 0 0 calc(var(--w) * .04) #24507a, inset 0 0 0 calc(var(--w) * .07) #fbf6ea, 0 4px 10px rgba(0, 0, 0, .35); }
+html[data-mondo="samurai"] .pc.back { background: radial-gradient(circle at 50% 50%, #e63946 0 22%, rgba(230, 57, 70, 0) 23%), #1d1517; box-shadow: inset 0 0 0 calc(var(--w) * .045) #f2c14e; }
+html[data-mondo="samurai"] .pc.back::after { content: none; }
+/* Pirati: sopra Vecchia scuola (legno e carta), coi titoli piratici */
+html[data-mondo="pirati"] { --font-display: 'Pirata One', 'Sancreek', serif; --t-font: 'Pirata One', 'Sancreek', serif; }
+html[data-mondo="pirati"] body { background-image: radial-gradient(ellipse at 50% -10%, rgba(255, 196, 92, .18), rgba(255, 196, 92, 0) 55%),
+  repeating-linear-gradient(180deg, #241b17 0 46px, #1b1411 46px 49px); background-size: auto; background-position: 0 0; }
+html[data-mondo="pirati"] .brand h1, html[data-mondo="pirati"] .status, html[data-mondo="pirati"] .h2, html[data-mondo="pirati"] .sheet h2 { letter-spacing: .02em; }
+/* Gangster: art déco nero e oro, carte d'avorio coi filetti dorati */
+html[data-mondo="gangster"] {
+  --table: #0e0d0b; --panel: #161411; --raise: #221e18; --line: #6e5a2a; --text: #f3ead7; --muted: #bfae8a;
+  --saffron: #d4af37; --on-saffron: #14110a; --focus: #f0d77a; --font-display: 'Limelight', 'Rozha One', serif;
+}
+html[data-mondo="gangster"] body { background-color: #0e0d0b;
+  background-image: repeating-conic-gradient(from -90deg at 50% 100%, rgba(212, 175, 55, .1) 0 5deg, rgba(212, 175, 55, 0) 5deg 15deg),
+    radial-gradient(ellipse at 50% 0, rgba(212, 175, 55, .18), rgba(212, 175, 55, 0) 60%);
+  background-size: 120px 60px, 100% 700px; background-repeat: repeat, no-repeat; background-position: 0 0; }
+html[data-mondo="gangster"] .panel, html[data-mondo="gangster"] .opp, html[data-mondo="gangster"] .mine, html[data-mondo="gangster"] .sheet,
+html[data-mondo="gangster"] .t-pannello { background: #161411; border: 1px solid #d4af37; border-radius: 6px; box-shadow: inset 0 0 0 3px #161411, inset 0 0 0 4px rgba(212, 175, 55, .55); }
+html[data-mondo="gangster"] .opp.turn, html[data-mondo="gangster"] .mine.turn { box-shadow: inset 0 0 0 3px #161411, inset 0 0 0 4px #d4af37, 0 0 16px rgba(212, 175, 55, .35); }
+html[data-mondo="gangster"] .brand h1 { color: #f0d77a; letter-spacing: .04em; text-shadow: 0 2px 0 #4a3a10; }
+html[data-mondo="gangster"] .brand h1 span { color: #f3ead7; }
+html[data-mondo="gangster"] .btn.primary { background: linear-gradient(#e8c766, #b8922a); color: #14110a; }
+html[data-mondo="gangster"] .pc { background: linear-gradient(170deg, #fbf7ec, #e9dfc7); color: #1c1710; border-radius: 4px;
+  box-shadow: inset 0 0 0 calc(var(--w) * .035) #b8922a, inset 0 0 0 calc(var(--w) * .06) #fbf7ec, inset 0 0 0 calc(var(--w) * .07) #b8922a, 0 4px 10px rgba(0, 0, 0, .45); }
+html[data-mondo="gangster"] .pc .rg { font-family: 'Limelight', var(--font-display); color: #7a5c12; }
+html[data-mondo="gangster"] .pc.back { background: repeating-conic-gradient(from -90deg at 50% 100%, #d4af37 0 6deg, #161411 6deg 18deg); box-shadow: inset 0 0 0 calc(var(--w) * .045) #d4af37; }
+html[data-mondo="gangster"] .pc.back::after { color: #f0d77a; }
 </style>
 </head>
 <body>
@@ -356,6 +404,9 @@ html[data-tema="cemento"] .hp i.off, html[data-tema="vecchia"] .hp i.off, html[d
     sfida: '⚔️', raffica: '🔥', bisonti: '🐃', botte: '🛢️', galera: '⛓️', candelotto: '🧨', cannocchiale: '🔭', cavallo: '🐎',
     rapida: '🔫', revolver: '🔫', fucile: '🔫', carabina: '🔫', lungo: '🔫' };
   var SUIT = { C: '♥', Q: '♦', F: '♣', P: '♠' };
+  // Mondi (mondi.js): emoji e nomi del mondo acceso; senza mondo, quelli del West.
+  var PPM = window.PolvereMondi || { parole: function (h) { return h; }, icona: function (k, b) { return b; } };
+  function icona(k) { return PPM.icona(k, ICON[k]); }
   var ROLE_TXT = K.ROLES;
   function cname(c) { var T = K.typeOf(c); return T ? T.name : ''; }
   function cfull(c) { var m = K.info(c); return m ? cname(c) + ' ' + m.r + SUIT[m.s] : ''; }
@@ -368,13 +419,13 @@ html[data-tema="cemento"] .hp i.off, html[data-tema="vecchia"] .hp i.off, html[d
     var st = opts.w ? ' style="--w:' + opts.w + 'px' + (opts.style ? ';' + opts.style : '') + '"' : (opts.style ? ' style="' + opts.style + '"' : '');
     return '<' + tag + ' class="pc' + (T.blue ? ' blue' : '') + (opts.cls ? ' ' + opts.cls : '') + '"' + attrs + st + '>' +
       '<span class="rk' + (red ? ' red' : '') + '">' + m.r + SUIT[m.s] + '</span>' + (T.weapon ? '<span class="rg">' + T.weapon + '</span>' : '') +
-      '<span class="ic" aria-hidden="true">' + ICON[m.k] + '</span><span class="nm">' + esc(T.name) + '</span></' + tag + '>';
+      '<span class="ic" aria-hidden="true">' + icona(m.k) + '</span><span class="nm">' + esc(T.name) + '</span></' + tag + '>';
   }
   function backHTML(w) { return '<span class="pc back" style="--w:' + w + 'px" role="img" aria-label="Mazzo"></span>'; }
   function chipHTML(c) {
     var k = K.kindOf(c), T = K.typeOf(c);
     var label = T.weapon ? T.name + ' ' + T.weapon : T.name;
-    return '<span class="chip' + (k === 'galera' ? ' jail' : k === 'candelotto' ? ' dyn' : '') + '"><i aria-hidden="true">' + ICON[k] + '</i>' + esc(label) + '</span>';
+    return '<span class="chip' + (k === 'galera' ? ' jail' : k === 'candelotto' ? ' dyn' : '') + '"><i aria-hidden="true">' + icona(k) + '</i>' + esc(label) + '</span>';
   }
   function hpHTML(s, p, big) {
     var h = '', bumped = ui.hpBump && ui.hpBump[p];
@@ -425,10 +476,10 @@ html[data-tema="cemento"] .hp i.off, html[data-tema="vecchia"] .hp i.off, html[d
       case 'play':
         if (K.kindOf(e.c) === 'borseggio' || K.kindOf(e.c) === 'lazo') return null;
         if (e.as === 'sparo') return { e: '💥', t: Who(s, P, p) + ' ' + v(P, p, 'spari', 'spara') + ' a ' + whom(s, P, e.to) };
-        return { e: ICON[K.kindOf(e.c)] || '🂠', t: Who(s, P, p) + ' ' + v(P, p, 'giochi', 'gioca') + ' ' + esc(cname(e.c)) + (e.to != null ? ' contro ' + whom(s, P, e.to) : '') };
+        return { e: icona(K.kindOf(e.c)) || '🂠', t: Who(s, P, p) + ' ' + v(P, p, 'giochi', 'gioca') + ' ' + esc(cname(e.c)) + (e.to != null ? ' contro ' + whom(s, P, e.to) : '') };
       case 'equip':
         if (K.kindOf(e.c) === 'galera') return { e: '⛓️', t: Who(s, P, p) + ' ' + v(P, p, 'metti', 'mette') + ' ' + whom(s, P, e.to) + ' in Galera' };
-        return { e: ICON[K.kindOf(e.c)], t: Who(s, P, p) + ' ' + v(P, p, 'metti', 'mette') + ' in gioco ' + esc(cname(e.c)) };
+        return { e: icona(K.kindOf(e.c)), t: Who(s, P, p) + ' ' + v(P, p, 'metti', 'mette') + ' in gioco ' + esc(cname(e.c)) };
       case 'miss': return { e: '💨', t: e.how === 'botte' ? 'La Botte salva ' + whom(s, P, p) : Who(s, P, p) + ' ' + v(P, p, 'schivi', 'schiva') + (e.cards && e.cards.length > 1 ? ' due volte' : '') };
       case 'half': return { e: '🛢️', t: 'La Botte vale una sola Schivata!: ne serve un\'altra' };
       case 'hurt': return { e: '🩸', t: Who(s, P, p) + ' ' + v(P, p, 'perdi', 'perde') + ' ' + e.n + ' ' + plural(e.n, 'punto', 'punti') + ' vita' + (e.why && WHY[e.why] && e.why !== 'sparo' ? ' (' + WHY[e.why] + ')' : ''), bad: true };
@@ -919,12 +970,12 @@ html[data-tema="cemento"] .hp i.off, html[data-tema="vecchia"] .hp i.off, html[d
     else if (ui.route === 'local') html = ui.local ? boardHTML(ui.local) : localSetupHTML();
     else if (ui.route === 'bot') html = boardHTML(ui.bot);
     else html = onlineGameHTML();
-    $app.innerHTML = html;
+    $app.innerHTML = PPM.parole(html);
     $app.classList.toggle('wide', html.indexOf('<div class="desk') >= 0);
     var lh = layerHTML();
     if (lh !== ui.layerHTML) {
       var old = $layer.querySelector('.sheet'), top = old ? old.scrollTop : 0, same = ui.layerSheet === ui.sheet;
-      $layer.innerHTML = lh; ui.layerHTML = lh;
+      $layer.innerHTML = PPM.parole(lh); ui.layerHTML = lh;
       var nw = $layer.querySelector('.sheet');
       if (nw && same && top) nw.scrollTop = top;
     }
