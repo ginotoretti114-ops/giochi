@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Piccante: la notte indaco della sala giochi; carte color crema con una fascia che scalda dal verde al rosso. */
@@ -298,6 +301,22 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
   .desk .opps { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
   .desk .col-l > .mission:first-child { margin-top: 8px; }
 }
+/* ---------- temi (lib/temi.css): le carte di Piccante coi gettoni --t-* ---------- */
+html[data-tema] .pc {
+  --t-c: color-mix(in srgb, var(--hb) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-carta); color: color-mix(in srgb, var(--t-c) 72%, #000); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); font-family: var(--t-font);
+}
+html[data-tema] .pc::before, html[data-tema] .pc::after { background: var(--t-c); }
+html[data-tema="gesso"] .pc, html[data-tema="neon"] .pc { color: var(--t-c); }
+html[data-tema="neon"] .pc { box-shadow: inset 0 0 0 2px var(--t-c), 0 0 10px var(--t-c); text-shadow: 0 0 6px currentColor; }
+html[data-tema] .pc.joker { background: radial-gradient(circle at 50% 38%, #3d438f 0%, #1f2352 72%); color: var(--saffron); text-shadow: none;
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--saffron), var(--t-ombra); }
+html[data-tema] .pc.back { background: var(--t-dorso); box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .pc.mini { box-shadow: inset 0 0 0 1px var(--t-tratto); }
+html[data-tema] .pc.empty { background: none; box-shadow: none; }
+html[data-tema] button.pc.pick { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), 0 0 0 2px var(--saffron), 0 6px 14px rgba(0, 0, 0, .3); }
+html[data-tema] button.pc[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), 0 0 0 3px var(--saffron), 0 12px 20px rgba(0, 0, 0, .45); }
 </style>
 </head>
 <body>
@@ -315,7 +334,6 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -550,9 +568,9 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
   function missionHTML(s) {
     var m = K.mission(s), N = s.N;
     var cards = N + ' ' + plural(N, 'carta', 'carte') + ' a testa' + (m && m.type === 'draw' ? ' + 1' : '');
-    if (!m) return '<section class="mission"><div class="mhd"><b class="mname">Senza missione</b><span class="mcards">' + cards + '</span></div></section>';
+    if (!m) return '<section class="mission t-pannello"><div class="mhd"><b class="mname">Senza missione</b><span class="mcards">' + cards + '</span></div></section>';
     var i = missionInfo(m);
-    return '<section class="mission' + (m.expert ? ' expert' : '') + '" aria-label="Missione del round"><div class="mhd"><span class="mtag">' + (m.expert ? 'Esperti' : 'Missione') +
+    return '<section class="mission t-pannello' + (m.expert ? ' expert' : '') + '" aria-label="Missione del round"><div class="mhd"><span class="mtag">' + (m.expert ? 'Esperti' : 'Missione') +
       '</span><b class="mname">' + i.name + '</b><span class="mcards">' + cards + '</span></div><p>' + i.desc + '</p></section>';
   }
   function bidTxt(s, p) { return s.bids && s.bids[p] != null ? String(s.bids[p]) : '–'; }
@@ -629,7 +647,7 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
     for (var i = 0; i < s.seats.length; i++) if (s.bids[i] != null) { sum += s.bids[i]; placed++; }
     var T = K.tricks(s);
     var tally = placed ? 'Scommesse <b>' + sum + '</b> su <b>' + T + '</b> prese' + (placed === s.seats.length ? (sum > T ? ' · qualcuno resterà a secco' : ' · avanza qualche presa') : '') : '<b>' + T + '</b> prese in palio';
-    return '<section class="table" aria-label="Tavolo">' + (slots ? '<div class="slots">' + slots + '</div>' : '') +
+    return '<section class="table t-pannello" aria-label="Tavolo">' + (slots ? '<div class="slots">' + slots + '</div>' : '') +
       (cap ? '<p class="cap">' + cap + '</p>' : '') + '<p class="tally">' + tally + '</p></section>';
   }
   // Carte della mano su una riga; se diventerebbero troppo piccole, su due righe pari.
@@ -1021,7 +1039,9 @@ dl.ms dd { margin: -4px 0 0; color: var(--muted); font-size: 15px; }
   }
 
   /* ---------- suoni (lib/suoni.js): musica del gioco ed effetti quando cambia il tavolo ---------- */
-  function snd() { return window.Suoni ? Suoni.bottone() : ''; }
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  function snd() { return (window.Temi ? Temi.bottone() : '') + (window.Suoni ? Suoni.bottone() : ''); }
+  document.addEventListener('temi:cambio', function () { render(); });
   if (window.Suoni) Suoni.tema('piccante');
   var sfxSeen = { key: null, snap: null };
   function sfxSnap(s, P) { return { v: s.v, nonce: s.nonce || '', round: s.round, status: s.status, turn: s.turn, plays: s.trick ? s.trick.plays.length : -1, tricks: s.trickNo, bids: cnt(s.bids), chosen: cnt(s.passSel) + cnt(s.designated) + cnt(s.sim), mine: s.status === 'playing' && (P.local ? false : P.seated && K.waitingFor(s).indexOf(P.me) >= 0) }; }
