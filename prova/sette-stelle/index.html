@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
 <script src="../lib/ambiente.js"></script>
 <script src="../lib/temi.js"></script>
+<script src="mondi.js"></script>
 <link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
@@ -294,6 +295,76 @@ html[data-tema] .sc.back { background: var(--t-dorso); color: var(--t-carta-test
 html[data-tema] .sc.back::before { opacity: .9; }
 html[data-tema] .sc.back::after { display: none; }
 html[data-tema] .sc.dup { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), 0 0 0 3px #ff5a5a, var(--t-ombra); }
+/* ---------- mondi (sette-stelle/mondi.js): Spazio e Luna park ---------- */
+/* Spazio: nebulose e polvere di stelle; le carte sono pianeti del loro colore con l'anello */
+html[data-mondo="spazio"] {
+  --table: #070a1a; --panel: rgba(18, 22, 52, .88); --raise: #1d2350; --line: #2f3672; --text: #eef0ff; --muted: #a8afe0;
+  --saffron: #7cf3ff; --on-saffron: #03131a; --focus: #c58bff; --font-display: 'Orbitron', 'Trebuchet MS', sans-serif;
+}
+html[data-mondo="spazio"] body { background-color: #070a1a;
+  background-image: radial-gradient(circle at 14% 22%, rgba(255, 255, 255, .8) 0 1px, rgba(255, 255, 255, 0) 1.6px),
+    radial-gradient(circle at 63% 71%, rgba(255, 255, 255, .6) 0 1px, rgba(255, 255, 255, 0) 1.5px),
+    radial-gradient(circle at 87% 37%, rgba(255, 255, 255, .7) 0 1.3px, rgba(255, 255, 255, 0) 2px),
+    radial-gradient(ellipse at 80% 10%, rgba(160, 90, 255, .32), rgba(160, 90, 255, 0) 45%),
+    radial-gradient(ellipse at 10% 70%, rgba(40, 200, 220, .22), rgba(40, 200, 220, 0) 45%);
+  background-size: 90px 90px, 130px 130px, 170px 170px, 100% 900px, 100% 1200px; background-repeat: repeat, repeat, repeat, no-repeat, no-repeat; background-position: 0 0; }
+html[data-mondo="spazio"] .brand h1 { font-weight: 800; font-size: 38px; letter-spacing: .04em; color: #eef0ff; text-shadow: 0 0 18px rgba(124, 243, 255, .5); }
+html[data-mondo="spazio"] .brand h1 span { color: #c58bff; }
+html[data-mondo="spazio"] .status, html[data-mondo="spazio"] .h2, html[data-mondo="spazio"] .sheet h2, html[data-mondo="spazio"] .topbar .round { font-weight: 600; letter-spacing: .03em; }
+html[data-mondo="spazio"] .sc { color: #ffffff; font-family: 'Orbitron', var(--font-display); font-weight: 800; border-radius: calc(var(--w) * .2);
+  background: radial-gradient(circle at 36% 34%, hsl(var(--h) 95% 78%) 0, hsl(var(--h) 75% 48%) 34%, hsl(var(--h) 70% 22%) 58%, #0b0f26 61%);
+  box-shadow: inset 0 0 0 1.5px rgba(160, 175, 255, .35), 0 0 14px hsl(var(--h) 80% 50% / .35); text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+html[data-mondo="spazio"] .sc::before { content: ""; width: 128%; height: 28%; left: -14%; top: 40%; transform: rotate(-18deg);
+  border-radius: 50%; border: calc(var(--w) * .045) solid hsl(var(--h) 90% 82% / .7); background: none; }
+html[data-mondo="spazio"] .sc .c { color: hsl(var(--h) 90% 85%); }
+html[data-mondo="spazio"] .sc.n0 { --h: 230; }
+html[data-mondo="spazio"] .sc.bonus, html[data-mondo="spazio"] .sc.x2, html[data-mondo="spazio"] .sc.act {
+  background: radial-gradient(circle at 50% 40%, rgba(197, 139, 255, .35), rgba(197, 139, 255, 0) 60%), #12163a; color: #eef0ff;
+  box-shadow: inset 0 0 0 1.5px rgba(197, 139, 255, .55), 0 0 12px rgba(197, 139, 255, .3); }
+html[data-mondo="spazio"] .sc.bonus::before, html[data-mondo="spazio"] .sc.x2::before, html[data-mondo="spazio"] .sc.act::before { content: none; }
+html[data-mondo="spazio"] .sc.back { background: radial-gradient(circle at 30% 30%, #fff 0 1px, rgba(255, 255, 255, 0) 1.6px) 0 0 / 9px 9px,
+  radial-gradient(ellipse at 50% 50%, rgba(160, 90, 255, .5), rgba(160, 90, 255, 0) 70%), #0b0f26; box-shadow: inset 0 0 0 1.5px rgba(124, 243, 255, .45); }
+html[data-mondo="spazio"] .sc.back::before { content: "✦"; color: #7cf3ff; border: 0; width: auto; height: auto; left: 50%; top: 50%; transform: translate(-50%, -52%); }
+html[data-mondo="spazio"] .sc.dup { box-shadow: inset 0 0 0 1.5px rgba(160, 175, 255, .35), 0 0 0 2px #ff5a5a, 0 0 14px #ff5a5a; }
+/* Luna park: il tendone a righe e le lucine; le carte sono biglietti delle giostre */
+html[data-mondo="luna"] {
+  --table: #5c0f1b; --panel: #fff4e0; --raise: #ffe9c2; --line: #e0b980; --text: #3a1a10; --muted: #7a4b33;
+  --saffron: #d7263d; --on-saffron: #ffffff; --focus: #1b998b; --font-display: 'Rye', 'Rozha One', serif;
+  color-scheme: light;
+}
+html[data-mondo="luna"] body { background-color: #5c0f1b;
+  background-image: radial-gradient(circle, #ffd166 0 3px, rgba(255, 209, 102, 0) 4px),
+    repeating-linear-gradient(90deg, #b5172f 0 34px, #f3e2c3 34px 68px);
+  background-size: 34px 34px, 100% 230px; background-repeat: repeat-x, no-repeat; background-position: 17px 222px, 0 0; }
+html[data-mondo="luna"] .hubnav, html[data-mondo="luna"] .topbar { background: rgba(61, 10, 18, .88); border-radius: 14px; padding-inline: 8px; }
+html[data-mondo="luna"] .hubnav .linkbtn, html[data-mondo="luna"] .hubnav .tema-btn, html[data-mondo="luna"] .hubnav .snd-btn { color: #fff4e0; }
+html[data-mondo="luna"] .brand { color: #fff4e0; }
+html[data-mondo="luna"] .brand h1 { color: #fff4e0; text-shadow: 0 3px 0 #7a0f1f, 0 0 18px rgba(255, 209, 102, .5); }
+html[data-mondo="luna"] .brand h1 span { color: #ffd166; }
+html[data-mondo="luna"] .brand .tag { color: #3a1a10; background: rgba(255, 244, 224, .85); border-radius: 10px; padding: 6px 10px; }
+html[data-mondo="luna"] .status, html[data-mondo="luna"] .topbar .round, html[data-mondo="luna"] .topbar .linkbtn, html[data-mondo="luna"] .topbar .tema-btn,
+html[data-mondo="luna"] .topbar .snd-btn { color: #fff4e0; }
+html[data-mondo="luna"] .status { text-shadow: 0 2px 0 #3d0a12, 0 0 10px rgba(61, 10, 18, .9); }
+html[data-mondo="luna"] .status.is-turn { color: #ffd166; }
+html[data-mondo="luna"] .panel, html[data-mondo="luna"] .t-pannello, html[data-mondo="luna"] .sheet { border: 2px solid #e0b980; box-shadow: 0 6px 0 rgba(0, 0, 0, .25); }
+html[data-mondo="luna"] .actions { --text: #fff4e0; --muted: #f3d9b0; --raise: #6e1422; --line: #8a2a36; color: var(--text); background: #3d0a12; border-top: 3px solid #ffd166; }
+html[data-mondo="luna"] .sc { color: hsl(var(--h) 70% 32%); font-family: 'Rye', var(--font-display); border-radius: 4px;
+  background: linear-gradient(hsl(var(--h) 80% 55%) 0 18%, #fff8ea 18% 100%);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 4px 10px rgba(0, 0, 0, .2);
+  -webkit-mask: radial-gradient(circle at 0 58%, transparent calc(var(--w) * .1), #000 calc(var(--w) * .11)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 58%, transparent calc(var(--w) * .1), #000 calc(var(--w) * .11)) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle at 0 58%, transparent calc(var(--w) * .1), #000 calc(var(--w) * .11)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 58%, transparent calc(var(--w) * .1), #000 calc(var(--w) * .11)) right / 51% 100% no-repeat; }
+html[data-mondo="luna"] .sc::before { content: ""; position: absolute; left: 14%; right: 14%; top: 58%; height: 0; border-top: 1.5px dashed hsl(var(--h) 50% 50% / .5); transform: none; }
+html[data-mondo="luna"] .sc .v { margin-top: calc(var(--w) * .22); }
+html[data-mondo="luna"] .sc .c { color: #ffffff; }
+html[data-mondo="luna"] .sc.n0 { --h: 25; }
+html[data-mondo="luna"] .sc.bonus { --h: 42; } html[data-mondo="luna"] .sc.x2 { --h: 200; }
+html[data-mondo="luna"] .sc.gelo { --h: 190; } html[data-mondo="luna"] .sc.pioggia { --h: 270; } html[data-mondo="luna"] .sc.desiderio { --h: 330; }
+html[data-mondo="luna"] .sc.bonus, html[data-mondo="luna"] .sc.x2, html[data-mondo="luna"] .sc.act { color: hsl(var(--h) 70% 30%); }
+html[data-mondo="luna"] .sc.back { background: repeating-linear-gradient(90deg, #d7263d 0 6px, #fff4e0 6px 12px); -webkit-mask: none; mask: none; border-radius: 6px; box-shadow: inset 0 0 0 2px #ffd166; }
+html[data-mondo="luna"] .sc.back::before { content: "★"; border: 0; color: #ffd166; left: 50%; top: 50%; right: auto; transform: translate(-50%, -52%); }
+html[data-mondo="luna"] .sc.dup { box-shadow: 0 0 0 3px #d7263d, 0 4px 10px rgba(0, 0, 0, .2); }
 </style>
 </head>
 <body>
@@ -383,8 +454,8 @@ html[data-tema] .sc.dup { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-
     if (!I) return '';
     if (I.t === 'num') { cls += ' n' + I.v; inner = '<span class="c">' + I.v + '</span><span class="v">' + I.v + '</span>'; label = 'Stella ' + I.v; }
     else if (I.t === 'bonus') { cls += ' bonus'; inner = '<span class="v">+' + I.v + '</span>'; label = 'Bonus +' + I.v; }
-    else if (I.t === 'x2') { cls += ' x2'; inner = '<span class="moon">🌕</span><span class="v">×2</span>'; }
-    else { cls += ' act ' + I.a; inner = '<span class="e">' + ACT_EMO[I.a] + '</span>' + (opts.w && opts.w >= 40 ? '<span class="l">' + esc(K.ACTIONS[I.a].name) + '</span>' : ''); }
+    else if (I.t === 'x2') { cls += ' x2'; inner = '<span class="moon">' + (window.SetteStelleMondi ? SetteStelleMondi.luna('🌕') : '🌕') + '</span><span class="v">×2</span>'; }
+    else { cls += ' act ' + I.a; inner = '<span class="e">' + (window.SetteStelleMondi ? SetteStelleMondi.emo(I.a, ACT_EMO[I.a]) : ACT_EMO[I.a]) + '</span>' + (opts.w && opts.w >= 40 ? '<span class="l">' + esc(K.ACTIONS[I.a].name) + '</span>' : ''); }
     if (opts.cls) cls += ' ' + opts.cls;
     var st = opts.w ? ' style="--w:' + opts.w + 'px' + (opts.style ? ';' + opts.style : '') + '"' : (opts.style ? ' style="' + opts.style + '"' : '');
     return '<span class="' + cls + '"' + st + ' role="img" aria-label="' + esc(label) + '">' + inner + '</span>';

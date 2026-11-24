@@ -313,3 +313,6 @@ html[data-tema="spettrale"] {
 
 /* il sipario del gioco in locale (Gran Bazar) copre la mano dell'altro: resta pieno anche dove i fogli sono velati */
 html[data-tema] .overlay.curtain { background: var(--table); }
+
+/* nei mondi sopra «Notte» i riquadri del gioco (t-pannello) prendono i colori del mondo */
+html[data-mondo]:not([data-tema]) .t-pannello { background: var(--panel); border-color: var(--line); }
