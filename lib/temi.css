@@ -247,6 +247,7 @@ html[data-tema="spettrale"] .actions { background: linear-gradient(rgba(190, 170
 .tema-prev .tema-emo { font: 28px/1 "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
 .tema-overlay { z-index: 40; }
 .tema-nota { margin: 0; color: var(--muted); font-size: 14px; }
+.tema-gruppo { margin: 6px 2px 0; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 
 /* ---------- gettoni per le carte dei giochi ----------
    Ogni gioco li usa nel suo CSS (html[data-tema] .carta { ... }), così una regola sola vale per tutti i temi.
