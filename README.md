@@ -139,6 +139,15 @@ pieni o a contorno, pastello nel gesso, antichi nei tatuaggi, al neon; le emoji 
 tatuaggio, gesso, tubo al neon, fumetto, ombra sulla luna). Un riquadro tutto del gioco prende l'aspetto dei pannelli
 con la classe `t-pannello`.
 
+Ogni gioco ha anche dei «mondi», temi solo suoi che cambiano ambientazione e nomi ma non le regole: Gran Bazar
+«Porto dei pirati» e «Mercatino di Natale», Sottozero «Vulcano» e «Acquario», Piccante «Laboratorio pazzo» e «Draghi»,
+Sette Stelle «Spazio» e «Luna park», Polvere e Piombo «Samurai», «Pirati» e «Gangster», Stalla Matta «Fondale» e
+«Peluche», Valanga «Caramelle». Stanno in `<gioco>/mondi.js` (nel `<head>` dopo `lib/temi.js`), che li dichiara con
+`Temi.mondi({ chiave: '<prefisso>mondo', lista })` e dà i nomi del mondo: il gioco li cambia nel testo già pronto
+(`parole()` attorno a `innerHTML`, in un solo passaggio e con parole dello stesso genere e della stessa iniziale, così
+le frasi restano giuste) e usa i disegni o le emoji del mondo. Un mondo veste l'interfaccia col suo tema base
+(`data-tema`) e mette `data-mondo` su `<html>` per il CSS del gioco; si sceglie dallo stesso foglio, sotto gli stili.
+
 Diavolerie in più disegna ogni carta in SVG nello stile del tema: `diavolerie/temi.js` disegna ogni bambino, animale,
 demone e candela al posto delle emoji, con le stesse forme in tutti i temi (i bambini cambiano capelli, carnagione e
 faccia da dolce, peste o normale) ma disegnate in modo diverso: ogni tema ha la sua tavolozza, il gesso ha un filtro
