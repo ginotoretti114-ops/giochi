@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-stili="no">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,6 +10,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<script src="mondi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Sette Stelle: la notte indaco della sala giochi con carte color crema e numeri che cambiano colore come le stelle. */
@@ -267,6 +271,99 @@ table.score td.z { color: var(--bad); }
   .desk .lanes.two .lc .sc, .desk .lanes.two .lane.me .lc .sc { --w: 33px; }
   .desk .lanes.two .lc { min-height: 48px; }
 }
+/* ---------- temi (lib/temi.css): le carte di Sette Stelle coi gettoni --t-* ---------- */
+html[data-tema] .sc {
+  --cc: hsl(var(--h) 72% 50%); --t-c: color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-col-fondo, var(--t-c)); color: var(--t-col-testo, var(--t-c)); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), var(--t-col-alone, var(--t-ombra));
+  font-family: var(--t-font); text-shadow: var(--t-col-glow, none);
+}
+html[data-tema] .sc::before { color: currentColor; opacity: .16; text-shadow: none; }
+html[data-tema] .sc::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--t-retino, none); background-size: var(--t-retino-size, auto); }
+html[data-tema] .sc.n0 { --cc: #7a80a8; }
+html[data-tema] .sc.bonus { --cc: #f5aa3e; }
+html[data-tema] .sc.x2 { --cc: #8fa3f0; }
+html[data-tema] .sc.gelo { --cc: #2e9fd6; }
+html[data-tema] .sc.pioggia { --cc: #7a4be0; }
+html[data-tema] .sc.desiderio { --cc: #e0438f; }
+html[data-tema] .sc .moon, html[data-tema] .sc .e { filter: var(--t-emo); text-shadow: none; }
+html[data-tema] .sc .l { text-shadow: none; }
+html[data-tema] .sc.back { background: var(--t-dorso); color: var(--t-carta-testo); text-shadow: none;
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .sc.back::before { opacity: .9; }
+html[data-tema] .sc.back::after { display: none; }
+html[data-tema] .sc.dup { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), 0 0 0 3px #ff5a5a, var(--t-ombra); }
+/* ---------- mondi (sette-stelle/mondi.js): Spazio e Luna park ---------- */
+/* Spazio: nebulose e polvere di stelle; le carte sono pianeti del loro colore con l'anello */
+html[data-mondo="spazio"] {
+  --table: #070a1a; --panel: rgba(18, 22, 52, .88); --raise: #1d2350; --line: #2f3672; --text: #eef0ff; --muted: #a8afe0;
+  --saffron: #7cf3ff; --on-saffron: #03131a; --focus: #c58bff; --font-display: 'Orbitron', 'Trebuchet MS', sans-serif;
+}
+html[data-mondo="spazio"] body { background-color: #070a1a;
+  background-image: radial-gradient(circle at 14% 22%, rgba(255, 255, 255, .8) 0 1px, rgba(255, 255, 255, 0) 1.6px),
+    radial-gradient(circle at 63% 71%, rgba(255, 255, 255, .6) 0 1px, rgba(255, 255, 255, 0) 1.5px),
+    radial-gradient(circle at 87% 37%, rgba(255, 255, 255, .7) 0 1.3px, rgba(255, 255, 255, 0) 2px),
+    radial-gradient(ellipse at 80% 10%, rgba(160, 90, 255, .32), rgba(160, 90, 255, 0) 45%),
+    radial-gradient(ellipse at 10% 70%, rgba(40, 200, 220, .22), rgba(40, 200, 220, 0) 45%);
+  background-size: 90px 90px, 130px 130px, 170px 170px, 100% 900px, 100% 1200px; background-repeat: repeat, repeat, repeat, no-repeat, no-repeat; background-position: 0 0; }
+html[data-mondo="spazio"] .brand h1 { font-weight: 800; font-size: 38px; letter-spacing: .04em; color: #eef0ff; text-shadow: 0 0 18px rgba(124, 243, 255, .5); }
+html[data-mondo="spazio"] .brand h1 span { color: #c58bff; }
+html[data-mondo="spazio"] .status, html[data-mondo="spazio"] .h2, html[data-mondo="spazio"] .sheet h2, html[data-mondo="spazio"] .topbar .round { font-weight: 600; letter-spacing: .03em; }
+html[data-mondo="spazio"] .sc { color: #ffffff; font-family: 'Orbitron', var(--font-display); font-weight: 800; border-radius: calc(var(--w) * .2);
+  background: radial-gradient(circle at 36% 34%, hsl(var(--h) 95% 78%) 0, hsl(var(--h) 75% 48%) 34%, hsl(var(--h) 70% 22%) 58%, #0b0f26 61%);
+  box-shadow: inset 0 0 0 1.5px rgba(160, 175, 255, .35), 0 0 14px hsl(var(--h) 80% 50% / .35); text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+html[data-mondo="spazio"] .sc::before { content: ""; width: 128%; height: 28%; left: -14%; top: 40%; transform: rotate(-18deg);
+  border-radius: 50%; border: calc(var(--w) * .045) solid hsl(var(--h) 90% 82% / .7); background: none; }
+html[data-mondo="spazio"] .sc .c { color: hsl(var(--h) 90% 85%); }
+html[data-mondo="spazio"] .sc.n0 { --h: 230; }
+html[data-mondo="spazio"] .sc.bonus, html[data-mondo="spazio"] .sc.x2, html[data-mondo="spazio"] .sc.act {
+  background: radial-gradient(circle at 50% 40%, rgba(197, 139, 255, .35), rgba(197, 139, 255, 0) 60%), #12163a; color: #eef0ff;
+  box-shadow: inset 0 0 0 1.5px rgba(197, 139, 255, .55), 0 0 12px rgba(197, 139, 255, .3); }
+html[data-mondo="spazio"] .sc.bonus::before, html[data-mondo="spazio"] .sc.x2::before, html[data-mondo="spazio"] .sc.act::before { content: none; }
+html[data-mondo="spazio"] .sc.back { background: radial-gradient(circle at 30% 30%, #fff 0 1px, rgba(255, 255, 255, 0) 1.6px) 0 0 / 9px 9px,
+  radial-gradient(ellipse at 50% 50%, rgba(160, 90, 255, .5), rgba(160, 90, 255, 0) 70%), #0b0f26; box-shadow: inset 0 0 0 1.5px rgba(124, 243, 255, .45); }
+html[data-mondo="spazio"] .sc.back::before { content: "✦"; color: #7cf3ff; border: 0; width: auto; height: auto; left: 50%; top: 50%; transform: translate(-50%, -52%); }
+html[data-mondo="spazio"] .sc.dup { box-shadow: inset 0 0 0 1.5px rgba(160, 175, 255, .35), 0 0 0 2px #ff5a5a, 0 0 14px #ff5a5a; }
+/* Luna park: il tendone a righe e le lucine; le carte sono biglietti delle giostre */
+html[data-mondo="luna"] {
+  --table: #5c0f1b; --panel: #fff4e0; --raise: #ffe9c2; --line: #e0b980; --text: #3a1a10; --muted: #7a4b33;
+  --saffron: #d7263d; --on-saffron: #ffffff; --focus: #1b998b; --font-display: 'Rye', 'Rozha One', serif;
+  color-scheme: light;
+}
+html[data-mondo="luna"] body { background-color: #5c0f1b;
+  background-image: radial-gradient(circle, #ffd166 0 3px, rgba(255, 209, 102, 0) 4px),
+    repeating-linear-gradient(90deg, #b5172f 0 34px, #f3e2c3 34px 68px);
+  background-size: 34px 34px, 100% 230px; background-repeat: repeat-x, no-repeat; background-position: 17px 222px, 0 0; }
+html[data-mondo="luna"] .hubnav, html[data-mondo="luna"] .topbar { background: rgba(61, 10, 18, .88); border-radius: 14px; padding-inline: 8px; }
+html[data-mondo="luna"] .hubnav .linkbtn, html[data-mondo="luna"] .hubnav .tema-btn, html[data-mondo="luna"] .hubnav .snd-btn { color: #fff4e0; }
+html[data-mondo="luna"] .brand { color: #fff4e0; }
+html[data-mondo="luna"] .brand h1 { color: #fff4e0; text-shadow: 0 3px 0 #7a0f1f, 0 0 18px rgba(255, 209, 102, .5); }
+html[data-mondo="luna"] .brand h1 span { color: #ffd166; }
+html[data-mondo="luna"] .brand .tag { color: #3a1a10; background: rgba(255, 244, 224, .85); border-radius: 10px; padding: 6px 10px; }
+html[data-mondo="luna"] .status, html[data-mondo="luna"] .topbar .round, html[data-mondo="luna"] .topbar .linkbtn, html[data-mondo="luna"] .topbar .tema-btn,
+html[data-mondo="luna"] .topbar .snd-btn { color: #fff4e0; }
+html[data-mondo="luna"] .status { text-shadow: 0 2px 0 #3d0a12, 0 0 10px rgba(61, 10, 18, .9); }
+html[data-mondo="luna"] .status.is-turn { color: #ffd166; }
+html[data-mondo="luna"] .panel, html[data-mondo="luna"] .t-pannello, html[data-mondo="luna"] .sheet { border: 2px solid #e0b980; box-shadow: 0 6px 0 rgba(0, 0, 0, .25); }
+html[data-mondo="luna"] .actions { --text: #fff4e0; --muted: #f3d9b0; --raise: #6e1422; --line: #8a2a36; color: var(--text); background: #3d0a12; border-top: 3px solid #ffd166; }
+html[data-mondo="luna"] .sc { color: hsl(var(--h) 70% 32%); font-family: 'Rye', var(--font-display); border-radius: 4px;
+  background: linear-gradient(hsl(var(--h) 80% 55%) 0 18%, #fff8ea 18% 100%);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 4px 10px rgba(0, 0, 0, .2);
+  -webkit-mask: radial-gradient(circle at 0 58%, transparent calc(var(--w) * .1), #000 calc(var(--w) * .11)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 58%, transparent calc(var(--w) * .1), #000 calc(var(--w) * .11)) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle at 0 58%, transparent calc(var(--w) * .1), #000 calc(var(--w) * .11)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 58%, transparent calc(var(--w) * .1), #000 calc(var(--w) * .11)) right / 51% 100% no-repeat; }
+html[data-mondo="luna"] .sc::before { content: ""; position: absolute; left: 14%; right: 14%; top: 58%; height: 0; border-top: 1.5px dashed hsl(var(--h) 50% 50% / .5); transform: none; }
+html[data-mondo="luna"] .sc .v { margin-top: calc(var(--w) * .22); }
+html[data-mondo="luna"] .sc .c { color: #ffffff; }
+html[data-mondo="luna"] .sc.n0 { --h: 25; }
+html[data-mondo="luna"] .sc.bonus { --h: 42; } html[data-mondo="luna"] .sc.x2 { --h: 200; }
+html[data-mondo="luna"] .sc.gelo { --h: 190; } html[data-mondo="luna"] .sc.pioggia { --h: 270; } html[data-mondo="luna"] .sc.desiderio { --h: 330; }
+html[data-mondo="luna"] .sc.bonus, html[data-mondo="luna"] .sc.x2, html[data-mondo="luna"] .sc.act { color: hsl(var(--h) 70% 30%); }
+html[data-mondo="luna"] .sc.back { background: repeating-linear-gradient(90deg, #d7263d 0 6px, #fff4e0 6px 12px); -webkit-mask: none; mask: none; border-radius: 6px; box-shadow: inset 0 0 0 2px #ffd166; }
+html[data-mondo="luna"] .sc.back::before { content: "★"; border: 0; color: #ffd166; left: 50%; top: 50%; right: auto; transform: translate(-50%, -52%); }
+html[data-mondo="luna"] .sc.dup { box-shadow: 0 0 0 3px #d7263d, 0 4px 10px rgba(0, 0, 0, .2); }
 </style>
 </head>
 <body>
@@ -275,7 +372,6 @@ table.score td.z { color: var(--bad); }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -289,6 +385,9 @@ table.score td.z { color: var(--bad); }
   var K = window.SetteStelle;
   var BOT = window.SetteStelleBot;
   var S = window.Suoni || { tema: function () {}, effetto: function () {}, sequenza: function () {}, bottone: function () { return ''; } };
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  var TM = window.Temi || { bottone: function () { return ''; }, attuale: function () { return 'notte'; } };
+  document.addEventListener('temi:cambio', function () { render(); });
   var $app = document.getElementById('app');
   var $layer = document.getElementById('layer');
 
@@ -354,8 +453,8 @@ table.score td.z { color: var(--bad); }
     if (!I) return '';
     if (I.t === 'num') { cls += ' n' + I.v; inner = '<span class="c">' + I.v + '</span><span class="v">' + I.v + '</span>'; label = 'Stella ' + I.v; }
     else if (I.t === 'bonus') { cls += ' bonus'; inner = '<span class="v">+' + I.v + '</span>'; label = 'Bonus +' + I.v; }
-    else if (I.t === 'x2') { cls += ' x2'; inner = '<span class="moon">🌕</span><span class="v">×2</span>'; }
-    else { cls += ' act ' + I.a; inner = '<span class="e">' + ACT_EMO[I.a] + '</span>' + (opts.w && opts.w >= 40 ? '<span class="l">' + esc(K.ACTIONS[I.a].name) + '</span>' : ''); }
+    else if (I.t === 'x2') { cls += ' x2'; inner = '<span class="moon">' + (window.SetteStelleMondi ? SetteStelleMondi.luna('🌕') : '🌕') + '</span><span class="v">×2</span>'; }
+    else { cls += ' act ' + I.a; inner = '<span class="e">' + (window.SetteStelleMondi ? SetteStelleMondi.emo(I.a, ACT_EMO[I.a]) : ACT_EMO[I.a]) + '</span>' + (opts.w && opts.w >= 40 ? '<span class="l">' + esc(K.ACTIONS[I.a].name) + '</span>' : ''); }
     if (opts.cls) cls += ' ' + opts.cls;
     var st = opts.w ? ' style="--w:' + opts.w + 'px' + (opts.style ? ';' + opts.style : '') + '"' : (opts.style ? ' style="' + opts.style + '"' : '');
     return '<span class="' + cls + '"' + st + ' role="img" aria-label="' + esc(label) + '">' + inner + '</span>';
@@ -416,7 +515,7 @@ table.score td.z { color: var(--bad); }
     var turn = s.status === 'playing' && s.phase === 'turn' && s.turn === p && !s.prompt;
     var ask = s.prompt && s.prompt.s === p;
     var pct = Math.min(100, Math.round(s.score[p] / K.TARGET * 100));
-    return '<section class="lane' + (turn ? ' turn' : '') + (ask ? ' ask' : '') + (isMe(P, p) ? ' me' : '') + (st !== 'in' ? ' out' : '') + '" aria-label="' + hn(s, p) + '">' +
+    return '<section class="lane t-pannello' + (turn ? ' turn' : '') + (ask ? ' ask' : '') + (isMe(P, p) ? ' me' : '') + (st !== 'in' ? ' out' : '') + '" aria-label="' + hn(s, p) + '">' +
       '<div class="lh"><span class="nm">' + (isMe(P, p) ? 'Tu' : hn(s, p)) + botTag(s, p) + '</span>' + (s.dealer === p ? '<span class="dl" title="Dà le carte">🃏</span>' : '') +
       '<span class="chip ' + chip[0] + '">' + chip[1] + '</span>' +
       '<span class="tot"><b>' + s.score[p] + ' <small>/ ' + K.TARGET + '</small></b><span class="bar"><i style="width:' + pct + '%"></i></span></span></div>' +
@@ -447,14 +546,14 @@ table.score td.z { color: var(--bad); }
     var msg = l ? l.e + ' ' + l.t : '';
     var sub = s.status === 'playing' && s.phase === 'turn' ? 'Ancora in gioco: ' + K.active(s).length + ' di ' + s.seats.length : '';
     if (s.phase === 'between' && s.last) sub = 'Tocca «Prossimo round» per continuare';
-    return '<section class="sky" aria-label="Il mazzo e l\'ultima carta"><div class="pile">' + backHTML(54) + '<span class="cnt">' + s.deck.length + ' nel mazzo</span></div>' +
+    return '<section class="sky t-pannello" aria-label="Il mazzo e l\'ultima carta"><div class="pile">' + backHTML(54) + '<span class="cnt">' + s.deck.length + ' nel mazzo</span></div>' +
       '<div class="reveal">' + big + '<p class="msg" aria-live="polite">' + msg + (sub ? '<span class="sub">' + sub + '</span>' : '') + '</p></div></section>';
   }
   function topbarHTML(s, P) {
     var off = P.local || P.bot;
     return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (off ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (off ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Round ' + s.round + (off ? '' : netDot()) + '</span>' +
-      '<span class="right">' + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -563,7 +662,7 @@ table.score td.z { color: var(--bad); }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + TM.bottone() + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Sette <span>Stelle</span></h1>' +
       '<p class="tag">Pesca stelle numerate e fermati in tempo: con un doppione sballi e perdi il round. Sette numeri diversi valgono 15 punti in più. Vince chi arriva a 200. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -587,7 +686,7 @@ table.score td.z { color: var(--bad); }
       return '<div class="row"><input id="ln-' + i + '" class="field" maxlength="20" placeholder="Giocatore ' + (i + 1) + '" value="' + esc(nm) + '" aria-label="Nome del giocatore ' + (i + 1) + '">' +
         (ui.localNames.length > 2 ? '<button type="button" class="icon-btn" data-act="ln-del" data-i="' + i + '" aria-label="Togli il giocatore ' + (i + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</div>';
     }).join('');
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span>' + S.bottone() + '</header>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span class="right">' + TM.bottone() + S.bottone() + '</span></header>' +
       '<section class="panel"><h2 class="h2">Chi gioca?</h2><p class="muted small" style="margin:0">Scrivete i nomi nell\'ordine in cui siete seduti.</p><div class="names">' + rows + '</div>' +
       (ui.localNames.length < K.MAX_PLAYERS ? '<button type="button" class="btn sm" data-act="ln-add">+ Aggiungi un giocatore</button>' : '') +
       '<button type="button" class="btn primary wide" data-act="local-start">Dai le carte</button>' +
@@ -599,7 +698,7 @@ table.score td.z { color: var(--bad); }
   }
   function waitingHTML(s) {
     var seat = K.seatOf(s, ui.myKey), host = seat === s.host;
-    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
     var list = '<ul class="seated">' + s.seats.map(function (x, i) {
       var tag = isBot(s, i) ? 'bot ' + esc(s.bots[i]) : (i === s.host ? 'ha creato la partita' : '') + (i === seat ? (i === s.host ? ' · tu' : 'tu') : '');
       return '<li><span class="n">' + (i + 1) + '</span><span>' + hn(s, i) + botTag(s, i) + '</span><span class="tag">' + tag + '</span>' +

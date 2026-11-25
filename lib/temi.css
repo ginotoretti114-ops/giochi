@@ -1,0 +1,337 @@
+/* Temi della sala: lib/temi.js li accende con data-tema su <html> («Notte», lo stile di base dei giochi, non ha attributo).
+   Qui c'è ciò che i giochi hanno in comune: il pulsantino e il foglio dei temi, le variabili dei colori e dei caratteri,
+   sfondo, pannelli, pulsanti, fogli, barra delle azioni e profilo. Un riquadro tutto suo del gioco (una riga di giocatore,
+   il centro del tavolo) prende l'aspetto dei pannelli con la classe .t-pannello (e .turn / .ask come .opp). Le carte hanno
+   il loro stile nel CSS di ogni gioco.
+   Ogni gioco include questo file prima del suo <style>, così le sue regole vincono a parità di forza. */
+
+/* ---------- temi ---------- */
+/* Si sceglie col pulsantino a forma di tavolozza in alto (data-tema sull'elemento html, vedi temi.js). «Notte» è lo
+   stile qui sopra; «Cemento» e «Vecchia scuola» cambiano colori, caratteri e anche i disegni delle carte. */
+.tema-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; flex: none; -webkit-tap-highlight-color: transparent; }
+.tema-btn:focus-visible { outline: 3px solid var(--focus, #fff); outline-offset: 1px; }
+.tema-list { display: grid; gap: 8px; }
+.tema-opt { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 6px 14px 6px 6px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--raise); color: var(--text); text-align: left; cursor: pointer; font: inherit; }
+.tema-opt[aria-pressed="true"] { border-color: var(--saffron); box-shadow: 0 0 0 1px var(--saffron); }
+.tema-opt:focus-visible { outline: 3px solid var(--focus, #fff); outline-offset: 2px; }
+.tema-prev { width: 52px; height: 52px; border-radius: 11px; display: grid; place-items: center; overflow: hidden; }
+.tema-txt { display: grid; gap: 2px; min-width: 0; }
+.tema-txt b { font-size: 16px; }
+.tema-txt span { font-size: 13px; color: var(--muted); }
+.tema-ok { width: 22px; height: 22px; color: var(--saffron); }
+/* «Cemento»: graffiti sul muro. Cemento grigio, manifesti di carta attaccati con lo scotch, pennarello nero e spray
+   rosso; le carte sono adesivi bianchi con l'ombra del colore del tipo. Chiaro. */
+html[data-tema="cemento"] {
+  --table: #b4b1ab; --panel: #f4f1ea; --raise: #ffffff; --line: #151515; --text: #141414; --muted: #3a3a3a;
+  --saffron: #d31f26; --on-saffron: #ffffff; --crimson: #1a5fb8; --bad: #b3141a; --good: #1d7a3a; --focus: #151515; --soul-eyes: #f4f1ea;
+  --font-display: 'Permanent Marker', 'Marker Felt', 'Comic Sans MS', cursive;
+  color-scheme: light;
+}
+html[data-tema="cemento"] body {
+  background-color: #b4b1ab;
+  background-image:
+    radial-gradient(circle at 15% 12%, rgba(255, 255, 255, .22) 0 70px, rgba(255, 255, 255, 0) 150px),
+    radial-gradient(circle at 85% 40%, rgba(0, 0, 0, .1) 0 90px, rgba(0, 0, 0, 0) 190px),
+    radial-gradient(rgba(0, 0, 0, .14) 1px, transparent 1.6px),
+    radial-gradient(rgba(255, 255, 255, .2) 1px, transparent 1.6px),
+    linear-gradient(rgba(0, 0, 0, 0) 0 419px, rgba(0, 0, 0, .14) 419px 421px, rgba(0, 0, 0, 0) 421px);
+  background-size: 100% 900px, 100% 900px, 9px 9px, 13px 13px, 100% 422px;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+  background-position: 0 0, 0 0, 0 0, 4px 6px, 0 0;
+}
+html[data-tema="cemento"] .brand h1 { font-family: 'Rubik Wet Paint', Impact, sans-serif; color: #151515; transform: rotate(-3deg); }
+html[data-tema="cemento"] .brand h1 span { color: var(--saffron); }
+html[data-tema="cemento"] .brand .tag { color: #1f1f1f; }
+html[data-tema="cemento"] .status { font-family: 'Rubik Wet Paint', Impact, sans-serif; }
+html[data-tema="cemento"] .status.is-turn { color: var(--saffron); text-shadow: 2px 2px 0 #151515; }
+html[data-tema="cemento"] .status.is-ask { color: var(--crimson); }
+html[data-tema="cemento"] .panel, html[data-tema="cemento"] .opp, html[data-tema="cemento"] .t-pannello, html[data-tema="cemento"] .mine, html[data-tema="cemento"] .sheet, html[data-tema="cemento"] .banner { background: #f4f1ea; border: 3px solid #151515; border-radius: 4px; box-shadow: 4px 4px 0 rgba(0, 0, 0, .25); }
+html[data-tema="cemento"] .panel { position: relative; transform: rotate(-.4deg); }
+html[data-tema="cemento"] .panel:nth-child(even) { transform: rotate(.4deg); }
+html[data-tema="cemento"] .panel::before { content: ""; position: absolute; top: -10px; left: 24px; width: 66px; height: 18px; background: rgba(236, 214, 120, .85); transform: rotate(-6deg); pointer-events: none; }
+html[data-tema="cemento"] .opp.turn, html[data-tema="cemento"] .t-pannello.turn, html[data-tema="cemento"] .mine.turn { border-color: #151515; box-shadow: 0 0 0 3px var(--saffron), 6px 6px 0 3px rgba(0, 0, 0, .3); }
+html[data-tema="cemento"] .opp.ask, html[data-tema="cemento"] .t-pannello.ask { border-color: #151515; box-shadow: 0 0 0 3px var(--crimson), 6px 6px 0 3px rgba(0, 0, 0, .3); }
+html[data-tema="cemento"] .sheet { border-bottom: 3px solid #151515; }
+html[data-tema="cemento"] .overlay { background: rgba(20, 20, 20, .6); }
+html[data-tema="cemento"] .btn { border: 3px solid #151515; border-radius: 6px; background: #ffffff; color: #151515; font-family: 'Permanent Marker', 'Marker Felt', cursive; font-weight: 400; font-size: 17px; box-shadow: 3px 3px 0 #151515; }
+html[data-tema="cemento"] .btn.sm { font-size: 15px; }
+html[data-tema="cemento"] .btn.primary { background: var(--saffron); color: #ffffff; }
+html[data-tema="cemento"] .field { background: #ffffff; border: 3px solid #151515; border-radius: 4px; }
+html[data-tema="cemento"] .seg { border: 3px solid #151515; border-radius: 6px; background: #ffffff; }
+html[data-tema="cemento"] .seg button { color: #151515; }
+html[data-tema="cemento"] .seg button[aria-pressed="true"] { background: #151515; color: #ffffff; }
+html[data-tema="cemento"] .actions { --text: #f4f1ea; --muted: #d8d4cc; --raise: #3a3936; --line: #151515; color: var(--text); border-top: 0;
+  background-color: #242321; background-image: repeating-linear-gradient(90deg, #ffd23f 0 28px, rgba(255, 210, 63, 0) 28px 46px); background-size: 100% 4px; background-repeat: no-repeat; }
+html[data-tema="cemento"] .desk .actions { border: 3px solid #151515; border-radius: 6px; }
+html[data-tema="cemento"] *:focus-visible { outline-color: #151515; }
+html[data-tema="cemento"] .actions *:focus-visible { outline-color: #ffd23f; }
+html[data-tema="cemento"] .pf-chip { background: #ffffff; border: 2px solid #151515; color: #151515; }
+html[data-tema="cemento"] .pf-chip i { background: conic-gradient(var(--saffron) var(--p), #d0cdc6 0); }
+html[data-tema="cemento"] .pf-chip i span { background: #ffffff; }
+html[data-tema="cemento"] #sala-avviso { background: #f4f1ea; color: #141414; border: 3px solid #151515; box-shadow: 5px 5px 0 #151515; }
+html[data-tema="cemento"] #sala-avviso b, html[data-tema="cemento"] #sala-avviso a { color: var(--saffron); }
+/* «Vecchia scuola»: i vecchi tatuaggi da marinaio. Muro scuro, fogli color crema col bordo nero spesso appesi con le
+   puntine, rosso, giallo, verde e blu pieni; le carte sono medaglioni col bordo del colore del tipo. Scuro.
+   Sul muro il testo è chiaro, sui fogli scuro: i fogli ridefiniscono --text, --muted, --raise e --line. */
+html[data-tema="vecchia"] {
+  --table: #171414; --panel: #f3ead3; --raise: #2a2424; --line: #4a4038; --text: #f3ead3; --muted: #cfc3a8;
+  --saffron: #c8372d; --on-saffron: #fbf3dc; --crimson: #2a7f8f; --bad: #ff9f8a; --good: #8fd16a; --focus: #f0c43c; --soul-eyes: #f3ead3;
+  --font-display: 'Sancreek', Georgia, serif;
+  color-scheme: dark;
+}
+html[data-tema="vecchia"] body {
+  background-color: #171414;
+  background-image: radial-gradient(ellipse 110% 50% at 50% 0%, rgba(240, 196, 60, .1), rgba(240, 196, 60, 0) 70%), repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 46px, rgba(0, 0, 0, .3) 46px 48px);
+  background-size: 100% 900px, auto; background-repeat: no-repeat, repeat;
+}
+html[data-tema="vecchia"] .panel, html[data-tema="vecchia"] .opp, html[data-tema="vecchia"] .t-pannello, html[data-tema="vecchia"] .mine, html[data-tema="vecchia"] .sheet {
+  --text: #1b1b1b; --muted: #5d5346; --raise: #e9dcbc; --line: #1b1b1b; --bad: #b3261e; --good: #2d6e3c; --focus: #1b1b1b;
+  background: #f3ead3; color: var(--text); border: 3px solid #1b1b1b; border-radius: 4px; box-shadow: 0 10px 22px rgba(0, 0, 0, .5); }
+html[data-tema="vecchia"] .panel { position: relative; }
+html[data-tema="vecchia"] .panel::before, html[data-tema="vecchia"] .panel::after { content: ""; position: absolute; top: 5px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid #1b1b1b; pointer-events: none; }
+html[data-tema="vecchia"] .panel::before { left: 6px; background: #c8372d; }
+html[data-tema="vecchia"] .panel::after { right: 6px; background: #f0c43c; }
+html[data-tema="vecchia"] .opp.turn, html[data-tema="vecchia"] .t-pannello.turn, html[data-tema="vecchia"] .mine.turn { box-shadow: 0 0 0 3px var(--saffron), 0 10px 22px rgba(0, 0, 0, .5); }
+html[data-tema="vecchia"] .opp.ask, html[data-tema="vecchia"] .t-pannello.ask { box-shadow: 0 0 0 3px #2a7f8f, 0 10px 22px rgba(0, 0, 0, .5); }
+html[data-tema="vecchia"] .sheet { border-bottom: 3px solid #1b1b1b; }
+html[data-tema="vecchia"] .overlay { background: rgba(10, 8, 8, .7); }
+html[data-tema="vecchia"] .brand h1 { display: inline-block; margin-top: 8px; padding: 6px 38px 10px; background: var(--saffron); color: #fbf3dc; font-size: 42px; text-shadow: 0 2px 0 #1b1b1b; clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); }
+html[data-tema="vecchia"] .brand h1 span { color: #fbf3dc; }
+html[data-tema="vecchia"] .status { width: fit-content; max-width: calc(100% - 24px); margin: 12px auto 4px; padding: 7px 34px 9px; background: #f3ead3; color: #1b1b1b; font-size: 22px; clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); }
+html[data-tema="vecchia"] .status.is-turn { background: var(--saffron); color: #fbf3dc; }
+html[data-tema="vecchia"] .status.is-ask { background: #2a7f8f; color: #fbf3dc; }
+html[data-tema="vecchia"] .topbar .round { color: #f0c43c; }
+html[data-tema="vecchia"] .btn { border: 3px solid #1b1b1b; border-radius: 8px; box-shadow: 0 4px 0 #000; }
+html[data-tema="vecchia"] .btn.primary { background: var(--saffron); border-color: #1b1b1b; color: #fbf3dc; }
+html[data-tema="vecchia"] .field { background: #fffaf0; color: #1b1b1b; border: 2px solid #1b1b1b; }
+html[data-tema="vecchia"] .seg { border: 2px solid #1b1b1b; }
+html[data-tema="vecchia"] .seg button[aria-pressed="true"] { background: #1b1b1b; color: #f3ead3; }
+html[data-tema="vecchia"] .actions { background: rgba(23, 20, 20, .97); border-top: 2px solid #f0c43c; }
+html[data-tema="vecchia"] .desk .actions { border: 2px solid #f0c43c; border-radius: 8px; }
+html[data-tema="vecchia"] *:focus-visible { outline-color: var(--focus); }
+html[data-tema="vecchia"] .pf-chip { background: #f3ead3; border: 2px solid #1b1b1b; color: #1b1b1b; }
+html[data-tema="vecchia"] .pf-chip i { background: conic-gradient(var(--saffron) var(--p), #cdbf9f 0); }
+html[data-tema="vecchia"] .pf-chip i span { background: #f3ead3; }
+html[data-tema="vecchia"] #sala-avviso { background: #f3ead3; color: #1b1b1b; border: 3px solid #1b1b1b; box-shadow: 0 12px 28px rgba(0, 0, 0, .55); }
+html[data-tema="vecchia"] #sala-avviso b, html[data-tema="vecchia"] #sala-avviso a { color: var(--saffron); }
+/* «Gessetto»: gesso su una lavagna di scuola; i personaggi hanno il tratto sporco del gesso e colori pastello. Scuro. */
+html[data-tema="gesso"] {
+  --table: #26332c; --panel: #2d3c34; --raise: #35463d; --line: rgba(238, 234, 224, .45); --text: #eeeae0; --muted: #b8c2bb;
+  --saffron: #f3d36b; --on-saffron: #26332c; --crimson: #f29bb0; --bad: #f28b82; --good: #a8d8a0; --focus: #f3d36b; --soul-eyes: #26332c;
+  --font-display: 'Cabin Sketch', 'Chalkboard SE', 'Comic Sans MS', cursive;
+  color-scheme: dark;
+}
+html[data-tema="gesso"] body { background-color: #26332c;
+  background-image: radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0) 45%),
+    radial-gradient(ellipse at 85% 55%, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 40%),
+    repeating-linear-gradient(168deg, rgba(255, 255, 255, .028) 0 3px, rgba(255, 255, 255, 0) 3px 17px);
+  background-size: 100% 900px, 100% 900px, auto; background-repeat: no-repeat, no-repeat, repeat; background-position: 0 0; }
+html[data-tema="gesso"] .brand h1, html[data-tema="gesso"] .status, html[data-tema="gesso"] .h2, html[data-tema="gesso"] .sheet h2, html[data-tema="gesso"] .topbar .round { font-weight: 700; }
+html[data-tema="gesso"] .brand h1 { color: #f6f3ea; }
+html[data-tema="gesso"] .brand h1 span { color: var(--saffron); }
+html[data-tema="gesso"] .status.is-turn { color: var(--saffron); }
+html[data-tema="gesso"] .status.is-ask { color: var(--crimson); }
+html[data-tema="gesso"] .panel, html[data-tema="gesso"] .opp, html[data-tema="gesso"] .t-pannello, html[data-tema="gesso"] .mine, html[data-tema="gesso"] .sheet, html[data-tema="gesso"] .banner { background: rgba(255, 255, 255, .04); border: 2px solid rgba(238, 234, 224, .7);
+  border-radius: 16px 9px 18px 8px / 9px 17px 8px 15px; box-shadow: none; }
+html[data-tema="gesso"] .sheet { background: #2d3c34; }
+html[data-tema="gesso"] .opp.turn, html[data-tema="gesso"] .t-pannello.turn, html[data-tema="gesso"] .mine.turn { border-color: var(--saffron); box-shadow: 0 0 0 1px var(--saffron); }
+html[data-tema="gesso"] .opp.ask, html[data-tema="gesso"] .t-pannello.ask { border-color: var(--crimson); box-shadow: 0 0 0 1px var(--crimson); }
+html[data-tema="gesso"] .btn { background: transparent; border: 2px solid rgba(238, 234, 224, .85); border-radius: 14px 8px 15px 7px / 8px 14px 7px 15px; color: #f1eee4;
+  font-family: var(--font-display); font-weight: 700; font-size: 19px; box-shadow: none; }
+html[data-tema="gesso"] .btn.primary { background: var(--saffron); border-color: var(--saffron); color: #26332c; }
+html[data-tema="gesso"] .field { background: rgba(0, 0, 0, .2); border: 2px solid rgba(238, 234, 224, .6); }
+html[data-tema="gesso"] .seg { background: transparent; border: 2px solid rgba(238, 234, 224, .7); }
+html[data-tema="gesso"] .seg button { color: #eeeae0; }
+html[data-tema="gesso"] .seg button[aria-pressed="true"] { background: #eeeae0; color: #26332c; }
+html[data-tema="gesso"] .actions { background: linear-gradient(#6d4c2e, #57391f); border-top: 5px solid #3f2915; }
+html[data-tema="gesso"] .pf-chip { background: transparent; border: 2px solid rgba(238, 234, 224, .7); }
+/* «Neon»: insegne luminose di notte; i personaggi sono tubi di luce del colore del loro tipo. Scuro. */
+html[data-tema="neon"] {
+  --table: #120d18; --panel: #18111f; --raise: #231a2d; --line: #3b2d4d; --text: #f6effc; --muted: #ab9cc0;
+  --saffron: #ff3fc8; --on-saffron: #1a0614; --crimson: #2ef2ff; --bad: #ff4f6b; --good: #7dff4f; --focus: #2ef2ff; --soul-eyes: #120d18;
+  --font-display: 'Tilt Neon', 'Trebuchet MS', sans-serif;
+  color-scheme: dark;
+}
+html[data-tema="neon"] body { background-color: #120d18;
+  background-image: radial-gradient(ellipse at 50% -10%, rgba(255, 63, 200, .2), rgba(255, 63, 200, 0) 60%),
+    radial-gradient(ellipse at 100% 70%, rgba(46, 242, 255, .1), rgba(46, 242, 255, 0) 50%),
+    radial-gradient(rgba(255, 255, 255, .035) 1px, transparent 1.5px);
+  background-size: 100% 900px, 100% 900px, 7px 7px; background-repeat: no-repeat, no-repeat, repeat; background-position: 0 0; }
+html[data-tema="neon"] .brand h1 { color: #ffe9f9; text-shadow: 0 0 2px #fff, 0 0 8px #ff3fc8, 0 0 20px #ff3fc8, 0 0 40px #ff3fc8; }
+html[data-tema="neon"] .brand h1 span { color: #e9feff; text-shadow: 0 0 2px #fff, 0 0 8px #2ef2ff, 0 0 20px #2ef2ff, 0 0 40px #2ef2ff; }
+html[data-tema="neon"] .status, html[data-tema="neon"] .topbar .round, html[data-tema="neon"] .h2, html[data-tema="neon"] .sheet h2 { text-shadow: 0 0 10px currentColor; }
+html[data-tema="neon"] .status.is-turn { color: #ffd9f5; text-shadow: 0 0 4px #ff3fc8, 0 0 16px #ff3fc8; }
+html[data-tema="neon"] .status.is-ask { color: #e9feff; text-shadow: 0 0 4px #2ef2ff, 0 0 16px #2ef2ff; }
+html[data-tema="neon"] .panel, html[data-tema="neon"] .opp, html[data-tema="neon"] .t-pannello, html[data-tema="neon"] .mine, html[data-tema="neon"] .sheet, html[data-tema="neon"] .banner { background: rgba(24, 17, 31, .94); border: 2px solid #2ef2ff; border-radius: 18px;
+  box-shadow: 0 0 10px rgba(46, 242, 255, .45), inset 0 0 10px rgba(46, 242, 255, .2); }
+html[data-tema="neon"] .opp.turn, html[data-tema="neon"] .t-pannello.turn, html[data-tema="neon"] .mine.turn { border-color: #ff3fc8; box-shadow: 0 0 14px #ff3fc8, inset 0 0 10px rgba(255, 63, 200, .3); }
+html[data-tema="neon"] .opp.ask, html[data-tema="neon"] .t-pannello.ask { border-color: #fff36b; box-shadow: 0 0 14px #fff36b, inset 0 0 10px rgba(255, 243, 107, .25); }
+html[data-tema="neon"] .btn { background: transparent; border: 2px solid #ff3fc8; border-radius: 999px; color: #ffe9f9; text-shadow: 0 0 6px #ff3fc8;
+  box-shadow: 0 0 10px rgba(255, 63, 200, .55), inset 0 0 8px rgba(255, 63, 200, .3); }
+html[data-tema="neon"] .btn.primary { background: #ff3fc8; color: #1a0614; text-shadow: none; box-shadow: 0 0 18px #ff3fc8; }
+html[data-tema="neon"] .field { background: #0d0912; border: 2px solid #3b2d4d; }
+html[data-tema="neon"] .seg { background: transparent; border: 2px solid #2ef2ff; box-shadow: 0 0 8px rgba(46, 242, 255, .45); }
+html[data-tema="neon"] .seg button[aria-pressed="true"] { background: #2ef2ff; color: #06181a; }
+html[data-tema="neon"] .actions { background: #0b0810; border-top: 2px solid #ff3fc8; box-shadow: 0 -6px 18px rgba(255, 63, 200, .3); }
+html[data-tema="neon"] .pf-chip { background: #18111f; border-color: #2ef2ff; box-shadow: 0 0 8px rgba(46, 242, 255, .45); }
+/* «Fumetto»: pop art; personaggi col retino a puntini, bordi neri spessi, nuvolette e raggi. Chiaro. */
+html[data-tema="fumetto"] {
+  --table: #ffe14d; --panel: #ffffff; --raise: #fff7d1; --line: #111111; --text: #111111; --muted: #3d3d3d;
+  --saffron: #ff2a2a; --on-saffron: #ffffff; --crimson: #1e6fff; --bad: #d01010; --good: #1b8a2b; --focus: #111111; --soul-eyes: #ffffff;
+  --font-display: 'Bangers', Impact, 'Arial Black', sans-serif;
+  color-scheme: light;
+}
+html[data-tema="fumetto"] body { background-color: #ffe14d;
+  background-image: repeating-conic-gradient(from 0deg at 50% 130px, rgba(255, 255, 255, .3) 0 7deg, rgba(255, 255, 255, 0) 7deg 14deg),
+    radial-gradient(rgba(255, 110, 0, .25) 27%, transparent 31%);
+  background-size: 100% 560px, 12px 12px; background-repeat: no-repeat, repeat; background-position: 0 0; }
+html[data-tema="fumetto"] .brand h1, html[data-tema="fumetto"] .status, html[data-tema="fumetto"] .h2, html[data-tema="fumetto"] .sheet h2, html[data-tema="fumetto"] .btn, html[data-tema="fumetto"] .topbar .round { letter-spacing: .04em; }
+html[data-tema="fumetto"] .brand h1 { color: #ff2a2a; -webkit-text-stroke: 2px #111; paint-order: stroke fill; text-shadow: 4px 4px 0 #111; transform: rotate(-2deg); }
+html[data-tema="fumetto"] .brand h1 span { color: #1e6fff; }
+html[data-tema="fumetto"] .status { width: fit-content; margin-inline: auto; padding: 6px 20px 4px; background: #fff; border: 3px solid #111; border-radius: 999px; box-shadow: 3px 3px 0 #111; }
+html[data-tema="fumetto"] .status.is-turn { color: #ff2a2a; }
+html[data-tema="fumetto"] .status.is-ask { color: #1e6fff; }
+html[data-tema="fumetto"] .panel, html[data-tema="fumetto"] .opp, html[data-tema="fumetto"] .t-pannello, html[data-tema="fumetto"] .mine, html[data-tema="fumetto"] .sheet, html[data-tema="fumetto"] .banner { background: #fff; border: 3px solid #111; border-radius: 3px; box-shadow: 5px 5px 0 #111; }
+html[data-tema="fumetto"] .sheet { box-shadow: none; }
+html[data-tema="fumetto"] .opp.turn, html[data-tema="fumetto"] .t-pannello.turn, html[data-tema="fumetto"] .mine.turn { box-shadow: 5px 5px 0 #ff2a2a; }
+html[data-tema="fumetto"] .opp.ask, html[data-tema="fumetto"] .t-pannello.ask { box-shadow: 5px 5px 0 #1e6fff; }
+html[data-tema="fumetto"] .overlay { background: rgba(17, 17, 17, .55); }
+html[data-tema="fumetto"] .btn { background: #fff; border: 3px solid #111; border-radius: 4px; color: #111; font-family: var(--font-display); font-weight: 400; font-size: 21px; box-shadow: 3px 3px 0 #111; }
+html[data-tema="fumetto"] .btn.sm { font-size: 18px; }
+html[data-tema="fumetto"] .btn.primary { background: #ff2a2a; color: #fff; }
+html[data-tema="fumetto"] .field { background: #fff; border: 3px solid #111; border-radius: 3px; }
+html[data-tema="fumetto"] .seg { background: #fff; border: 3px solid #111; border-radius: 4px; }
+html[data-tema="fumetto"] .seg button { color: #111; }
+html[data-tema="fumetto"] .seg button[aria-pressed="true"] { background: #1e6fff; color: #fff; }
+html[data-tema="fumetto"] .actions { --text: #ffffff; --muted: #e3ebff; --raise: #3d82ff; --line: #111111; color: var(--text); border-top: 3px solid #111;
+  background-color: #1e6fff; background-image: radial-gradient(rgba(0, 30, 120, .35) 27%, transparent 31%); background-size: 10px 10px; }
+html[data-tema="fumetto"] .pf-chip { background: #fff; border: 2px solid #111; color: #111; }
+html[data-tema="fumetto"] .pf-chip i { background: conic-gradient(var(--saffron) var(--p), #dddddd 0); }
+html[data-tema="fumetto"] .pf-chip i span { background: #fff; }
+html[data-tema="fumetto"] #sala-avviso { background: #fff; color: #111; border: 3px solid #111; box-shadow: 5px 5px 0 #111; }
+/* «Spettrale»: notte di streghe; le carte sono lune piene con sopra le ombre nere dei personaggi, solo gli occhi
+   accesi. Pipistrelli, ragnatele e nebbia. Scuro. */
+html[data-tema="spettrale"] {
+  --table: #160c1f; --panel: #21152b; --raise: #2c1d38; --line: #4a3160; --text: #f3eaf7; --muted: #b9a6c8;
+  --saffron: #ff8a1f; --on-saffron: #1a0d05; --crimson: #8ae65c; --bad: #ff5a5a; --good: #8ae65c; --focus: #ff8a1f; --soul-eyes: #21152b;
+  --font-display: 'Creepster', 'Chiller', fantasy;
+  color-scheme: dark;
+}
+html[data-tema="spettrale"] body { background-color: #160c1f;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='390' height='200' viewBox='0 0 390 200'%3E%3Cg fill='%2307030a' fill-opacity='.75'%3E%3Cpath transform='translate(286 34) scale(1.15) rotate(-8 14 5)' d='M0 6Q6 0 11 4L12 1L13 3L15 3L16 1L17 4Q22 0 28 6Q24 5 22 9Q19 7 17 9Q14 7 11 9Q9 7 6 9Q4 5 0 6Z'/%3E%3Cpath transform='translate(330 70) scale(0.8) rotate(10 14 5)' d='M0 6Q6 0 11 4L12 1L13 3L15 3L16 1L17 4Q22 0 28 6Q24 5 22 9Q19 7 17 9Q14 7 11 9Q9 7 6 9Q4 5 0 6Z'/%3E%3Cpath transform='translate(248 82) scale(0.65) rotate(-14 14 5)' d='M0 6Q6 0 11 4L12 1L13 3L15 3L16 1L17 4Q22 0 28 6Q24 5 22 9Q19 7 17 9Q14 7 11 9Q9 7 6 9Q4 5 0 6Z'/%3E%3Cpath transform='translate(40 120) scale(0.7) rotate(6 14 5)' d='M0 6Q6 0 11 4L12 1L13 3L15 3L16 1L17 4Q22 0 28 6Q24 5 22 9Q19 7 17 9Q14 7 11 9Q9 7 6 9Q4 5 0 6Z'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 85% 0, rgba(255, 170, 70, .16), rgba(255, 170, 70, 0) 65%),
+    linear-gradient(#1d0f2b, #160c1f 520px),
+    linear-gradient(to top, rgba(190, 170, 210, .14), rgba(190, 170, 210, 0) 260px);
+  background-size: 390px 200px, 100% 300px, 100% 100%, 100% 100%; background-repeat: no-repeat; background-position: right 0 top 64px, 0 0, 0 0, 0 0; }
+html[data-tema="spettrale"] .brand h1 { color: #ff8a1f; letter-spacing: .02em; text-shadow: 0 0 14px rgba(255, 138, 31, .45), 2px 3px 0 #3a0d00; }
+html[data-tema="spettrale"] .brand h1 span { color: #8ae65c; text-shadow: 0 0 14px rgba(138, 230, 92, .5), 2px 3px 0 #0d2a05; }
+html[data-tema="spettrale"] .status, html[data-tema="spettrale"] .h2, html[data-tema="spettrale"] .sheet h2, html[data-tema="spettrale"] .topbar .round { letter-spacing: .03em; }
+html[data-tema="spettrale"] .status.is-turn { color: #ff8a1f; text-shadow: 0 0 12px rgba(255, 138, 31, .5); }
+html[data-tema="spettrale"] .status.is-ask { color: #8ae65c; }
+html[data-tema="spettrale"] .panel, html[data-tema="spettrale"] .opp, html[data-tema="spettrale"] .t-pannello, html[data-tema="spettrale"] .mine, html[data-tema="spettrale"] .sheet, html[data-tema="spettrale"] .banner { background: rgba(33, 21, 43, .93); border: 1px solid #4a3160; border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
+html[data-tema="spettrale"] .panel { position: relative; }
+html[data-tema="spettrale"] .panel::after { content: ""; position: absolute; top: 0; right: 0; width: 48px; height: 48px; transform: scaleX(-1); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M0 0L48.0 0.0M0 0L44.3 18.4M0 0L33.9 33.9M0 0L18.4 44.3M0 0L0.0 48.0M13.0 0.0Q11.0 2.2 12.0 5.0Q9.3 6.2 9.2 9.2Q6.2 9.3 5.0 12.0Q2.2 11.0 0.0 13.0M25.0 0.0Q21.1 4.2 23.1 9.6Q17.9 11.9 17.7 17.7Q11.9 17.9 9.6 23.1Q4.2 21.1 0.0 25.0M37.0 0.0Q31.2 6.2 34.2 14.2Q26.5 17.7 26.2 26.2Q17.7 26.5 14.2 34.2Q6.2 31.2 0.0 37.0' fill='none' stroke='%23ffffff' stroke-opacity='.2' stroke-width='.8'/%3E%3C/svg%3E"); pointer-events: none; }
+html[data-tema="spettrale"] .opp.turn, html[data-tema="spettrale"] .t-pannello.turn, html[data-tema="spettrale"] .mine.turn { border-color: #ff8a1f; box-shadow: 0 0 0 1px #ff8a1f, 0 0 18px rgba(255, 138, 31, .35); }
+html[data-tema="spettrale"] .opp.ask, html[data-tema="spettrale"] .t-pannello.ask { border-color: #8ae65c; box-shadow: 0 0 0 1px #8ae65c, 0 0 18px rgba(138, 230, 92, .3); }
+html[data-tema="spettrale"] .btn { background: #2c1d38; border: 1px solid #5a3d73; color: #f3eaf7; }
+html[data-tema="spettrale"] .btn.primary { background: #ff8a1f; border-color: #ff8a1f; color: #1a0d05; box-shadow: 0 0 16px rgba(255, 138, 31, .35); }
+html[data-tema="spettrale"] .field { background: #140b1b; border: 1px solid #4a3160; }
+html[data-tema="spettrale"] .seg { background: #140b1b; border: 1px solid #4a3160; }
+html[data-tema="spettrale"] .seg button[aria-pressed="true"] { background: #ff8a1f; color: #1a0d05; }
+html[data-tema="spettrale"] .actions { background: linear-gradient(rgba(190, 170, 210, .08), rgba(190, 170, 210, 0)), #120a18; border-top: 1px solid #4a3160; }
+
+/* il foglio dei temi (lib/temi.js lo apre con le classi comuni .overlay e .sheet) */
+.tema-btn svg { width: 21px; height: 21px; }
+.tema-prev svg { width: 44px; height: 44px; }
+.tema-prev .tema-emo { font: 28px/1 "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.tema-overlay { z-index: 40; }
+.tema-nota { margin: 0; color: var(--muted); font-size: 14px; }
+.tema-gruppo { margin: 6px 2px 0; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- gettoni per le carte dei giochi ----------
+   Ogni gioco li usa nel suo CSS (html[data-tema] .carta { ... }), così una regola sola vale per tutti i temi.
+   --t-font: carattere dei numeri e dei nomi sulle carte;  --t-raggio: angoli;  --t-ombra: ombra della carta.
+   Carte senza colore proprio: fondo --t-carta, testo --t-carta-testo, contorno --t-tratto largo --t-tratto-w.
+   Dorso: --t-dorso (un intero «background»). --t-rosso: inchiostro rosso sulla carta (cuori e quadri).  Emoji dei disegni: filter: var(--t-emo) (lo mette lib/temi.js).
+   Carte col loro colore (--cc, dato dal gioco): il colore del tema è
+     color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff))   (pastello nel gesso, antico nei tatuaggi)
+   e poi fondo var(--t-col-fondo, colore), testo var(--t-col-testo, colore), contorno var(--t-col-tratto, colore),
+   alone var(--t-col-alone, var(--t-ombra)), ombra del numero var(--t-col-glow, none): i temi «pieni» (Cemento, Vecchia
+   scuola, Fumetto) danno contorno e testo e lasciano il fondo del colore, quelli «a contorno» (Gessetto, Neon,
+   Spettrale) danno il fondo scuro e lasciano il colore a testo e contorno. --t-retino: puntini sopra il colore. */
+html[data-tema="cemento"] {
+  --t-rosso: #d31f26;
+  --t-font: 'Permanent Marker', 'Comic Sans MS', cursive; --t-raggio: 8px; --t-ombra: 3px 3px 0 #151515;
+  --t-carta: #ffffff; --t-carta-testo: #151515; --t-tratto: #151515; --t-tratto-w: 3px;
+  --t-dorso: repeating-linear-gradient(45deg, #151515 0 7px, #ffffff 7px 14px);
+  --t-col-tratto: #151515; --t-col-testo: #ffffff;
+  --t-col-glow: -1.5px -1.5px 0 #151515, 1.5px -1.5px 0 #151515, -1.5px 1.5px 0 #151515, 1.5px 1.5px 0 #151515, 2.5px 3px 0 #151515;
+}
+html[data-tema="vecchia"] {
+  --t-rosso: #b8322a;
+  --t-font: 'Sancreek', Georgia, serif; --t-raggio: 10px; --t-ombra: 0 0 0 2px #f3ead3, 0 5px 10px rgba(0, 0, 0, .5);
+  --t-carta: #f4e9cf; --t-carta-testo: #1b1b1b; --t-tratto: #1b1b1b; --t-tratto-w: 3px;
+  --t-dorso: radial-gradient(circle, #f0c43c 0 16%, rgba(240, 196, 60, 0) 18%) 0 0 / 14px 14px, #c8372d;
+  --t-col-tratto: #1b1b1b; --t-col-testo: #f8f0dc; --t-col-mix: 80%; --t-col-mixcon: #8a6a3a;
+  --t-col-glow: -1.5px -1.5px 0 #1b1b1b, 1.5px -1.5px 0 #1b1b1b, -1.5px 1.5px 0 #1b1b1b, 1.5px 1.5px 0 #1b1b1b;
+}
+html[data-tema="gesso"] {
+  --t-rosso: #f28b82;
+  --t-font: 'Cabin Sketch', 'Chalkboard SE', cursive; --t-raggio: 12px 8px 13px 7px / 8px 12px 7px 13px; --t-ombra: none;
+  --t-carta: #2d3c34; --t-carta-testo: #eeeae0; --t-tratto: rgba(238, 234, 224, .85); --t-tratto-w: 2px;
+  --t-dorso: repeating-linear-gradient(45deg, #2d3c34 0 5px, #3a4b42 5px 10px);
+  --t-col-fondo: #2d3c34; --t-col-mix: 55%; --t-col-mixcon: #ffffff;
+}
+html[data-tema="neon"] {
+  --t-rosso: #ff4f6b;
+  --t-font: 'Tilt Neon', 'Trebuchet MS', sans-serif; --t-raggio: 12px; --t-ombra: 0 0 10px rgba(46, 242, 255, .45);
+  --t-carta: #0f0a14; --t-carta-testo: #f6effc; --t-tratto: #2ef2ff; --t-tratto-w: 2px;
+  --t-dorso: repeating-radial-gradient(circle, #0f0a14 0 5px, #24142e 5px 7px);
+  --t-col-fondo: #0f0a14; --t-col-glow: 0 0 4px currentColor, 0 0 12px currentColor; --t-col-alone: 0 0 12px currentColor;
+}
+html[data-tema="fumetto"] {
+  --t-rosso: #e81c1c;
+  --t-font: 'Bangers', Impact, sans-serif; --t-raggio: 5px; --t-ombra: 3px 3px 0 #111111;
+  --t-carta: #ffffff; --t-carta-testo: #111111; --t-tratto: #111111; --t-tratto-w: 3px;
+  --t-dorso: repeating-conic-gradient(#ff2a2a 0 11deg, #ffe03a 11deg 22deg);
+  --t-col-tratto: #111111; --t-col-testo: #ffffff;
+  --t-col-glow: -1.5px -1.5px 0 #111, 1.5px -1.5px 0 #111, -1.5px 1.5px 0 #111, 1.5px 1.5px 0 #111, 2.5px 3px 0 #111;
+  --t-retino: radial-gradient(rgba(0, 0, 0, .2) 24%, rgba(0, 0, 0, 0) 28%); --t-retino-size: 7px 7px;
+}
+html[data-tema="spettrale"] {
+  --t-rosso: #b0122f;
+  --t-font: 'Creepster', 'Chiller', fantasy; --t-raggio: 12px; --t-ombra: 0 0 14px rgba(255, 138, 31, .25);
+  --t-carta: radial-gradient(circle at 50% 42%, #fff0c2 0, #ffcf6e 38%, #f59a32 78%, #a3470f 100%); --t-carta-testo: #1a0d05;
+  --t-tratto: #ff8a1f; --t-tratto-w: 2px;
+  --t-dorso: radial-gradient(circle, #8ae65c 0 10%, rgba(138, 230, 92, 0) 11%), repeating-conic-gradient(#21152b 0 15deg, #2c1d38 15deg 30deg);
+  --t-col-fondo: #1d1226; --t-col-mix: 85%; --t-col-mixcon: #ff8a1f; --t-col-glow: 0 0 8px currentColor; --t-col-alone: 0 0 10px rgba(255, 138, 31, .3);
+}
+
+/* sul telefono stretto i due pulsantini della barra del tavolo (tema e audio) si stringono: il titolo resta su una riga */
+@media (max-width: 430px) { .topbar .tema-btn, .topbar .snd-btn { width: 32px; } }
+
+/* il sipario del gioco in locale (Gran Bazar) copre la mano dell'altro: resta pieno anche dove i fogli sono velati */
+html[data-tema] .overlay.curtain { background: var(--table); }
+
+/* nei mondi sopra «Notte» i riquadri del gioco (t-pannello) prendono i colori del mondo */
+html[data-mondo]:not([data-tema]) .t-pannello { background: var(--panel); border-color: var(--line); }
+
+/* la prima settimana (lib/temi.js): il fumetto che fa scoprire la tavolozza, uguale in ogni tema */
+.tema-coach { position: fixed; z-index: 35; width: min(272px, calc(100vw - 20px)); padding: 12px 14px; border-radius: 16px;
+  background: #fffdf6; color: #1d1a33; box-shadow: 0 12px 30px rgba(0, 0, 0, .38);
+  font: 15px/1.4 'Atkinson Hyperlegible', system-ui, sans-serif; animation: tema-coach-su .35s ease-out; }
+.tema-coach::before { content: ""; position: absolute; top: -7px; left: calc(var(--freccia, 50%) - 8px); width: 16px; height: 16px;
+  background: #fffdf6; border-radius: 3px; transform: rotate(45deg); }
+.tema-coach p { position: relative; margin: 0 0 10px; }
+.tema-coach b { color: #b45309; }
+.tema-coach-ok { display: block; margin-left: auto; min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: #f5aa3e;
+  color: #1d1a33; font: 700 15px/1 'Atkinson Hyperlegible', system-ui, sans-serif; cursor: pointer; }
+.tema-coach-ok:focus-visible { outline: 3px solid #1d1a33; outline-offset: 2px; }
+.tema-coach-alone { position: fixed; z-index: 35; border-radius: 50%; pointer-events: none; animation: tema-coach-pulsa 1.6s ease-out infinite;
+  box-shadow: 0 0 0 3px #f5aa3e; }
+.tema-coach[hidden], .tema-coach-alone[hidden] { display: none; }
+@keyframes tema-coach-pulsa { 0% { box-shadow: 0 0 0 3px rgba(245, 170, 62, 1), 0 0 0 0 rgba(245, 170, 62, .6); }
+  100% { box-shadow: 0 0 0 3px rgba(245, 170, 62, 1), 0 0 0 16px rgba(245, 170, 62, 0); } }
+@keyframes tema-coach-su { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .tema-coach, .tema-coach-alone { animation: none; } }

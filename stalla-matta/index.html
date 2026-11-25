@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-stili="no">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,6 +10,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<script src="mondi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Stalla Matta: la notte indaco della sala giochi con carte color confetto: lilla gli unicorni magici,
@@ -282,6 +286,71 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   .seg button:not([aria-pressed="true"]):hover { color: var(--text); }
   .linkbtn:hover { color: var(--text); }
 }
+/* ---------- temi (lib/temi.css): le carte di Stalla Matta coi gettoni --t-* ---------- */
+html[data-tema] .uc {
+  --cc: var(--edge); --t-c: color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-carta); color: var(--t-carta-testo); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 calc(var(--t-tratto-w) + 1px) var(--t-c), var(--t-ombra);
+}
+html[data-tema] .uc.t-cucciolo::before, html[data-tema] .uc.t-semplice::before { opacity: .25; }
+html[data-tema] .uc .ty { color: var(--t-c); }
+html[data-tema] .uc .ic { filter: var(--t-emo); }
+html[data-tema="neon"] .uc { color: var(--t-c); box-shadow: inset 0 0 0 2px var(--t-c), 0 0 12px var(--t-c); }
+html[data-tema="neon"] .uc .nm { text-shadow: 0 0 6px currentColor; }
+html[data-tema] .uc.back { background: var(--t-dorso); box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .uc.back::after { color: var(--t-tratto); }
+html[data-tema] button.uc[aria-pressed="true"] { box-shadow: inset 0 0 0 calc(var(--t-tratto-w) + 1px) var(--t-c), 0 0 0 3px var(--saffron), 0 10px 18px rgba(0, 0, 0, .45); }
+/* ---------- mondi (stalla-matta/mondi.js): Fondale e Peluche ---------- */
+/* Fondale: il mare profondo con le alghe e le bolle; le carte sono vetro di mare col contorno del tipo */
+html[data-mondo="fondale"] {
+  --table: #052a3d; --panel: rgba(6, 58, 82, .82); --raise: rgba(255, 255, 255, .1); --line: rgba(150, 230, 255, .28); --text: #eafcff; --muted: #9fd3e3;
+  --saffron: #ffcf56; --on-saffron: #2a1d00; --focus: #7fffd4; --pink: #7fffd4; --font-display: 'Lilita One', 'Rozha One', sans-serif;
+}
+html[data-mondo="fondale"] body { background-color: #052a3d;
+  background-image: radial-gradient(circle at 25% 40%, rgba(255, 255, 255, .22) 0 3px, rgba(255, 255, 255, 0) 4px),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, .16) 0 5px, rgba(255, 255, 255, 0) 6px),
+    radial-gradient(ellipse 14px 60px at 50% 100%, rgba(46, 160, 110, .35) 0 98%, rgba(46, 160, 110, 0) 100%),
+    linear-gradient(180deg, #1b8fb3 0, #0a4f6e 420px, #052a3d 1000px);
+  background-size: 140px 160px, 190px 210px, 46px 120px, 100% 100%; background-repeat: repeat, repeat, repeat-x, no-repeat;
+  background-position: 0 0, 0 0, 0 100%, 0 0; background-attachment: scroll, scroll, fixed, scroll; }
+html[data-mondo="fondale"] .panel, html[data-mondo="fondale"] .opp, html[data-mondo="fondale"] .mine, html[data-mondo="fondale"] .sheet,
+html[data-mondo="fondale"] .t-pannello { border-radius: 20px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 8px 20px rgba(0, 20, 30, .35); }
+html[data-mondo="fondale"] .sheet { background: #0a4f6e; }
+html[data-mondo="fondale"] .brand h1 { color: #eafcff; text-shadow: 0 3px 0 #0a4f6e; }
+html[data-mondo="fondale"] .brand h1 span { color: #ffcf56; }
+html[data-mondo="fondale"] .uc { color: #0c3442; border-radius: 14px;
+  background: radial-gradient(circle at 80% 18%, rgba(255, 255, 255, .8) 0 4%, rgba(255, 255, 255, 0) 5%),
+    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, .6) 0 3%, rgba(255, 255, 255, 0) 4%),
+    linear-gradient(170deg, #f1feff, #bfeef6);
+  box-shadow: inset 0 0 0 calc(var(--w) * .05) var(--edge), 0 4px 12px rgba(0, 20, 30, .4); }
+html[data-mondo="fondale"] .uc.back { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .3) 0 6%, rgba(255, 255, 255, 0) 7%), linear-gradient(180deg, #1b8fb3, #0a4f6e);
+  box-shadow: inset 0 0 0 calc(var(--w) * .045) #7fffd4, 0 4px 10px rgba(0, 20, 30, .4); }
+html[data-mondo="fondale"] .uc .ic { filter: drop-shadow(0 2px 2px rgba(0, 60, 80, .35)) hue-rotate(-12deg); }
+/* Peluche: feltro lilla, toppe pastello con le cuciture; le carte sono pezze imbottite */
+html[data-mondo="peluche"] {
+  --table: #efe3ff; --panel: #fff6fb; --raise: #f6e9ff; --line: #d9c2ef; --text: #3b2a4a; --muted: #7d6690;
+  --saffron: #ff7eb6; --on-saffron: #ffffff; --crimson: #7a5cff; --focus: #7a5cff; --pink: #ff7eb6;
+  --font-display: 'Baloo 2', 'Trebuchet MS', sans-serif; color-scheme: light;
+}
+html[data-mondo="peluche"] body { background-color: #efe3ff;
+  background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, .35) 0 2px, rgba(255, 255, 255, 0) 2px 9px),
+    repeating-linear-gradient(-45deg, rgba(160, 120, 220, .08) 0 2px, rgba(160, 120, 220, 0) 2px 9px);
+  background-size: auto; background-position: 0 0; }
+html[data-mondo="peluche"] .panel, html[data-mondo="peluche"] .opp, html[data-mondo="peluche"] .mine, html[data-mondo="peluche"] .sheet,
+html[data-mondo="peluche"] .t-pannello { background: #fff6fb; border: 0; border-radius: 22px; box-shadow: 0 6px 0 #e2cff3, 0 10px 20px rgba(122, 92, 255, .15);
+  outline: 2px dashed #e7b6d4; outline-offset: -8px; }
+html[data-mondo="peluche"] .opp.turn, html[data-mondo="peluche"] .mine.turn { outline-color: #ff7eb6; box-shadow: 0 6px 0 #ff9fc8, 0 10px 20px rgba(255, 126, 182, .3); }
+html[data-mondo="peluche"] .brand h1, html[data-mondo="peluche"] .status, html[data-mondo="peluche"] .h2, html[data-mondo="peluche"] .sheet h2,
+html[data-mondo="peluche"] .topbar .round { font-weight: 800; }
+html[data-mondo="peluche"] .brand h1 { color: #7a5cff; text-shadow: 0 3px 0 #ffffff; }
+html[data-mondo="peluche"] .brand h1 span { color: #ff7eb6; }
+html[data-mondo="peluche"] .actions { background: #fff6fb; border-top: 2px dashed #e7b6d4; }
+html[data-mondo="peluche"] .btn { border-radius: 999px; }
+html[data-mondo="peluche"] .uc { border-radius: 16px; color: #3b2a4a; box-shadow: inset 0 0 0 calc(var(--w) * .05) color-mix(in srgb, var(--edge) 55%, #fff), 0 3px 0 color-mix(in srgb, var(--edge) 35%, #fff), 0 6px 12px rgba(122, 92, 255, .18); }
+html[data-mondo="peluche"] .uc::after { content: ""; position: absolute; inset: calc(var(--w) * .07); border: 1.5px dashed color-mix(in srgb, var(--edge) 60%, #fff); border-radius: 11px; pointer-events: none; }
+html[data-mondo="peluche"] .uc .ic { filter: drop-shadow(0 2px 0 rgba(255, 255, 255, .9)) drop-shadow(0 3px 3px rgba(80, 40, 120, .25)) saturate(.85); }
+html[data-mondo="peluche"] .uc.back { background: repeating-linear-gradient(45deg, #f7c6e0 0 6px, #e7d6ff 6px 12px); box-shadow: 0 3px 0 #d9c2ef; }
+html[data-mondo="peluche"] .uc.back::after { content: "✿"; border: 0; inset: auto; position: static; color: #ff7eb6; font-size: calc(var(--w) * .42); }
 </style>
 </head>
 <body>
@@ -290,7 +359,6 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -304,6 +372,9 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   var K = window.StallaMatta;
   var BOT = window.StallaBot;
   var S = window.Suoni || { tema: function () {}, effetto: function () {}, sequenza: function () {}, bottone: function () { return ''; } };
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  var TM = window.Temi || { bottone: function () { return ''; }, attuale: function () { return 'notte'; } };
+  document.addEventListener('temi:cambio', function () { render(); });
   var $app = document.getElementById('app');
   var $layer = document.getElementById('layer');
 
@@ -383,7 +454,9 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     cuts.forEach(function (c) { out += w.slice(last, c) + '\u00ad'; last = c; });
     return out + w.slice(last);
   }
-  function faceName(t) { return t.split(' ').map(sillabe).join(' '); }
+  // Mondi (mondi.js): le parole del mondo acceso, anche sui nomi prima che vadano a capo.
+  var SMM = window.StallaMondi || { parole: function (h) { return h; } };
+  function faceName(t) { return SMM.parole(t).split(' ').map(sillabe).join(' '); }
   function cb(c) { return '<b>' + esc(cname(c)) + '</b>'; }
   function colVar(d, name) {
     if (!d.col) return '';
@@ -532,7 +605,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     var off = P.local || P.bot;
     return '<header class="topbar"><button class="linkbtn" data-act="lobby" aria-label="' + (off ? 'Esci' : 'Torna alle partite') + '">‹<span class="bk"> ' + (off ? 'Esci' : 'Partite') + '</span></button>' +
       '<span class="round">Turno ' + s.turnNo + (off ? '' : netDot()) + '</span>' +
-      '<span class="right">' + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
+      '<span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="log">Storico</button><button class="linkbtn" data-act="rules">Regole</button></span></header>';
   }
   function bannersHTML(s, P) {
     var h = '';
@@ -594,7 +667,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     }
     ui.cronNext = Math.max(ui.cronNext || 0, seen);
     var topD = s.discard.length ? cardHTML(s.discard[s.discard.length - 1], { w: 44 }) : '<span class="uc ghost" style="--w:44px"></span>';
-    return '<section class="tavolo" aria-label="Il tavolo"><div class="piles">' +
+    return '<section class="tavolo t-pannello" aria-label="Il tavolo"><div class="piles">' +
       '<span class="pile">' + backHTML(44) + '<span>' + s.deck.length + ' nel mazzo</span></span>' +
       '<button type="button" class="pile" data-act="pile" data-p="scarti">' + topD + '<span>' + s.discard.length + ' scarti</span></button>' +
       '<button type="button" class="pile" data-act="pile" data-p="nido"><span class="nido" aria-hidden="true">🍼</span><span>' + s.nursery.length + ' nel Nido</span></button>' +
@@ -891,7 +964,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   function lobbyHTML() {
     var saved = ui.local && ui.local.status !== 'gameOver';
     var label = ui.online === 'up' ? 'Nuova partita online' : (ui.online === 'connecting' ? 'Mi collego…' : 'Senza connessione');
-    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + S.bottone() + '</span></nav>' +
+    return '<nav class="hubnav"><a class="linkbtn" href="../">‹ Tutti i giochi</a><span class="pf-nav">' + (window.Profilo ? Profilo.chip() : '') + TM.bottone() + S.bottone() + '</span></nav>' +
       (isWide() ? '<div class="desk lobby"><div class="col-l">' : '') + '<header class="brand">' + fanHTML() + '<h1>Stalla <span>Matta</span></h1>' +
       '<p class="tag">Riempi la tua stalla di unicorni e rovina quella degli altri. Vince chi ne ha 7. Da 2 a 8 giocatori.</p></header>' +
       '<section class="panel"><div class="row-between"><label class="lab" for="nm">Il tuo nome al tavolo</label>' + netChipHTML() + '</div>' +
@@ -916,7 +989,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
       return '<div class="row"><input id="ln-' + i + '" class="field" maxlength="20" placeholder="Giocatore ' + (i + 1) + '" value="' + esc(nm) + '" aria-label="Nome del giocatore ' + (i + 1) + '">' +
         (ui.localNames.length > K.MIN_PLAYERS ? '<button type="button" class="icon-btn" data-act="ln-del" data-i="' + i + '" aria-label="Togli il giocatore ' + (i + 1) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg></button>' : '') + '</div>';
     }).join('');
-    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span>' + S.bottone() + '</header>' +
+    return '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Indietro</button><span class="round">Sullo stesso telefono</span><span class="right">' + TM.bottone() + S.bottone() + '</span></header>' +
       '<section class="panel"><h2 class="h2">Chi gioca?</h2><p class="muted small" style="margin:0">Da 2 a 8 giocatori, nell\'ordine in cui siete seduti.</p><div class="names">' + rows + '</div>' +
       (ui.localNames.length < K.MAX_PLAYERS ? '<button type="button" class="btn sm" data-act="ln-add">+ Aggiungi un giocatore</button>' : '') +
       '<button type="button" class="btn primary wide" data-act="local-start">Distribuisci le carte</button>' +
@@ -928,7 +1001,7 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
   }
   function waitingHTML(s) {
     var seat = K.seatOf(s, ui.myKey), host = seat === s.host;
-    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
+    var top = '<header class="topbar"><button class="linkbtn" data-act="lobby">‹ Partite</button><span class="round">Sala d\'attesa' + netDot() + '</span><span class="right">' + TM.bottone() + S.bottone() + '<button class="linkbtn" data-act="rules">Regole</button></span></header>';
     var list = '<ul class="seated">' + s.seats.map(function (x, i) {
       var tag = isBot(s, i) ? 'bot ' + esc(s.bots[i]) : (i === s.host ? 'ha creato la partita' : '') + (i === seat ? (i === s.host ? ' · tu' : 'tu') : '');
       return '<li><span class="n">' + (i + 1) + '</span><span>' + hn(s, i) + botTag(s, i) + '</span><span class="tag">' + tag + '</span>' +
@@ -1191,12 +1264,12 @@ table.score tr.win td { color: var(--saffron); font-weight: 700; }
     else if (ui.route === 'local') html = ui.local ? boardHTML(ui.local) : localSetupHTML();
     else if (ui.route === 'bot') html = boardHTML(ui.bot);
     else html = onlineGameHTML();
-    $app.innerHTML = html;
+    $app.innerHTML = SMM.parole(html);
     $app.classList.toggle('wide', html.indexOf('<div class="desk') >= 0);
     var lh = layerHTML();
     if (lh !== ui.layerHTML) {
       var old = $layer.querySelector('.sheet'), top = old ? old.scrollTop : 0, same = ui.layerSheet === ui.sheet;
-      $layer.innerHTML = lh; ui.layerHTML = lh;
+      $layer.innerHTML = SMM.parole(lh); ui.layerHTML = lh;
       var nw = $layer.querySelector('.sheet');
       if (nw && same && top) nw.scrollTop = top;
     }

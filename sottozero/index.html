@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-stili="no">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,6 +10,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Rozha+One&display=swap">
+<script src="../lib/ambiente.js"></script>
+<script src="../lib/temi.js"></script>
+<script src="mondi.js"></script>
+<link rel="stylesheet" href="../lib/temi.css">
 <style>
 :root {
   /* Sottozero: la notte indaco della sala giochi, carte a tinta piena con un simbolo per colore, zafferano per il turno. */
@@ -272,6 +276,92 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   .desk .opps.one { grid-template-columns: minmax(0, 520px); }
   .desk .opps.one .mg .zc.mini { --w: 56px; }
 }
+/* ---------- temi (lib/temi.css): le carte di Sottozero coi gettoni --t-* ---------- */
+html[data-tema] .zc {
+  --cc: var(--k); --t-c: color-mix(in srgb, var(--cc) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff));
+  background: var(--t-col-fondo, var(--t-c)); color: var(--t-col-testo, var(--t-c)); border-radius: var(--t-raggio);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), var(--t-col-alone, var(--t-ombra));
+  font-family: var(--t-font); text-shadow: var(--t-col-glow, none);
+}
+html[data-tema] .zc::before { border: 1px solid currentColor; opacity: .3; }
+html[data-tema] .zc::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--t-retino, none); background-size: var(--t-retino-size, auto); }
+html[data-tema] .zc .lb, html[data-tema] .zc .pt { text-shadow: none; }
+html[data-tema] .zc.dbl { color: var(--t-col-testo, #ffffff);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--k1) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff)) 0 49.5%,
+    color-mix(in srgb, var(--k2) var(--t-col-mix, 100%), var(--t-col-mixcon, #fff)) 50.5% 100%);
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, rgba(255, 255, 255, .7)), var(--t-ombra); }
+html[data-tema="neon"] .zc.dbl, html[data-tema="spettrale"] .zc.dbl { text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
+html[data-tema] .zc.back { background: var(--t-dorso); color: var(--t-carta-testo); text-shadow: none;
+  box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-tratto), var(--t-ombra); }
+html[data-tema] .zc.back::after, html[data-tema] .zc.empty::after { display: none; }
+html[data-tema] .zc.mini { box-shadow: inset 0 0 0 1px var(--t-col-tratto, var(--t-c)); }
+html[data-tema] .zc.empty { background: none; box-shadow: none; }
+html[data-tema] button.zc.pick { box-shadow: inset 0 0 0 var(--t-tratto-w) var(--t-col-tratto, var(--t-c)), 0 0 0 3px var(--saffron), 0 8px 16px rgba(0, 0, 0, .35); }
+/* ---------- mondi (sottozero/mondi.js): Vulcano e Acquario ---------- */
+/* Vulcano: roccia scura con le crepe accese; le carte sono basalto col bordo e il numero di lava */
+html[data-mondo="vulcano"] {
+  --table: #1a0f0d; --panel: #2a1814; --raise: #3a211b; --line: #5a2f22; --text: #fbe9dc; --muted: #d1a993;
+  --saffron: #ff7a1a; --on-saffron: #1a0a05; --focus: #ffd23f; --font-display: 'Rubik Burned', 'Rozha One', serif;
+  --cM: #ff5a1f; --cS: #ffd23f; --cR: #ff2e88; --cB: #7de2ff;
+}
+html[data-mondo="vulcano"] body { background-color: #1a0f0d;
+  background-image: radial-gradient(ellipse at 50% 125%, rgba(255, 90, 20, .5), rgba(255, 90, 20, 0) 62%),
+    repeating-linear-gradient(118deg, rgba(255, 110, 30, 0) 0 61px, rgba(255, 110, 30, .14) 61px 62.5px),
+    repeating-linear-gradient(62deg, rgba(255, 110, 30, 0) 0 89px, rgba(255, 110, 30, .1) 89px 90.5px);
+  background-size: auto; background-position: 0 0; }
+html[data-mondo="vulcano"] .panel, html[data-mondo="vulcano"] .opp, html[data-mondo="vulcano"] .mine, html[data-mondo="vulcano"] .sheet {
+  background: linear-gradient(180deg, #2c1914, #22130f); border-color: #5a2f22; box-shadow: inset 0 0 14px rgba(255, 90, 20, .12); }
+html[data-mondo="vulcano"] .brand h1, html[data-mondo="vulcano"] .status.is-turn { color: #ff7a1a; text-shadow: 0 0 14px rgba(255, 90, 20, .6); }
+html[data-mondo="vulcano"] .brand h1 span { color: #ffd23f; }
+html[data-mondo="vulcano"] .zc { color: var(--k); background: radial-gradient(circle at 30% 18%, #3d2a23, #1c110e 72%);
+  box-shadow: inset 0 0 0 2px var(--k), 0 0 14px color-mix(in srgb, var(--k) 55%, transparent);
+  text-shadow: 0 0 6px var(--k), 0 0 14px var(--k); font-family: 'Rubik Burned', var(--font-display); }
+html[data-mondo="vulcano"] .zc::before { border-color: color-mix(in srgb, var(--k) 40%, transparent); }
+html[data-mondo="vulcano"] .zc .lb, html[data-mondo="vulcano"] .zc .pt { text-shadow: 0 0 4px var(--k); }
+html[data-mondo="vulcano"] .zc.dbl { color: #fff5ea; text-shadow: 0 1px 2px #000;
+  background: linear-gradient(135deg, var(--k1) 0 49.5%, var(--k2) 50.5% 100%); box-shadow: inset 0 0 0 2px #1c110e, 0 0 12px rgba(255, 90, 20, .4); }
+html[data-mondo="vulcano"] .zc.back { color: #ff7a1a; text-shadow: none;
+  background: radial-gradient(circle at 50% 50%, #ffb347 0 6%, #ff5a1f 7% 14%, rgba(255, 90, 31, 0) 26%),
+    repeating-linear-gradient(135deg, #22130f 0 7px, #2d1914 7px 14px);
+  box-shadow: inset 0 0 0 2px #5a2f22, 0 3px 8px rgba(0, 0, 0, .5); }
+html[data-mondo="vulcano"] .zc.mini { box-shadow: inset 0 0 0 1px var(--k); }
+html[data-mondo="vulcano"] .zc.empty { background: none; box-shadow: none; }
+html[data-mondo="vulcano"] button.zc.pick { box-shadow: inset 0 0 0 2px var(--k), 0 0 0 3px #ffd23f, 0 0 18px rgba(255, 90, 20, .6); }
+/* Acquario: sott'acqua con i raggi di luce e le bolle; le carte sono vasche col loro colore */
+html[data-mondo="acquario"] {
+  --table: #06324a; --panel: rgba(10, 70, 100, .72); --raise: rgba(255, 255, 255, .1); --line: rgba(190, 240, 255, .28); --text: #effbff; --muted: #a5d6ea;
+  --saffron: #ffb84d; --on-saffron: #2a1500; --focus: #ffe08a; --font-display: 'Fredoka', 'Trebuchet MS', sans-serif;
+  --cM: #ff6f61; --cS: #e9b949; --cR: #b77dff; --cB: #22b8a7;
+}
+html[data-mondo="acquario"] body { background-color: #06324a;
+  background-image: radial-gradient(circle at 18% 60%, rgba(255, 255, 255, .22) 0 3px, rgba(255, 255, 255, 0) 4px),
+    radial-gradient(circle at 80% 30%, rgba(255, 255, 255, .18) 0 4px, rgba(255, 255, 255, 0) 5px),
+    repeating-linear-gradient(100deg, rgba(255, 255, 255, 0) 0 70px, rgba(255, 255, 255, .05) 70px 110px),
+    linear-gradient(180deg, #1a7fa8 0, #0a4a6c 380px, #06324a 900px);
+  background-size: 120px 140px, 170px 190px, auto, auto; background-position: 0 0; }
+html[data-mondo="acquario"] .panel, html[data-mondo="acquario"] .opp, html[data-mondo="acquario"] .mine, html[data-mondo="acquario"] .sheet {
+  border-radius: 20px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 8px 20px rgba(0, 20, 40, .35); }
+html[data-mondo="acquario"] .sheet { background: #0b4563; }
+html[data-mondo="acquario"] .brand h1, html[data-mondo="acquario"] .status, html[data-mondo="acquario"] .h2, html[data-mondo="acquario"] .sheet h2,
+html[data-mondo="acquario"] .topbar .round { font-weight: 700; }
+html[data-mondo="acquario"] .brand h1 span { color: #ffb84d; }
+html[data-mondo="acquario"] .zc { color: #ffffff; border-radius: 14px; font-family: 'Fredoka', var(--font-display); font-weight: 700;
+  background: radial-gradient(circle at 76% 22%, rgba(255, 255, 255, .6) 0 5%, rgba(255, 255, 255, 0) 6%),
+    radial-gradient(circle at 66% 36%, rgba(255, 255, 255, .45) 0 3.5%, rgba(255, 255, 255, 0) 4.5%),
+    radial-gradient(circle at 84% 44%, rgba(255, 255, 255, .35) 0 2.5%, rgba(255, 255, 255, 0) 3.5%),
+    linear-gradient(180deg, color-mix(in srgb, var(--k) 62%, #fff) 0%, var(--k) 55%, color-mix(in srgb, var(--k) 70%, #04263a) 100%);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .55), inset 0 -10px 14px rgba(4, 38, 58, .25), 0 4px 12px rgba(0, 20, 40, .4);
+  text-shadow: 0 2px 0 rgba(4, 38, 58, .35); }
+html[data-mondo="acquario"] .zc.dbl { background: linear-gradient(135deg, var(--k1) 0 49.5%, var(--k2) 50.5% 100%); }
+html[data-mondo="acquario"] .zc.back { color: #ffe08a;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .35) 0 6%, rgba(255, 255, 255, 0) 7%),
+    radial-gradient(circle at 62% 64%, rgba(255, 255, 255, .25) 0 5%, rgba(255, 255, 255, 0) 6%),
+    linear-gradient(180deg, #1a7fa8, #0b4563);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .45), 0 4px 12px rgba(0, 20, 40, .4); }
+html[data-mondo="acquario"] .zc.mini { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55); }
+html[data-mondo="acquario"] .zc.empty { background: none; box-shadow: none; }
+html[data-mondo="acquario"] button.zc.pick { box-shadow: inset 0 0 0 2px #ffffff, 0 0 0 3px #ffb84d, 0 8px 16px rgba(0, 20, 40, .45); }
 </style>
 </head>
 <body>
@@ -286,7 +376,6 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
 </svg>
 <div id="app"></div>
 <div id="layer"></div>
-<script src="../lib/ambiente.js"></script>
 <script src="../lib/profilo.js"></script>
 <script src="../lib/conti.js"></script>
 <script src="motore.js"></script>
@@ -337,11 +426,13 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   function nameOf(s, p) { return (s.seats[p] && s.seats[p].name) || ('Giocatore ' + (p + 1)); }
   function hn(s, p) { return esc(nameOf(s, p)); }
   function plural(n, a, b) { return n === 1 ? a : b; }
+  // il nome del colore: quello del mondo acceso (mondi.js), o quello di sempre
+  function colNome(k) { return window.SottozeroMondi ? SottozeroMondi.nome(k, Z.COLOR_NAME[k]) : Z.COLOR_NAME[k]; }
   function cardName(c) {
     var k = Z.kind(c);
-    if (k === 'n') return Z.COLOR_NAME[c[0]] + ' ' + c[1];
-    if (k === 'd') return 'Doppio pesca 2 ' + Z.COLOR_NAME[c[1]] + '/' + Z.COLOR_NAME[c[2]];
-    return Z.ACTION_NAME[k] + ' ' + Z.COLOR_NAME[c[0]];
+    if (k === 'n') return colNome(c[0]) + ' ' + c[1];
+    if (k === 'd') return 'Doppio pesca 2 ' + colNome(c[1]) + '/' + colNome(c[2]);
+    return Z.ACTION_NAME[k] + ' ' + colNome(c[0]);
   }
   function mark(col, cls) { return '<svg class="mk ' + cls + '" aria-hidden="true" viewBox="0 0 20 20"><use href="#m-' + col + '"/></svg>'; }
 
@@ -822,7 +913,9 @@ table.score td.left { text-align: left; white-space: normal; min-width: 96px; }
   }
 
   /* ---------- suoni (lib/suoni.js): musica del gioco ed effetti quando cambia il tavolo ---------- */
-  function snd() { return window.Suoni ? Suoni.bottone() : ''; }
+  // Temi comuni (lib/temi.js): pulsantino accanto all'audio; cambiato il tema, si ridisegna.
+  function snd() { return (window.Temi ? Temi.bottone() : '') + (window.Suoni ? Suoni.bottone() : ''); }
+  document.addEventListener('temi:cambio', function () { render(); });
   if (window.Suoni) Suoni.tema('sottozero');
   var sfxSeen = { key: null, snap: null };
   function sfxSnap(s, P) { return { v: s.v, nonce: s.nonce || '', round: s.round, status: s.status, turn: s.turn, last: JSON.stringify(s.last || null), tail: JSON.stringify((s.log || [])[(s.log || []).length - 1] || null), mine: s.status === 'playing' && !P.local && P.seated && s.turn === P.me }; }
