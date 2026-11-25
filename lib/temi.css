@@ -316,3 +316,22 @@ html[data-tema] .overlay.curtain { background: var(--table); }
 
 /* nei mondi sopra «Notte» i riquadri del gioco (t-pannello) prendono i colori del mondo */
 html[data-mondo]:not([data-tema]) .t-pannello { background: var(--panel); border-color: var(--line); }
+
+/* la prima settimana (lib/temi.js): il fumetto che fa scoprire la tavolozza, uguale in ogni tema */
+.tema-coach { position: fixed; z-index: 35; width: min(272px, calc(100vw - 20px)); padding: 12px 14px; border-radius: 16px;
+  background: #fffdf6; color: #1d1a33; box-shadow: 0 12px 30px rgba(0, 0, 0, .38);
+  font: 15px/1.4 'Atkinson Hyperlegible', system-ui, sans-serif; animation: tema-coach-su .35s ease-out; }
+.tema-coach::before { content: ""; position: absolute; top: -7px; left: calc(var(--freccia, 50%) - 8px); width: 16px; height: 16px;
+  background: #fffdf6; border-radius: 3px; transform: rotate(45deg); }
+.tema-coach p { position: relative; margin: 0 0 10px; }
+.tema-coach b { color: #b45309; }
+.tema-coach-ok { display: block; margin-left: auto; min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: #f5aa3e;
+  color: #1d1a33; font: 700 15px/1 'Atkinson Hyperlegible', system-ui, sans-serif; cursor: pointer; }
+.tema-coach-ok:focus-visible { outline: 3px solid #1d1a33; outline-offset: 2px; }
+.tema-coach-alone { position: fixed; z-index: 35; border-radius: 50%; pointer-events: none; animation: tema-coach-pulsa 1.6s ease-out infinite;
+  box-shadow: 0 0 0 3px #f5aa3e; }
+.tema-coach[hidden], .tema-coach-alone[hidden] { display: none; }
+@keyframes tema-coach-pulsa { 0% { box-shadow: 0 0 0 3px rgba(245, 170, 62, 1), 0 0 0 0 rgba(245, 170, 62, .6); }
+  100% { box-shadow: 0 0 0 3px rgba(245, 170, 62, 1), 0 0 0 16px rgba(245, 170, 62, 0); } }
+@keyframes tema-coach-su { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .tema-coach, .tema-coach-alone { animation: none; } }

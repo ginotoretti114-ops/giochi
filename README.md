@@ -126,11 +126,13 @@ restituisce una mossa per il motore. Il facile sceglie quasi a caso; il medio d�
 per vincere, colpisce chi è in testa e ritira i dadi quando conviene. Le partite contro il computer restano nel
 browser (`dv-bot`) e non passano dai server.
 
-I temi cambiano solo l'aspetto e sono gli stessi in tutti i giochi: «Notte» (lo stile di sempre), «Cemento»
-(graffiti, chiaro), «Vecchia scuola» (tatuaggi da marinaio, scuro), «Gessetto» (lavagna, scuro), «Neon» (insegne
-luminose, scuro), «Fumetto» (pop art, chiaro) e «Spettrale» (ombre sulla luna piena, scuro). Si scelgono da un
-pulsantino con la tavolozza accanto a quello dell'audio (lobby e tavolo) e la scelta vale per tutta la sala
-(`sala-tema`). `lib/temi.js`, nel `<head>` subito dopo `lib/ambiente.js`, mette `data-tema="..."` su `<html>` coi
+I temi cambiano solo l'aspetto. Gli stili sono «Notte» (lo stile di sempre), «Cemento» (graffiti, chiaro), «Vecchia
+scuola» (tatuaggi da marinaio, scuro), «Gessetto» (lavagna, scuro), «Fumetto» (pop art, chiaro) e «Spettrale» (ombre
+sulla luna piena, scuro); «Neon» (insegne luminose) è pronto ma spento. Per ora gli stili ci sono solo in Diavolerie:
+gli altri giochi hanno `data-stili="no"` su `<html>` e offrono solo «Notte» e i loro mondi. Si sceglie da un
+pulsantino con la tavolozza accanto a quello dell'audio (lobby e tavolo) e lo stile vale per tutta la sala
+(`sala-tema`). Fino al 2 dicembre 2026 un fumetto accanto alla tavolozza fa scoprire temi o mondi, finché non lo
+si chiude o si apre il foglio (`sala-coach-...`). `lib/temi.js`, nel `<head>` subito dopo `lib/ambiente.js`, mette `data-tema="..."` su `<html>` coi
 caratteri del tema prima che la pagina si disegni, dà il pulsantino (`Temi.bottone()`), apre il foglio per scegliere e
 manda l'evento `temi:cambio`, su cui il gioco ridisegna. `lib/temi.css` (prima dello stile del gioco) veste ciò che i
 giochi hanno in comune (sfondo, pannelli, pulsanti, fogli, barra delle azioni) e definisce i gettoni `--t-*` con cui
