@@ -56,7 +56,23 @@
     { id: 'falco', name: 'Falco', k: 'A', n: 7, x: 1, fx: 'hawk', art: '🦅', o: 2 },
     { id: 'puzzola', name: 'Puzzola', k: 'A', n: 7, x: 1, fx: 'skunk', art: '🦨', o: 2 },
     { id: 'rabbioso', name: 'Cane Rabbioso', k: 'A', n: 7, x: 2, fx: 'collect', v: 2, req: 'noKid', art: '🐶', prop: '💢', o: 1 },
-    { id: 'pipistrello', name: 'Pipistrello', k: 'A', n: 7, x: 1, fx: 'bat', art: '🦇' }
+    { id: 'pipistrello', name: 'Pipistrello', k: 'A', n: 7, x: 1, fx: 'bat', art: '🦇' },
+    // Espansione «Campo estivo» (exp: 'campo'): carte nostre, nello spirito del gioco, per l'estate in tenda.
+    { id: 'greta', name: 'Dolce Greta', k: 'G', t: 'S', n: 3, x: 2, fx: 'perGirl', v: 1, art: '👧🏼', prop: '🏕️', exp: 'campo' },
+    { id: 'margherita', name: 'Dolce Margherita', k: 'G', t: 'S', n: 11, x: 2, fx: 'poorest', v: 4, art: '👧🏾', prop: '🌼', exp: 'campo' },
+    { id: 'bea', name: 'Bea la Peste', k: 'G', t: 'R', n: 8, x: 2, fx: 'discardAnimal', art: '👧🏻', prop: '🪃', exp: 'campo' },
+    { id: 'agnese', name: 'Agnese', k: 'G', t: null, n: 9, x: 2, fx: 'collect', v: 3, req: 'demon', art: '👧🏽', prop: '🗺️', exp: 'campo' },
+    { id: 'bruno', name: 'Dolce Bruno', k: 'B', t: 'S', n: 4, x: 2, fx: 'perBoy', v: 1, art: '👦🏻', prop: '🎒', exp: 'campo' },
+    { id: 'michele', name: 'Dolce Michele', k: 'B', t: 'S', n: 9, x: 2, fx: 'campfire', art: '👦🏿', prop: '🪵', exp: 'campo' },
+    { id: 'rocco', name: 'Rocco la Peste', k: 'B', t: 'R', n: 5, x: 2, fx: 'stealAnimal', art: '👦🏽', prop: '🪝', exp: 'campo' },
+    { id: 'ugo', name: 'Ugo la Peste', k: 'B', t: 'R', n: 12, x: 2, fx: 'stealRich', v: 4, art: '👦🏼', prop: '🏹', exp: 'campo' },
+    { id: 'nando', name: 'Nando', k: 'B', t: null, n: 2, x: 2, fx: 'perDemon', v: 2, art: '👦', prop: '🛶', exp: 'campo' },
+    { id: 'procione', name: 'Procione', k: 'A', n: 7, x: 2, fx: 'richTax', art: '🦝', exp: 'campo' },
+    { id: 'orsetto', name: 'Orsetto', k: 'A', n: 7, x: 2, fx: 'collect', v: 3, req: 'demon', art: '🐻', exp: 'campo' },
+    { id: 'rana', name: 'Rana del Lago', k: 'A', n: 7, x: 2, fx: 'perAnimal', v: 1, art: '🐸', exp: 'campo' },
+    { id: 'lucciole', name: 'Lucciole', k: 'A', n: 7, x: 2, fx: 'fireflies', art: '🪲', prop: '✨', exp: 'campo' },
+    { id: 'zanzare', name: 'Zanzare', k: 'A', n: 7, x: 1, fx: 'bite', art: '🦟', exp: 'campo' },
+    { id: 'cerbiatto', name: 'Cerbiatto', k: 'A', n: 7, x: 2, fx: 'perSweet', art: '🦌', exp: 'campo' }
   ];
   /* Demoni: con n si attivano solo quando tira chi li ha evocati; con p hanno un potere sempre attivo. */
   var DEMONS = [
@@ -79,7 +95,13 @@
     { id: 'tentazione', name: 'Lady Tentazione', n: 4, fx: 'stealKid', art: '💃', prop: '💋' },
     { id: 'candelora', name: 'Strega Candelora', p: 'candle2', art: '🧙‍♀️', prop: '🕯️' },
     { id: 'sabba', name: 'Barone Sabba', p: 'cheap', art: '🎩', prop: '💸' },
-    { id: 'burlone', name: 'Diavolo Burlone', p: 'jester', art: '🤡', prop: '🃏' }
+    { id: 'burlone', name: 'Diavolo Burlone', p: 'jester', art: '🤡', prop: '🃏' },
+    // Campo estivo
+    { id: 'lago', name: 'Mostro del Lago', n: 3, fx: 'perAnimal', v: 2, art: '🦕', prop: '🌊', exp: 'campo' },
+    { id: 'fatuo', name: 'Fuoco Fatuo', p: 'wisp', art: '💫', prop: '🌫️', exp: 'campo' },
+    { id: 'piedone', name: 'Piedone', n: 4, fx: 'collect', v: 4, art: '🦍', prop: '🦶', exp: 'campo' },
+    { id: 'bosco', name: 'Spirito del Bosco', p: 'sweetGain', art: '🌳', prop: '👁️', exp: 'campo' },
+    { id: 'caposcout', name: 'Capo Scout Senza Testa', n: 10, fx: 'tribute', art: '👔', prop: '⛺', exp: 'campo' }
   ];
   /* Candele: raccolgono 1 anima quando esce uno dei loro numeri, con chiunque tiri. Non si perdono mai.
      Come nell'originale: quella del principiante col 6 e l'8 (28%), le altre al 25%. */
@@ -88,8 +110,22 @@
     { id: 'malvagia', name: 'Candela Malvagia', nums: [9, 10, 11], fx: 'candle', o: 2 },
     { id: 'buona', name: 'Candela Buona', nums: [3, 4, 5], fx: 'candle', o: 1 },
     { id: 'gentile', name: 'Candela Gentile', nums: [4, 7], fx: 'candle', o: 1 },
-    { id: 'marcia', name: 'Candela Marcia', nums: [7, 10], fx: 'candle', o: 1 }
+    { id: 'marcia', name: 'Candela Marcia', nums: [7, 10], fx: 'candle', o: 1 },
+    { id: 'lanterna', name: 'Lanterna del Campo', nums: [2, 5, 9], fx: 'candle', art: '🏮', exp: 'campo' }
   ];
+  /* Espansioni: le loro carte (campo exp) entrano nei mazzi solo se la partita le ha scelte (s.exp). */
+  var ESPANSIONI = [
+    { id: 'campo', name: 'Campo estivo', pronta: true,
+      text: 'L\'estate in tenda: 9 bambini e bambine, 6 animali del bosco, 5 demoni e la Lanterna del Campo.' }
+  ];
+  function espansioni(list) {
+    var ok = [];
+    (Array.isArray(list) ? list : []).forEach(function (x) {
+      if (ok.indexOf(x) < 0 && ESPANSIONI.some(function (e) { return e.id === x && e.pronta; })) ok.push(x);
+    });
+    return ok;
+  }
+  function inGioco(s, x) { return !x.exp || (s.exp || []).indexOf(x.exp) >= 0; }
   var BY = {};
   BLOCK.forEach(function (x) { x.cat = 'block'; BY[x.id] = x; });
   DEMONS.forEach(function (x) { x.cat = 'demon'; BY[x.id] = x; });
@@ -100,7 +136,7 @@
   /* ---------- testi delle carte ---------- */
   function soulsTxt(v) { return v === 1 ? '1 anima' : v + ' anime'; }
   function orList(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' o ' + a[a.length - 1] : String(a[0]); }
-  var REQ_TXT = { kid: 'Se hai almeno un bambino o una bambina', noKid: 'Se non hai nessun bambino e nessuna bambina', animals3: 'Se hai almeno 3 animali', pair: 'Se hai almeno 2 bambini oppure almeno 2 bambine', rotten3: 'Se hai almeno 3 bambini o bambine pesti' };
+  var REQ_TXT = { kid: 'Se hai almeno un bambino o una bambina', noKid: 'Se non hai nessun bambino e nessuna bambina', animals3: 'Se hai almeno 3 animali', pair: 'Se hai almeno 2 bambini oppure almeno 2 bambine', rotten3: 'Se hai almeno 3 bambini o bambine pesti', demon: 'Se hai almeno un demone evocato' };
   function text(I) {
     switch (I.fx) {
       case 'candle': return 'Raccogli 1 anima quando esce il ' + orList(I.nums) + ', chiunque tiri. Non si perde mai e non si può spegnere.';
@@ -140,6 +176,17 @@
       case 'damian': return 'Puoi scartare questa carta: se lo fai, evoca gratis un demone della tua mano.';
       case 'egg': return 'Si schiude: scarta l\'Uovo, cerca nel mazzo dei demoni quello che vuoi ed evocalo subito al suo posto, gratis.';
       case 'clock': return 'Raccogli 1 anima e fai un altro turno dopo questo: in quel turno si attivano solo le tue carte.';
+      case 'perGirl': return 'Raccogli 1 anima per ogni tua bambina (lei compresa).';
+      case 'perBoy': return 'Raccogli 1 anima per ogni tuo bambino (lui compreso).';
+      case 'poorest': return 'Se nessuno ha meno anime di te, raccogli ' + soulsTxt(I.v) + '; altrimenti 1.';
+      case 'campfire': return 'Raccogli 1 anima per ogni giocatore al tavolo, te compreso.';
+      case 'stealRich': return 'Ruba ' + soulsTxt(I.v) + ' a chi ne ha di più (se sono in tanti, scegli tu).';
+      case 'richTax': return 'Ogni giocatore che ha più anime di te te ne dà 1.';
+      case 'bite': return 'Ogni altro giocatore perde 1 anima.';
+      case 'tribute': return 'Ogni altro giocatore ti dà 1 anima (se non ne ha, arriva dalla riserva).';
+      case 'fireflies': return 'Raccogli 1 anima per ogni numero della tua candela.';
+      case 'perDemon': return 'Raccogli ' + soulsTxt(I.v) + ' per ogni tuo demone evocato.';
+      case 'discardAnimal': return 'Scarta un animale di un altro giocatore.';
     }
     switch (I.p) {
       case 'twins': return 'I tuoi bambini e bambine contano sia come dolci sia come pesti.';
@@ -153,6 +200,8 @@
       case 'candle2': return 'La tua candela raccoglie 2 anime invece di 1.';
       case 'cheap': return 'Per te comprare dal Quartiere costa 2 anime invece di 3.';
       case 'jester': return 'Ogni volta che un altro giocatore evoca un demone, raccogli 2 anime.';
+      case 'wisp': return 'Ogni volta che esce un doppio, chiunque tiri, raccogli 1 anima.';
+      case 'sweetGain': return 'Ogni volta che prendi un bambino o una bambina dolce, raccogli 1 anima.';
     }
     return '';
   }
@@ -211,6 +260,7 @@
     if (req === 'animals3') return count(s, p, animalsF) >= 3;
     if (req === 'pair') return count(s, p, asBoy) >= 2 || count(s, p, asGirl) >= 2;
     if (req === 'rotten3') return count(s, p, asRotten) >= 3;
+    if (req === 'demon') return (s.demons[p] || []).length >= 1;
     return true;
   }
 
@@ -230,6 +280,7 @@
     if (from != null) e.from = from;
     pushLog(s, e);
     if (isAnimal(uid) && hasP(s, p, 'animalGain')) addSouls(s, p, 1, 'asinodeo');
+    if (asSweet(s, p, uid) && hasP(s, p, 'sweetGain')) addSouls(s, p, 1, 'bosco');
   }
   function drop(s, p, uid, by, src, quiet) {
     var i = s.cards[p].indexOf(uid);
@@ -283,9 +334,11 @@
       case 'cat': case 'alice': case 'tommy': case 'hawk': case 'gainBlock': case 'gainBoy': case 'annie':
       case 'stealKid': case 'stealAnimal': case 'egg': case 'damian': case 'stealAny': case 'serpent': return 1;
       case 'irwin': case 'leo': case 'destiny': return 2;
-      case 'perAnimal': case 'perSweet': case 'perRotten': case 'perCard': case 'pietro': case 'corvo': case 'bat': case 'beasts': return 3;
+      case 'perAnimal': case 'perSweet': case 'perRotten': case 'perCard': case 'pietro': case 'corvo': case 'bat': case 'beasts':
+      case 'perGirl': case 'perBoy': case 'poorest': case 'campfire': case 'fireflies': case 'perDemon': return 3;
+      case 'stealRich': case 'richTax': case 'bite': case 'tribute': return 4;
       case 'collect': case 'steal': return I.req ? 3 : 4;
-      case 'sam': case 'goat': case 'alligator': case 'discardKid': case 'goldfish': return 5;
+      case 'sam': case 'goat': case 'alligator': case 'discardKid': case 'discardAnimal': case 'goldfish': return 5;
       case 'skunk': case 'purgeSweet': return 9;
     }
     return 4;
@@ -469,6 +522,47 @@
         s.extra = true;
         pushLog(s, { t: 'extra', s: p, c: c });
         break;
+      // Campo estivo
+      case 'perGirl': case 'perBoy':
+        n = I.v * count(s, p, I.fx === 'perGirl' ? asGirl : asBoy) * dbl;
+        if (n) addSouls(s, p, n, c); else idle(s, p, c);
+        break;
+      case 'poorest':
+        addSouls(s, p, (others(s, p).every(function (q) { return s.souls[q] >= s.souls[p]; }) ? I.v : 1) * dbl, c);
+        break;
+      case 'campfire': addSouls(s, p, s.seats.length * dbl, c); break;
+      case 'fireflies': addSouls(s, p, BY[s.candle[p]].nums.length, c); break;
+      case 'perDemon': n = I.v * s.demons[p].length * dbl; if (n) addSouls(s, p, n, c); else idle(s, p, c); break;
+      case 'stealRich': {
+        list = others(s, p).filter(function (q) { return !shielded(s, q, p) && s.souls[q] > 0; });
+        var max = Math.max.apply(null, [0].concat(list.map(function (q) { return s.souls[q]; })));
+        list = list.filter(function (q) { return s.souls[q] === max; });
+        if (!list.length) takeSouls(s, p, -1, I.v, c);   // come per gli altri furti: se nessuno ne ha, arrivano dalla riserva
+        else if (list.length === 1) takeSouls(s, p, list[0], I.v, c);
+        else ask(s, p, 'steal', c, { fx: 'steal', v: I.v, opts: list });
+        break;
+      }
+      case 'richTax':
+        list = others(s, p).filter(function (q) { return !shielded(s, q, p) && s.souls[q] > s.souls[p]; });
+        if (!list.length) idle(s, p, c);
+        list.forEach(function (q) { takeSouls(s, p, q, 1, c); });
+        break;
+      case 'tribute':
+        list = others(s, p).filter(function (q) { return !shielded(s, q, p); });
+        if (!list.length) idle(s, p, c);
+        list.forEach(function (q) { takeSouls(s, p, q, 1, c); });
+        break;
+      case 'bite':
+        list = others(s, p).filter(function (q) { return !shielded(s, q, p) && s.souls[q] > 0; });
+        if (!list.length) { idle(s, p, c); break; }
+        list.forEach(function (q) { s.souls[q] -= 1; pushLog(s, { t: 'lose', s: q, n: 1, by: p, c: c }); });
+        break;
+      case 'discardAnimal':
+        list = animalTargets(s, p);
+        if (!list.length) idle(s, p, c);
+        else if (list.length === 1) finish(s, p, I.fx, c, list);
+        else ask(s, p, 'pick', c, { fx: I.fx, opts: list, may: false });
+        break;
     }
   }
   // Completa un effetto dopo la scelta del giocatore (pick: carte scelte; vuoto = rinuncia).
@@ -489,7 +583,7 @@
         takeCard(s, p, pick[0], c);
         break;
       case 'stealKid': case 'stealAnimal': takeCard(s, p, pick[0], c); break;
-      case 'discardKid': drop(s, ownerOf(s, pick[0]), pick[0], p, c); break;
+      case 'discardKid': case 'discardAnimal': drop(s, ownerOf(s, pick[0]), pick[0], p, c); break;
       case 'sam':
         if (!pick.length) { pushLog(s, { t: 'pass', s: p, c: c }); break; }
         drop(s, p, pick[0], p, c);
@@ -560,6 +654,8 @@
   function afterRoll(s) {
     var r = s.roll, p = s.turn;
     if (r.a === r.b && hasP(s, p, 'doubles')) addSouls(s, p, r.a, 'belzedado');
+    // Fuoco Fatuo: con ogni doppio, anche degli altri (non nel turno in più di Satana a Cucù, dove conta solo chi tira)
+    if (r.a === r.b) order(s, p).forEach(function (q) { if (hasP(s, q, 'wisp') && (!s.onlyMine || q === p)) addSouls(s, q, 1, 'fatuo'); });
     s.queue = eligible(s, r.sum, p);
     s.phase = 'resolve';
     run(s);
@@ -576,16 +672,18 @@
       host: 0, souls: [], candle: [], cards: {}, demons: {}, hand: {},
       block: [], deck: [], discard: [], ddeck: [],
       turn: 0, first: 0, turnNo: 0, phase: 'turn', did: { roll: false, buy: false, summon: false },
-      roll: null, lastRoll: null, onlyMine: false, extra: false, queue: [], prompt: null, log: [], logN: 0, result: null
+      roll: null, lastRoll: null, onlyMine: false, extra: false, queue: [], prompt: null, log: [], logN: 0, result: null,
+      exp: espansioni(opts.exp)
     };
   }
   function setup(s) {
     var n = s.seats.length, i, deck = [];
-    BLOCK.forEach(function (t) { for (var k = 1; k <= t.x; k++) deck.push(t.id + '.' + k); });
+    s.exp = espansioni(s.exp);
+    BLOCK.forEach(function (t) { if (inGioco(s, t)) for (var k = 1; k <= t.x; k++) deck.push(t.id + '.' + k); });
     s.deck = shuffle(deck); s.discard = []; s.block = [];
     for (i = 0; i < BLOCK_SIZE; i++) s.block.push(s.deck.pop());
-    s.ddeck = shuffle(DEMONS.map(function (d) { return d.id; }));
-    var candles = shuffle(CANDLES.map(function (c) { return c.id; }));
+    s.ddeck = shuffle(DEMONS.filter(function (d) { return inGioco(s, d); }).map(function (d) { return d.id; }));
+    var candles = shuffle(CANDLES.filter(function (c) { return inGioco(s, c); }).map(function (c) { return c.id; }));
     s.souls = []; s.candle = []; s.cards = {}; s.demons = {}; s.hand = {};
     for (i = 0; i < n; i++) {
       s.souls.push(START_SOULS); s.candle.push(candles[i]);
@@ -607,10 +705,10 @@
     touch(s, state.v);
     return { ok: true, state: s };
   }
-  function startLocal(names) { return setup(newGame({ local: true, names: names })); }
+  function startLocal(names, exp) { return setup(newGame({ local: true, names: names, exp: exp })); }
   // Contro il computer: il posto 0 è di chi gioca, gli altri sono bot del livello scelto.
-  function startBots(names, level) {
-    var s = setup(newGame({ local: true, names: names }));
+  function startBots(names, level, exp) {
+    var s = setup(newGame({ local: true, names: names, exp: exp }));
     s.mode = 'bot'; s.bots = {};
     for (var i = 1; i < names.length; i++) s.bots[i] = level;
     return s;
@@ -629,6 +727,14 @@
     if (seatOf(state, key) >= 0) return { ok: false, error: 'Sei già seduto.' };
     var s = clone(state);
     s.seats.push({ keys: key ? [key] : [], name: String(name || '').slice(0, 20) });
+    touch(s, state.v);
+    return { ok: true, state: s };
+  }
+  // Le espansioni di una partita online si scelgono finché si aspettano i giocatori.
+  function setExp(state, list) {
+    if (!state || state.status !== 'waiting') return { ok: false, error: 'La partita è già cominciata.' };
+    var s = clone(state);
+    s.exp = espansioni(list);
     touch(s, state.v);
     return { ok: true, state: s };
   }
@@ -795,7 +901,7 @@
   }
 
   var api = {
-    BLOCK: BLOCK, DEMONS: DEMONS, CANDLES: CANDLES, BY: BY, COST: COST, WIN_DEMONS: WIN_DEMONS, WIN_SOULS: WIN_SOULS,
+    BLOCK: BLOCK, DEMONS: DEMONS, CANDLES: CANDLES, ESPANSIONI: ESPANSIONI, espansioni: espansioni, inGioco: inGioco, setExp: setExp, BY: BY, COST: COST, WIN_DEMONS: WIN_DEMONS, WIN_SOULS: WIN_SOULS,
     START_SOULS: START_SOULS, MIN_PLAYERS: MIN_PLAYERS, MAX_PLAYERS: MAX_PLAYERS, BLOCK_SIZE: BLOCK_SIZE,
     info: info, typeOf: typeOf, text: text, isKid: isKid, isAnimal: isAnimal, asBoy: asBoy, asGirl: asGirl, asSweet: asSweet, asRotten: asRotten,
     hasP: hasP, owns: owns, ownerOf: ownerOf, buyCost: buyCost, summonCost: summonCost, reqOk: reqOk, order: order,

@@ -15,11 +15,11 @@ https://ginotoretti114-ops.github.io/giochi/
 - **Diavolerie** (`diavolerie/`): da 2 a 5 giocatori, carte e dadi. Si raccolgono anime, si comprano bambini
   e animali dal Quartiere e si spengono per evocare demoni: vince chi ha 3 demoni e 10 anime. Online, sullo
   stesso telefono (l'unica cosa segreta sono i demoni in mano) o contro il computer: da 1 a 4 bot, livello
-  facile, medio o difficile. Sette temi, dal pulsantino con la tavolozza in alto: «Notte», come gli altri giochi,
+  facile, medio o difficile. Sei temi, dal pulsantino con la tavolozza in alto: «Notte», come gli altri giochi,
   «Cemento» (graffiti su un muro, chiaro), «Vecchia scuola» (tatuaggi da marinaio, scuro), «Gessetto» (lavagna di
-  scuola, scuro), «Neon» (insegne luminose, scuro), «Fumetto» (pop art coi puntini, chiaro) e «Spettrale» (ombre sulla luna
-  piena, scuro): tutti tranne «Notte»
-  ridisegnano anche le carte.
+  scuola, scuro), «Fumetto» (pop art coi puntini, chiaro) e «Spettrale» (ombre sulla luna piena, scuro): tutti tranne
+  «Notte» ridisegnano anche le carte («Neon», insegne luminose, è pronto ma spento). Nella lobby si accende
+  l'espansione «Campo estivo», inventata per il sito: 9 bambini e bambine, 6 animali, 5 demoni e la Lanterna del Campo.
 - **Sette Stelle** (`sette-stelle/`): da 2 a 8 giocatori, «pesca o fermati». Si pescano stelle numerate da 0 a 12:
   con un doppione si sballa, con sette numeri diversi si chiude il round con 15 punti in più; vince chi arriva a 200.
   Online (con bot per riempire il tavolo), sullo stesso telefono o contro il computer (da 1 a 5 bot).
@@ -119,6 +119,9 @@ quanto è fedele ogni carta: `2` numero ed effetto come nell'originale, `1` effe
 ricostruiti, assente carta ricostruita nello stesso spirito. Il mazzo rispetta la composizione originale
 (32 animali, tutti col 7; 34 bambine e 34 bambini, ognuno con 12 dolci, 12 pesti e 10 né l'uno né l'altro).
 Quando un tiro attiva più carte dello stesso giocatore, il gioco le attiva nell'ordine più utile invece di farlo scegliere.
+Le espansioni sono in `ESPANSIONI`: le loro carte hanno il campo `exp` ed entrano nei mazzi solo se la partita le ha
+scelte (`s.exp`: dalla lobby per le nuove partite, e in sala d'attesa da chi ha creato la partita online, con `setExp`).
+«Campo estivo» (`campo`) è nostra, non dell'originale: le sue carte non hanno il campo `o` e nelle regole hanno un elenco a parte.
 
 I giocatori del computer di Diavolerie sono in `diavolerie/bot.js`: `DiavolerieBot.mossa(stato, posto, livello)`
 restituisce una mossa per il motore. Il facile sceglie quasi a caso; il medio dà un valore in anime a ogni carta
@@ -219,8 +222,8 @@ online li muove il telefono di chi ha creato la partita, che decide anche se un 
 node gran-bazar/test/motore.test.js            # scenari di regole + 500 partite simulate
 node sottozero/test/motore.test.js             # scenari di regole + 300 partite da 2 a 8 giocatori
 node piccante/test/motore.test.js              # scenari di regole e missioni + 300 partite da 2 a 8 giocatori
-node diavolerie/test/motore.test.js            # scenari di carte e demoni + 300 partite da 2 a 5 giocatori
-node diavolerie/test/bot.test.js               # sfide tra i livelli dei bot: il più forte deve vincere più spesso
+node diavolerie/test/motore.test.js            # scenari di carte e demoni + 300 partite da 2 a 5 giocatori (metà con Campo estivo)
+node diavolerie/test/bot.test.js               # sfide tra i livelli dei bot, col gioco base e con Campo estivo
 node diavolerie/test/temi.test.js              # ogni carta ha il suo disegno in ogni tema, SVG ben formati
 node sette-stelle/test/motore.test.js          # scenari di regole + 400 partite da 2 a 8 giocatori
 node sette-stelle/test/bot.test.js             # i bot dei tre livelli uno contro l'altro

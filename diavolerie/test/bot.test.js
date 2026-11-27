@@ -16,8 +16,8 @@ function mulberry32(a) {
 const rnd = mulberry32(99);
 K._setRng(mulberry32(7));
 const N = +(process.env.PARTITE || 160);
-function play(levels) {
-  let s = K.startLocal(levels.map((l, i) => l + i));
+function play(levels, exp) {
+  let s = K.startLocal(levels.map((l, i) => l + i), exp);
   let guard = 0;
   while (s.status === 'playing' && s.turnNo < 500) {
     const a = K.nextActor(s);
@@ -30,11 +30,11 @@ function play(levels) {
   }
   return s;
 }
-function duel(a, b) {
+function duel(a, b, exp) {
   let wa = 0, done = 0, turns = 0;
   for (let g = 0; g < N; g++) {
     const levels = g % 2 ? [a, b] : [b, a]; // si alterna chi siede per primo
-    const s = play(levels);
+    const s = play(levels, exp);
     if (s.status !== 'gameOver') continue;
     done++; turns += s.turnNo;
     if (levels[s.result.winner] === a) wa++;
@@ -42,17 +42,22 @@ function duel(a, b) {
   return { rate: wa / done, done, turns: turns / done };
 }
 const out = {};
-for (const [a, b] of [['medio', 'facile'], ['difficile', 'facile'], ['difficile', 'medio']]) {
-  const r = duel(a, b);
-  out[a + ' contro ' + b] = `${(r.rate * 100).toFixed(0)}% (${r.done}/${N} finite, ${r.turns.toFixed(0)} turni)`;
-  assert.ok(r.done >= N * 0.97, 'troppe partite senza fine');
-  assert.ok(r.rate > 0.55, `${a} dovrebbe battere ${b}: ${(r.rate * 100).toFixed(0)}%`);
+// prima il gioco base, poi con l'espansione Campo estivo. Con Campo estivo, su 1000 partite il difficile
+// batte il medio circa 57 volte su 100; con 160 partite il caso sposta di qualche punto, quindi qui basta che non perda nettamente.
+for (const exp of [[], ['campo']]) {
+  for (const [a, b] of [['medio', 'facile'], ['difficile', 'facile'], ['difficile', 'medio']]) {
+    const r = duel(a, b, exp);
+    out[(exp.length ? 'Campo estivo, ' : '') + a + ' contro ' + b] = `${(r.rate * 100).toFixed(0)}% (${r.done}/${N} finite, ${r.turns.toFixed(0)} turni)`;
+    assert.ok(r.done >= N * 0.97, 'troppe partite senza fine');
+    const min = exp.length && b === 'medio' ? 0.45 : 0.55;
+    assert.ok(r.rate > min, `${a} dovrebbe battere ${b}${exp.length ? ' con Campo estivo' : ''}: ${(r.rate * 100).toFixed(0)}%`);
+  }
 }
 // a quattro: un bot per livello più un medio
 let wins = { facile: 0, medio: 0, difficile: 0 };
 for (let g = 0; g < N / 2; g++) {
   const lv = K.shuffle(['facile', 'medio', 'difficile', 'medio']);
-  const s = play(lv);
+  const s = play(lv, g % 2 ? ['campo'] : []);
   if (s.status === 'gameOver') wins[lv[s.result.winner]]++;
 }
 console.log('OK bot:', out);

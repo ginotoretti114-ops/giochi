@@ -47,13 +47,14 @@ function roll(s, seat, a, b) { K._forceDice(a, b); return run(s, [[seat, { type:
 
 /* ---------- preparazione ---------- */
 test('mazzi e preparazione', () => {
-  assert.strictEqual(K.BLOCK.reduce((a, b) => a + b.x, 0), 100);
+  const BASE = K.BLOCK.filter((t) => !t.exp);
+  assert.strictEqual(BASE.reduce((a, b) => a + b.x, 0), 100);
   const kinds = { A: 0, G: 0, B: 0 }, traits = {};
-  K.BLOCK.forEach((t) => { kinds[t.k] += t.x; if (t.k !== 'A') traits[t.k + (t.t || '-')] = (traits[t.k + (t.t || '-')] || 0) + t.x; });
+  BASE.forEach((t) => { kinds[t.k] += t.x; if (t.k !== 'A') traits[t.k + (t.t || '-')] = (traits[t.k + (t.t || '-')] || 0) + t.x; });
   assert.deepStrictEqual(kinds, { A: 32, G: 34, B: 34 });
   assert.ok(K.BLOCK.every((t) => (t.k === 'A') === (t.n === 7)), 'gli animali, e solo loro, col 7');
   assert.deepStrictEqual(traits, { GS: 12, GR: 12, 'G-': 10, BS: 12, BR: 12, 'B-': 10 });
-  assert.strictEqual(K.DEMONS.length, 20);
+  assert.strictEqual(K.DEMONS.filter((d) => !d.exp).length, 20);
   for (let n = 2; n <= 5; n++) {
     const s = K.startLocal(Array.from({ length: n }, (_, i) => 'G' + i));
     assert.strictEqual(K.blockCount(s), 100);
@@ -63,6 +64,33 @@ test('mazzi e preparazione', () => {
     assert.strictEqual(new Set(s.candle).size, n);
     for (let p = 0; p < n; p++) assert.strictEqual(s.hand[p].length, 3);
   }
+});
+
+test('Campo estivo: le sue carte entrano solo se la partita la sceglie', () => {
+  const campo = (x) => x.exp === 'campo';
+  assert.strictEqual(K.BLOCK.filter(campo).reduce((a, b) => a + b.x, 0), 29);
+  assert.strictEqual(K.DEMONS.filter(campo).length, 5);
+  assert.deepStrictEqual(K.espansioni(['campo', 'boh', 'campo']), ['campo']);
+  for (let n = 2; n <= 5; n++) {
+    const base = K.startLocal(Array.from({ length: n }, (_, i) => 'G' + i));
+    const tutto = base.deck.concat(base.block, base.ddeck, base.candle).concat(...Object.values(base.hand));
+    assert.ok(tutto.every((u) => !K.info(u).exp), 'nessuna carta di Campo estivo senza l\'espansione');
+    const s = K.startLocal(Array.from({ length: n }, (_, i) => 'G' + i), ['campo']);
+    assert.deepStrictEqual(s.exp, ['campo']);
+    assert.strictEqual(K.blockCount(s), 129);
+    assert.strictEqual(K.demonCount(s), 25);
+  }
+  const b = K.startBots(['Io', 'B1'], 'medio', ['campo']);
+  assert.deepStrictEqual(b.exp, ['campo']);
+  let w = K.newGame({ name: 'Ospite', key: 'k1' });
+  assert.deepStrictEqual(w.exp, []);
+  const r = K.setExp(w, ['campo']);
+  assert.ok(r.ok && r.state.exp[0] === 'campo' && r.state.v === w.v + 1);
+  assert.ok(!K.setExp(K.startLocal(['A', 'B']), ['campo']).ok, 'a partita iniziata non si cambia');
+  const fine = K.startLocal(['A', 'B'], ['campo']);
+  fine.status = 'gameOver'; fine.result = { winner: 0 };
+  const rv = K.rematch(fine);
+  assert.ok(rv.ok && rv.state.exp[0] === 'campo' && K.blockCount(rv.state) === 129, 'la rivincita tiene l\'espansione');
 });
 
 /* ---------- turno ---------- */
@@ -331,6 +359,106 @@ test('Tentazione e Mefistolesto rubano carte, Tina le scarta', () => {
   assert.deepStrictEqual(s.cards[0], []);
 });
 
+/* ---------- Campo estivo ---------- */
+test('Campo estivo: Greta, Bruno, Margherita, Agnese, Michele, Nando', () => {
+  let s = mk({ cards: { 0: ['greta.1', 'gianna.5', 'paolo.1'] } });
+  s = roll(s, 0, 1, 2); // 3: una bambina in più oltre a Greta
+  assert.strictEqual(s.souls[0], 5 + 2);
+  s = mk({ cards: { 0: ['bruno.1', 'paolo.1', 'gianna.5'] } });
+  s = roll(s, 0, 1, 3); // 4
+  assert.strictEqual(s.souls[0], 5 + 2);
+  s = mk({ cards: { 0: ['margherita.1'] }, souls: [3, 5, 3] });
+  s = roll(s, 0, 5, 6); // 11: nessuno ha meno anime (pari conta)
+  assert.strictEqual(s.souls[0], 3 + 4);
+  s = mk({ cards: { 0: ['margherita.1'] }, souls: [6, 5, 7] });
+  s = roll(s, 0, 5, 6);
+  assert.strictEqual(s.souls[0], 6 + 1);
+  s = mk({ cards: { 0: ['agnese.1'] } });
+  s = roll(s, 0, 4, 5); // 9 senza demoni: niente
+  assert.strictEqual(s.souls[0], 5);
+  s = mk({ cards: { 0: ['agnese.1', 'michele.1'] }, demons: { 0: ['mammona'] }, n: 4 });
+  s = roll(s, 0, 4, 5); // 9: Agnese 3 col demone, Michele 1 per giocatore (4)
+  assert.strictEqual(s.souls[0], 5 + 3 + 4);
+  s = mk({ cards: { 0: ['nando.1'] }, demons: { 0: ['mammona', 'cerbero'] } });
+  s = roll(s, 0, 1, 1); // 2: 2 anime per demone
+  assert.strictEqual(s.souls[0], 5 + 4);
+});
+test('Campo estivo: Rocco ruba un animale, Bea lo scarta, Ugo ruba al più ricco', () => {
+  let s = mk({ cards: { 0: ['rocco.1'], 1: ['fido.1'] } });
+  s = roll(s, 0, 2, 3); // 5
+  assert.deepStrictEqual(s.cards[0], ['rocco.1', 'fido.1']);
+  assert.deepStrictEqual(s.cards[1], []);
+  s = mk({ cards: { 0: ['bea.1'], 1: ['fido.1'], 2: ['micio.1'] } });
+  s = roll(s, 0, 3, 5); // 8: si sceglie quale animale
+  assert.strictEqual(s.prompt.fx, 'discardAnimal');
+  s = run(s, [[0, ans(['micio.1'])]]);
+  assert.deepStrictEqual(s.cards[2], []);
+  assert.ok(s.discard.indexOf('micio.1') >= 0);
+  s = mk({ cards: { 0: ['bea.1'], 1: ['fido.1'] }, demons: { 1: ['custode'] } });
+  s = roll(s, 0, 3, 5); // lo Spettro Custode protegge
+  assert.deepStrictEqual(s.cards[1], ['fido.1']);
+  s = mk({ cards: { 0: ['ugo.1'] }, souls: [5, 9, 7] });
+  s = roll(s, 0, 6, 6); // 12
+  assert.deepStrictEqual(s.souls, [9, 5, 7]);
+  s = mk({ cards: { 0: ['ugo.1'] }, souls: [5, 8, 8] });
+  s = roll(s, 0, 6, 6);
+  assert.strictEqual(s.prompt.kind, 'steal');
+  assert.deepStrictEqual(s.prompt.opts, [1, 2]);
+  s = run(s, [[0, { type: 'answer', target: 2 }]]);
+  assert.deepStrictEqual(s.souls, [9, 8, 4]);
+  s = mk({ cards: { 0: ['ugo.1'] }, souls: [5, 0, 0] });
+  s = roll(s, 0, 6, 6); // nessuno ha anime: arrivano dalla riserva, come per gli altri furti
+  assert.deepStrictEqual(s.souls, [9, 0, 0]);
+});
+test('Campo estivo: gli animali col 7', () => {
+  let s = mk({ cards: { 0: ['procione.1'] }, souls: [3, 6, 2] });
+  s = roll(s, 0, 3, 4); // Procione: solo chi ha più anime gliene dà 1
+  assert.deepStrictEqual(s.souls, [4, 5, 2]);
+  s = mk({ cards: { 0: ['orsetto.1'], 1: ['orsetto.2'] }, demons: { 1: ['mammona'] } });
+  s = roll(s, 0, 3, 4); // l'Orsetto vuole un demone: solo il secondo giocatore; Mammona non è del tiratore
+  assert.deepStrictEqual(s.souls, [5, 8, 5]);
+  s = mk({ cards: { 0: ['rana.1', 'fido.1', 'micio.1'] }, deck: ['gianna.2'] });
+  s = roll(s, 0, 3, 4); // Rana: 1 per animale (3); Fido e Micio Nero qui non danno anime
+  assert.strictEqual(s.souls[0], 5 + 3);
+  s = mk({ cards: { 0: ['lucciole.1'], 1: ['lucciole.2'] }, candle: ['principiante', 'lanterna', 'malvagia'] });
+  s = roll(s, 0, 3, 4); // 2 numeri la candela del principiante, 3 la lanterna
+  assert.deepStrictEqual(s.souls, [7, 8, 5]);
+  s = mk({ cards: { 0: ['zanzare.1'] }, souls: [5, 3, 0] });
+  s = roll(s, 0, 3, 4); // ogni altro perde 1 anima, se ne ha
+  assert.deepStrictEqual(s.souls, [5, 2, 0]);
+  assert.ok(s.log.some((e) => e.t === 'lose' && e.s === 1 && e.n === 1));
+  s = mk({ cards: { 0: ['cerbiatto.1', 'rosina.1', 'ciccio.1', 'nina.1'] } });
+  s = roll(s, 0, 3, 4); // Cerbiatto: 1 per ogni dolce (2)
+  assert.strictEqual(s.souls[0], 5 + 2);
+});
+test('Campo estivo: i demoni e la Lanterna del Campo', () => {
+  let s = mk({ demons: { 0: ['lago'], 1: ['lago'] }, cards: { 0: ['fido.1', 'micio.1'], 1: ['fido.2'] } });
+  s = roll(s, 0, 1, 2); // 3: Mostro del Lago solo per chi tira, 2 per animale
+  assert.deepStrictEqual(s.souls, [9, 5, 5]);
+  s = mk({ demons: { 0: ['piedone'] } });
+  s = roll(s, 0, 1, 3); // 4
+  assert.strictEqual(s.souls[0], 9);
+  s = mk({ demons: { 0: ['caposcout'] }, souls: [5, 3, 0] });
+  s = roll(s, 0, 4, 6); // 10: 1 da ciascuno, dalla riserva per chi non ne ha
+  assert.deepStrictEqual(s.souls, [7, 2, 0]);
+  s = mk({ demons: { 1: ['fatuo'], 2: ['fatuo'] } });
+  s = roll(s, 0, 2, 2); // doppio di chiunque: 1 anima a chi ha il Fuoco Fatuo
+  assert.deepStrictEqual(s.souls, [5, 6, 6]);
+  s = mk({ demons: { 1: ['fatuo'] } });
+  s.onlyMine = true;
+  s = roll(s, 0, 2, 2); // nel turno in più di Satana a Cucù contano solo le carte di chi tira
+  assert.deepStrictEqual(s.souls, [5, 5, 5]);
+  s = mk({ demons: { 0: ['bosco'] }, block: ['rosina.1', 'paolo.1', 'paolo.2', 'paolo.3', 'paolo.4'] });
+  s = run(s, [[0, { type: 'buy', i: 0 }]]); // prende una dolce: 1 anima indietro
+  assert.strictEqual(s.souls[0], 5 - 3 + 1);
+  s = mk({ candle: ['lanterna', 'principiante', 'principiante'], turn: 1 });
+  s = roll(s, 1, 2, 3); // 5 tirato da un altro: la lanterna raccoglie lo stesso
+  assert.deepStrictEqual(s.souls, [6, 5, 5]);
+  s = mk({ candle: ['lanterna', 'principiante', 'principiante'], turn: 2 });
+  s = roll(s, 2, 4, 5); // 9
+  assert.deepStrictEqual(s.souls, [6, 5, 5]);
+});
+
 /* ---------- simulazione ---------- */
 function noNested(x, path) {
   if (x === undefined) throw new Error('undefined in ' + path);
@@ -342,7 +470,9 @@ let wins = 0, turnsTot = 0, moves = 0, longest = 0, prompts = 0;
 const seenFx = new Set();
 for (let g = 0; g < N; g++) {
   const n = 2 + (g % 4);
-  let s = K.startLocal(Array.from({ length: n }, (_, i) => 'G' + i));
+  let s = K.startLocal(Array.from({ length: n }, (_, i) => 'G' + i), g % 2 ? ['campo'] : []);
+  const B0 = K.blockCount(s), D0 = K.demonCount(s);
+  assert.strictEqual(B0, g % 2 ? 129 : 100);
   let guard = 0;
   while (s.status === 'playing' && s.turnNo < 400) {
     const actor = K.nextActor(s);
@@ -359,8 +489,8 @@ for (let g = 0; g < N; g++) {
     const r = K.act(s, actor, mv);
     assert.ok(r.ok, JSON.stringify(mv) + ': ' + r.error);
     s = r.state; moves++;
-    assert.strictEqual(K.blockCount(s), 100, 'carte del Quartiere');
-    assert.strictEqual(K.demonCount(s), 20, 'demoni');
+    assert.strictEqual(K.blockCount(s), B0, 'carte del Quartiere');
+    assert.strictEqual(K.demonCount(s), D0, 'demoni');
     assert.ok(s.souls.every((x) => x >= 0 && Number.isInteger(x)), 'anime');
     if (++guard > 20000) throw new Error('partita infinita');
   }

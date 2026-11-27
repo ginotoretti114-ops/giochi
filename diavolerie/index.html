@@ -150,6 +150,11 @@ button.dc:disabled { cursor: default; filter: saturate(.5) brightness(.65); }
 .howto li::marker { color: var(--saffron); font-weight: 700; }
 .note { text-align: center; font-size: 13px; color: var(--muted); max-width: 44ch; margin: 18px auto 0; line-height: 1.45; }
 .foot { text-align: center; margin: 14px 0 28px; }
+.exps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.exps li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; background: var(--raise); min-height: 44px; }
+.exps input { width: 20px; height: 20px; accent-color: var(--saffron); flex: none; }
+.exps .t { flex: 1; min-width: 0; }
+.exps .t small { display: block; color: var(--muted); font-size: 13px; }
 .seated { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .seated li { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; background: var(--raise); }
 .seated .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--table); font-weight: 700; font-size: 13px; }
@@ -520,6 +525,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     botN: Math.max(1, Math.min(4, +LS.get('dv-botn') || 2)),
     botLv: (function () { var v = LS.get('dv-botlv'); return v === 'facile' || v === 'difficile' ? v : 'medio'; })(),
     botFast: LS.get('dv-botfast') === '1',
+    exp: K.espansioni(loadJSON('dv-exp', [])),
     error: '', copied: false, seenKey: null, seenLog: 0, pendingJoin: null
   };
   ui.device = LS.get('dv-device');
@@ -544,7 +550,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
   function emo(I) {
     if (!I) return '';
     if (disegnate()) return '<span class="mini">' + T.arte(I, tema()) + '</span>';
-    return I.cat === 'candle' ? '🕯️' : I.art;
+    return I.cat === 'candle' ? I.art || '🕯️' : I.art;
   }
   function temaBtn() { return TM.bottone(); }
   // nel foglio dei temi la figurina è il diavoletto Cucù, disegnato nello stile di ogni tema
@@ -578,7 +584,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     return t + ' · si attiva col ' + I.n + ', chiunque tiri · ' + I.x + ' ' + plural(I.x, 'copia', 'copie') + ' nel mazzo';
   }
   // Effetto in poche parole, sotto le carte del Quartiere.
-  var REQ_SHORT = { kid: ' con un bimbo', noKid: ' senza bimbi', animals3: ' con 3 animali', pair: ' con 2 bimbi', rotten3: ' con 3 pesti' };
+  var REQ_SHORT = { kid: ' con un bimbo', noKid: ' senza bimbi', animals3: ' con 3 animali', pair: ' con 2 bimbi', rotten3: ' con 3 pesti', demon: ' con un demone' };
   function shortFx(I) {
     var r = I.req ? REQ_SHORT[I.req] || ' se…' : '';
     switch (I.fx) {
@@ -612,6 +618,17 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
       case 'damian': return 'evoca gratis';
       case 'goldfish': return '+5 se lo scarti';
       case 'owl': return 'cambia carte';
+      case 'perGirl': return '+' + I.v + ' per bambina';
+      case 'perBoy': return '+' + I.v + ' per bambino';
+      case 'poorest': return '+' + I.v + ' se sei povero';
+      case 'campfire': return '+1 a testa';
+      case 'stealRich': return 'ruba ' + I.v + ' al più ricco';
+      case 'richTax': return '+1 dai più ricchi';
+      case 'bite': return 'gli altri −1';
+      case 'tribute': return '+1 da ognuno';
+      case 'fireflies': return '+1 per numero';
+      case 'perDemon': return '+' + I.v + ' per demone';
+      case 'discardAnimal': return 'via un animale';
     }
     return '';
   }
@@ -638,7 +655,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
   function cardHTML(uid, opts) {
     opts = opts || {};
     var I = K.info(uid);
-    var art = I.cat === 'candle' ? '🕯️' : I.art, svg = disegnate() ? T.arte(I, tema()) : '';
+    var art = I.cat === 'candle' ? I.art || '🕯️' : I.art, svg = disegnate() ? T.arte(I, tema()) : '';
     var cls = 'dc ' + catClass(I) + (opts.size ? ' ' + opts.size : '') + (opts.cls ? ' ' + opts.cls : '');
     var tag = opts.tag || 'span';
     var a11y = /aria-label=/.test(opts.attrs || '') ? '' : ' aria-label="' + esc(cardLabel(I)) + '"';
@@ -648,6 +665,20 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
         : '<span class="art" aria-hidden="true">' + art + (I.prop ? '<span class="pr">' + I.prop + '</span>' : '') + '</span>') +
       (opts.size === 'big' ? arcName(I.name) : '') + '</' + tag + '>';
   }
+  // I nomi lunghi sull'arco: con i caratteri larghi di certi temi il nome si stringe finché ci sta tutto.
+  function fitArcs(box) {
+    var list = box.querySelectorAll('.dc .arc text');
+    for (var i = 0; i < list.length; i++) {
+      var t = list[i], tp = t.querySelector('textPath'), path = t.ownerSVGElement.querySelector('path');
+      if (!tp || !path || !tp.getComputedTextLength) continue;
+      var base = parseFloat(t.getAttribute('data-fs') || t.style.fontSize);
+      t.setAttribute('data-fs', base);
+      t.style.fontSize = base + 'px';
+      var max = path.getTotalLength() * 0.97, len = tp.getComputedTextLength();
+      if (len > max) t.style.fontSize = (base * max / len).toFixed(2) + 'px';
+    }
+  }
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', function () { fitArcs($layer); });
   // Il nome scritto ad arco in alto, come sui sottobicchieri.
   function arcName(name) {
     var fs = Math.min(10.5, 118 / Math.max(6, name.length) / 0.62).toFixed(1);
@@ -702,7 +733,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
       case 'roll': return { e: '🎲', t: (isMe(P, e.s) ? 'Hai tirato ' : hn(s, e.s) + ' tira ') + e.a + ' + ' + e.b + ' = <b>' + (e.a + e.b) + '</b>' };
       case 'reroll': return { e: '🔁', t: 'Ritiracifero, nuovo tiro: ' + e.a + ' + ' + e.b + ' = <b>' + (e.a + e.b) + '</b>' };
       case 'souls': {
-        var nm = e.c === 'belzedado' ? 'Belzedado (doppio)' : e.c === 'asinodeo' ? 'Asinodeo' : e.c === 'burlone' ? 'Diavolo Burlone' : card;
+        var nm = e.c === 'belzedado' ? 'Belzedado (doppio)' : e.c === 'fatuo' ? 'Fuoco Fatuo (doppio)' : e.c === 'asinodeo' ? 'Asinodeo' : e.c === 'burlone' ? 'Diavolo Burlone' : card;
         return { e: ico || '👻', t: nm + by(e.s), d: '+' + e.n, plus: true };
       }
       case 'steal': return { e: ico || '🫳', t: card + by(e.s) + ' ← ' + (e.from >= 0 ? (isMe(P, e.from) ? 'da te' : 'da ' + hn(s, e.from)) + (e.got < e.n ? ' (+' + (e.n - e.got) + ' riserva)' : '') : 'dalla riserva'), d: '+' + e.n, plus: true };
@@ -715,6 +746,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
         if (e.by !== e.s) return { e: ico || '🗑️', t: card + by(e.by) + ' ✗ ' + cname(e.g) + ' ' + (isMe(P, e.s) ? 'tua' : 'di ' + hn(s, e.s)), minus: true };
         return { e: ico || '🗑️', t: card + by(e.s) + ' ✗ ' + cname(e.g), minus: true };
       case 'reveal': return { e: ico, t: card + by(e.s) + ': scopre ' + cname(e.g) + ', scartata' };
+      case 'lose': return { e: ico || '💨', t: card + by(e.by) + ' → ' + (isMe(P, e.s) ? 'perdi' : hn(s, e.s) + ' perde') + ' ' + soulsTxt(e.n), d: '−' + e.n, minus: true };
       case 'skunk': return { e: '🦨', t: 'Puzzola' + by(e.s) + ': tutti scartano le carte del Quartiere (' + e.n + ')', minus: true };
       case 'purge': return { e: '🧪', t: 'Dora' + by(e.s) + ': via i bambini dolci (' + e.n + ')', minus: true };
       case 'idle': return { e: ico || '·', t: card + by(e.s) + ': niente' };
@@ -870,7 +902,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     var Q = {
       destiny: 'quale tuo bambino o bambina dolce attivi?', gainBlock: 'quale carta del Quartiere prendi gratis?',
       annie: 'la scarti per rubare un bambino o una bambina (o prenderne uno dal Quartiere)? Scegli quale.',
-      stealKid: 'quale bambino o bambina rubi?', stealAnimal: 'quale animale rubi?', discardKid: 'quale bambino o bambina fai scartare?',
+      stealKid: 'quale bambino o bambina rubi?', stealAnimal: 'quale animale rubi?', discardKid: 'quale bambino o bambina fai scartare?', discardAnimal: 'quale animale fai scartare?',
       sam: 'scarti uno dei tuoi animali per raccogliere 6 anime?', goat: 'scarti un tuo bambino e una tua bambina per evocare gratis il primo demone del mazzo?',
       alligator: 'lo scarti per far scartare fino a 2 bambini o bambine degli altri? Scegli quali.',
       owl: 'quali carte del Quartiere sostituisci? (anche nessuna)', damian: 'lo scarti per evocare gratis un demone della tua mano?', egg: 'l\'Uovo si schiude! Quale demone del mazzo evochi al suo posto?', gainBoy: 'quale bambino del Quartiere prendi gratis?',
@@ -879,7 +911,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     h = '<p class="hint"><b>' + nm + '</b>: ' + (Q[pr.fx] || 'scegli.') + '</p><div class="opts">' +
       pr.opts.map(function (u) { return optHTML(s, P, u, demonWhere(s, P, u, pr.fx) || whereTxt(s, P, u), ui.sel.indexOf(u) >= 0); }).join('') + '</div>';
     var n = ui.sel.length, ok = false, label = '';
-    if (pr.kind === 'pick') { ok = n === 1; label = ok ? (pr.fx === 'annie' ? 'Scarta Nina e prendi ' : pr.fx === 'sam' ? 'Scarta ' : pr.fx === 'damian' || pr.fx === 'egg' ? 'Evoca ' : pr.fx === 'discardKid' ? 'Fai scartare ' : pr.fx === 'stealAny' ? 'Ruba ' : pr.fx === 'gainBlock' || pr.fx === 'gainBoy' ? 'Prendi ' : 'Scegli ') + cname(ui.sel[0]) : 'Tocca una carta'; }
+    if (pr.kind === 'pick') { ok = n === 1; label = ok ? (pr.fx === 'annie' ? 'Scarta Nina e prendi ' : pr.fx === 'sam' ? 'Scarta ' : pr.fx === 'damian' || pr.fx === 'egg' ? 'Evoca ' : pr.fx === 'discardKid' || pr.fx === 'discardAnimal' ? 'Fai scartare ' : pr.fx === 'stealAny' ? 'Ruba ' : pr.fx === 'gainBlock' || pr.fx === 'gainBoy' ? 'Prendi ' : 'Scegli ') + cname(ui.sel[0]) : 'Tocca una carta'; }
     else { ok = n >= pr.min && n <= pr.max && (n > 0 || pr.fx === 'owl'); label = pr.fx === 'owl' ? (n ? 'Sostituisci ' + n + ' ' + plural(n, 'carta', 'carte') : 'Non sostituire niente') : pr.fx === 'goat' ? (ok ? 'Scarta le 2 carte ed evoca' : 'Scegli un bambino e una bambina') : (ok ? 'Fai scartare ' + n + ' ' + plural(n, 'carta', 'carte') : 'Scegli fino a ' + pr.max + ' carte'); }
     h += '<div class="btnrow">' + (pr.may && pr.fx !== 'owl' ? '<button type="button" class="btn" data-act="decline">No</button>' : '') +
       '<button type="button" class="btn primary" data-act="answer"' + (ok ? '' : ' disabled') + '>' + label + '</button></div>';
@@ -979,7 +1011,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
       '<button type="button" class="btn primary wide" data-act="new"' + (ui.online === 'up' ? '' : ' disabled') + '>' + label + '</button>' +
       (ui.online === 'down' || ui.online === 'off' ? '<p class="muted small" style="margin:0">Non riesco a raggiungere i server di gioco. Controlla la connessione: riprovo da solo.</p>' : '') +
       '</section>' +
-      botPanelHTML() +
+      botPanelHTML() + expPanelHTML() +
       (isWide() ? '</div><div class="col-r">' : '') + '<section class="panel"><h2 class="h2">Le tue partite</h2>' + roomsListHTML() + '</section>' +
       '<section class="panel"><h2 class="h2">Sullo stesso telefono</h2><p class="muted small" style="margin:0">Passatevi il telefono: l\'unica cosa segreta sono i demoni in mano, che si guardano con un tocco.</p>' +
       '<button type="button" class="btn wide" data-act="go-local">' + (saved ? 'Riprendi la partita sul telefono' : 'Gioca qui con gli amici') + '</button>' +
@@ -1004,6 +1036,18 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
       '<div class="row-between"><span class="lab">Velocità dei bot</span>' + segHTML('bot-fast', ui.botFast ? 1 : 0, [[0, 'Normale'], [1, 'Veloce']], 'Velocità') + '</div>' +
       '<button type="button" class="btn primary wide" data-act="bot-start">Gioca contro ' + (ui.botN === 1 ? 'un bot' : ui.botN + ' bot') + '</button>' +
       (saved ? '<button type="button" class="btn wide" data-act="bot-resume">Riprendi la partita (turno ' + ui.bot.turnNo + ')</button>' : '') + '</section>';
+  }
+  // Espansioni: una casella per ognuna. In lobby valgono per le nuove partite; in sala d'attesa le cambia chi ha creato la partita.
+  function expListHTML(cur, act, editable) {
+    return '<ul class="exps">' + K.ESPANSIONI.map(function (e) {
+      var id = act + '-' + e.id, on = cur.indexOf(e.id) >= 0;
+      return '<li><input type="checkbox" id="' + id + '" data-act="' + act + '" data-v="' + e.id + '"' + (on ? ' checked' : '') + (editable && e.pronta ? '' : ' disabled') + '>' +
+        '<label class="t" for="' + id + '"><b>' + esc(e.name) + '</b><small>' + esc(e.text) + '</small></label></li>';
+    }).join('') + '</ul>';
+  }
+  function expPanelHTML() {
+    return '<section class="panel"><h2 class="h2">Espansioni</h2><p class="muted small" style="margin:0">Valgono per le nuove partite: contro il computer, sullo stesso telefono e online.</p>' +
+      expListHTML(ui.exp, 'exp', true) + '</section>';
   }
   function localSetupHTML() {
     var rows = ui.localNames.map(function (n, i) {
@@ -1042,7 +1086,9 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     } else {
       body = '<p style="margin:0">Sei seduto. Aspetta che ' + hn(s, s.host) + ' inizi la partita; intanto puoi invitare altri amici.</p>' + share;
     }
-    return top + '<section class="panel">' + fanHTML() + '<h2 class="h2">' + s.seats.length + ' di 5 al tavolo</h2>' + list + body +
+    var host = seat >= 0 && seat === s.host;
+    var exps = (host || (s.exp || []).length) ? '<h3 class="lab" style="margin:4px 0 0">Espansioni</h3>' + expListHTML(s.exp || [], 'room-exp', host && ui.online === 'up') : '';
+    return top + '<section class="panel">' + fanHTML() + '<h2 class="h2">' + s.seats.length + ' di 5 al tavolo</h2>' + list + exps + body +
       (ui.error ? '<p class="err small" role="alert">' + esc(ui.error) + '</p>' : '') + '</section>';
   }
   function onlineGameHTML() {
@@ -1120,15 +1166,23 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     return sheetWrap('Storico', items ? '<ul class="log">' + items + '</ul>' : '<p class="muted">Ancora nessuna mossa.</p>');
   }
   function catalogHTML(list) {
-    var mark = { 2: '', 1: ' <span title="Effetto originale, numero o dettaglio ricostruito">≈</span>', 0: ' <span title="Carta ricostruita">✧</span>' };
+    var mark = { 2: '', 1: ' <span title="Effetto originale, numero o dettaglio ricostruito">≈</span>', 0: ' <span title="Carta ricostruita">✧</span>', exp: '' };
     return '<div class="catalog">' + list.map(function (I) {
       var id = I.cat === 'block' ? I.id + '.1' : I.id;
-      return '<div class="row">' + cardHTML(id) + '<div class="t"><b>' + esc(I.name) + (I.x ? ' <span>×' + I.x + '</span>' : '') + mark[I.o || 0] + '</b>' + esc(K.text(I)) + '</div></div>';
+      return '<div class="row">' + cardHTML(id) + '<div class="t"><b>' + esc(I.name) + (I.x ? ' <span>×' + I.x + '</span>' : '') + mark[I.exp ? 'exp' : I.o || 0] + '</b>' + esc(K.text(I)) + '</div></div>';
     }).join('') + '</div>';
   }
   function rulesHTML() {
-    var kids = K.BLOCK.filter(function (x) { return x.k !== 'A'; }), animals = K.BLOCK.filter(function (x) { return x.k === 'A'; });
-    var byN = function (a, b) { return a.n - b.n; };
+    var base = function (x) { return !x.exp; };
+    var kids = K.BLOCK.filter(function (x) { return x.k !== 'A' && base(x); }), animals = K.BLOCK.filter(function (x) { return x.k === 'A' && base(x); });
+    var byN = function (a, b) { return a.n - b.n; }, byDemon = function (a, b) { return (a.n || 99) - (b.n || 99); };
+    // le espansioni hanno carte inventate qui: niente segni di ricostruzione, un elenco per ognuna
+    var exps = K.ESPANSIONI.map(function (e) {
+      var mine = function (x) { return x.exp === e.id; };
+      return '<h3>Espansione ' + esc(e.name) + '</h3><p class="muted small">' + esc(e.text) + ' Si aggiunge al gioco base dal riquadro <b>Espansioni</b>, prima di cominciare. Queste carte sono inventate per Diavolerie.</p>' +
+        catalogHTML(K.CANDLES.filter(mine).concat(K.BLOCK.filter(function (x) { return mine(x) && x.k !== 'A'; }).sort(byN),
+          K.BLOCK.filter(function (x) { return mine(x) && x.k === 'A'; }), K.DEMONS.filter(mine).sort(byDemon)));
+    }).join('');
     return sheetWrap('Come si gioca',
       '<p>Vince subito chi ha <b>3 demoni evocati e almeno 10 anime</b> nello stesso momento.</p>' +
       '<h3>Si comincia</h3><ul><li>Ognuno riceve 5 anime, una candela e 3 demoni in mano (segreti).</li><li>Al centro ci sono 5 carte scoperte: il <b>Quartiere</b>.</li></ul>' +
@@ -1142,11 +1196,11 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
       '<li>Qui le tue carte attivate dallo stesso tiro partono nell\'ordine più utile: prima quelle che fanno prendere carte o evocare, per ultime quelle che fanno scartare.</li></ul>' +
       '<h3>Le carte</h3><p class="muted small">Bambine e bambini possono essere <b>dolci</b> (rosa), <b>pesti</b> (verdi) o nessuna delle due (azzurri); gli animali sono gialli. Il numero nel cerchietto è quello da tirare.</p>' +
       '<p class="muted small">≈ effetto originale, numero o dettaglio ricostruito · ✧ carta ricostruita</p>' +
-      '<h3>Candele</h3>' + catalogHTML(K.CANDLES) +
+      '<h3>Candele</h3>' + catalogHTML(K.CANDLES.filter(base)) +
       '<h3>Bambine e bambini</h3>' + catalogHTML(kids.slice().sort(byN)) +
       '<h3>Animali</h3>' + catalogHTML(animals.slice().sort(byN)) +
-      '<h3>Demoni</h3>' + catalogHTML(K.DEMONS.slice().sort(function (a, b) { return (a.n || 99) - (b.n || 99); })) +
-      '<p class="muted small">Gli effetti vengono dal gioco originale dove si conoscono: dal regolamento, dalle recensioni e dalle domande dei giocatori. Le carte indicate come ricostruite non sono pubbliche e sono state rifatte nello stesso spirito, rispettando quante bambine, bambini e animali ci sono nel mazzo. I nomi e i disegni sono nuovi.</p>');
+      '<h3>Demoni</h3>' + catalogHTML(K.DEMONS.filter(base).sort(byDemon)) +
+      '<p class="muted small">Gli effetti vengono dal gioco originale dove si conoscono: dal regolamento, dalle recensioni e dalle domande dei giocatori. Le carte indicate come ricostruite non sono pubbliche e sono state rifatte nello stesso spirito, rispettando quante bambine, bambini e animali ci sono nel mazzo. I nomi e i disegni sono nuovi.</p>' + exps);
   }
   function delHTML() {
     var g = net ? net.carica(ui.sheetId) : null;
@@ -1178,7 +1232,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
       if ((e.i || 0) <= ui.seenI) return;
       if (e.t === 'roll' || e.t === 'reroll') names.push('dadi');
       else if (e.t === 'souls') names.push(isMe(P, e.s) || P.local ? 'anima' : 'moneta');
-      else if (e.t === 'steal') names.push('ruba');
+      else if (e.t === 'steal' || e.t === 'lose') names.push('ruba');
       else if (e.t === 'gain') names.push(e.how === 'buy' ? 'compra' : 'carta');
       else if (e.t === 'discard' || e.t === 'skunk' || e.t === 'purge') names.push(e.c === 'snuff' ? 'fuoco' : 'scarta');
       else if (e.t === 'summon') names.push('evoca');
@@ -1226,6 +1280,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     if (lh !== ui.layerHTML) {
       var old = $layer.querySelector('.sheet'), top = old ? old.scrollTop : 0, same = ui.layerSheet === ui.sheet;
       $layer.innerHTML = lh; ui.layerHTML = lh;
+      fitArcs($layer);
       var nw = $layer.querySelector('.sheet');
       if (nw && same && top) nw.scrollTop = top;
     }
@@ -1317,7 +1372,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     var name = (ui.name || '').trim() || 'Giocatore 1';
     LS.set('dv-name', name);
     var id = rnd36(10);
-    var s = K.newGame({ key: ui.myKey, name: name });
+    var s = K.newGame({ key: ui.myKey, name: name, exp: ui.exp });
     s.nonce = net.nonce();
     net.aggiungi(id); net.salva(id, s); net.guarda(id); net.pubblica(id, s);
     go('#partita-' + id);
@@ -1339,7 +1394,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     var a = K.nextActor(s);
     if (!isBot(s, a) || !window.DiavolerieBot) return;
     var last = s.log[s.log.length - 1], wait;
-    if (last && (last.t === 'roll' || last.t === 'reroll' || last.t === 'souls' || last.t === 'steal')) wait = 1400;
+    if (last && (last.t === 'roll' || last.t === 'reroll' || last.t === 'souls' || last.t === 'steal' || last.t === 'lose')) wait = 1400;
     else if (!s.prompt && !s.did.roll) wait = 750;
     else wait = 650;
     if (ui.botFast) wait = Math.round(wait * 0.4);
@@ -1446,12 +1501,23 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     },
     'ln-add': function () { readNames(); if (ui.localNames.length < 5) ui.localNames.push(''); LS.set('dv-lnames', JSON.stringify(ui.localNames)); render(); },
     'ln-del': function (el) { readNames(); ui.localNames.splice(+el.dataset.i, 1); LS.set('dv-lnames', JSON.stringify(ui.localNames)); render(); },
+    exp: function (el) {
+      var id = el.dataset.v, i = ui.exp.indexOf(id);
+      if (el.checked && i < 0) ui.exp.push(id); else if (!el.checked && i >= 0) ui.exp.splice(i, 1);
+      LS.set('dv-exp', JSON.stringify(ui.exp)); render();
+    },
+    'room-exp': function (el) {
+      var s = ui.game; if (!s) return;
+      var list = (s.exp || []).slice(), id = el.dataset.v, i = list.indexOf(id);
+      if (el.checked && i < 0) list.push(id); else if (!el.checked && i >= 0) list.splice(i, 1);
+      writeGame(function (c) { return K.setExp(c, list); }, { expectV: s.v });
+    },
     'bot-n': function (el) { ui.botN = +el.dataset.v; LS.set('dv-botn', String(ui.botN)); render(); },
     'bot-lv': function (el) { ui.botLv = el.dataset.v; LS.set('dv-botlv', ui.botLv); render(); },
     'bot-fast': function (el) { ui.botFast = el.dataset.v === '1'; LS.set('dv-botfast', ui.botFast ? '1' : '0'); render(); },
     'bot-start': function () {
       var me = (ui.name || '').trim() || 'Tu';
-      ui.bot = K.startBots([me].concat(BOT_NAMES.slice(0, ui.botN)), ui.botLv);
+      ui.bot = K.startBots([me].concat(BOT_NAMES.slice(0, ui.botN)), ui.botLv, ui.exp);
       ui.hideResultKey = null; saveBot(); S.effetto('mescola');
       go('#computer');
     },
@@ -1459,7 +1525,7 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     'local-start': function () {
       readNames();
       var names = ui.localNames.map(function (n, i) { return (n || '').trim() || 'Giocatore ' + (i + 1); });
-      ui.local = K.startLocal(names); ui.handOpen = -1; ui.hideResultKey = null; saveLocal(); S.effetto('mescola'); render();
+      ui.local = K.startLocal(names, ui.exp); ui.handOpen = -1; ui.hideResultKey = null; saveLocal(); S.effetto('mescola'); render();
     },
     'local-reset': function () { ui.local = null; ui.handOpen = -1; saveLocal(); ui.hideResultKey = null; if (ui.route === 'local') render(); else go('#locale'); }
   };
@@ -1469,7 +1535,9 @@ html[data-tema="spettrale"] .mini { border-radius: 50%; background: radial-gradi
     if (!el || el.disabled) return;
     if (el.dataset.self && ev.target !== el) return;
     var fn = actions[el.dataset.act];
-    if (fn) { ev.preventDefault(); fn(el, ev); }
+    if (!fn) return;
+    if (el.type !== 'checkbox') ev.preventDefault();
+    fn(el, ev);
   });
   document.addEventListener('input', function (ev) {
     var t = ev.target;
