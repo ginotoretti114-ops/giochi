@@ -266,6 +266,53 @@
       return pa('M32 34c-6-6-16-8-26-4 4 2 5 5 4 8 3-1 6 0 7 3 3-2 7-1 9 2z', p.pipi) + pa('M32 34c6-6 16-8 26-4-4 2-5 5-4 8-3-1-6 0-7 3-3-2-7-1-9 2z', p.pipi) +
         pa('M25.5 27l-1.5-8 5.5 4zM38.5 27l1.5-8-5.5 4z', p.pipi) + ci(32, 33, 8.5, p.pipi) +
         ci(29, 32, 1.7, p.giallo, NS) + ci(35, 32, 1.7, p.giallo, NS) + pa('M30 37l1 2.5 1-2.5M33 37l1 2.5 1-2.5', p.bianco, sw(1.3));
+    },
+    // Campo estivo
+    procione: function (p) {   // la mascherina da ladro e il muso a punta
+      return pa('M17.5 26c-3.5-4-4-10.5-.5-12.5 4-1 8.5 2 10 6.5zM46.5 26c3.5-4 4-10.5.5-12.5-4-1-8.5 2-10 6.5z', p.grigio) +
+        pa('M19 22c-1.4-2.2-1.6-5-.3-6.2 2-.3 4 1.2 4.8 3.2zM45 22c1.4-2.2 1.6-5 .3-6.2-2-.3-4 1.2-4.8 3.2z', p.grigio2, NS) +
+        pa('M13 34c0-10 8-16 19-16s19 6 19 16c0 4-3 7-7 9l-12 8-12-8c-4-2-7-5-7-9z', p.grigio) +
+        pa('M18 37c4 1.5 9 1.5 14-.5 5 2 10 2 14 .5-2 4-7 8-14 12-7-4-12-8-14-12z', p.bianco) +
+        pa('M15 31c3-3.5 8-4.5 12.5-2.5L32 31l4.5-2.5C41 26.5 46 27.5 49 31c-1 4.5-4.5 7.5-9.5 7.5-3.5 0-5.5-2-7.5-3.5-2 1.5-4 3.5-7.5 3.5-5 0-8.5-3-9.5-7.5z', p.nero) +
+        ci(25, 32.5, 2.6, p.bianco, NS) + ci(25.5, 32.8, 1.3, p.occhio === p.nero ? p.giallo : p.occhio, NS) +
+        ci(39, 32.5, 2.6, p.bianco, NS) + ci(38.5, 32.8, 1.3, p.occhio === p.nero ? p.giallo : p.occhio, NS) +
+        pa('M32 19.5v8', null, st(p.grigio2, 2.4)) + el(32, 45.5, 2.8, 2, p.o, NS) + pa('M32 47.5v1.5M29.5 50c1.2.8 2.5.6 2.5-.5 0 1.1 1.3 1.3 2.5.5', null, sw(1.4));
+    },
+    orsetto: function (p) {   // col fazzolettone degli scout
+      return ci(19, 20, 6, p.marrone) + ci(45, 20, 6, p.marrone) + ci(19, 20, 2.8, p.beige, NS) + ci(45, 20, 2.8, p.beige, NS) +
+        ci(32, 33, 16, p.marrone) + el(32, 39.5, 8, 6.2, p.beige) + pa('M28.8 36.2h6.4c0 2.2-1.6 3.4-3.2 3.4s-3.2-1.2-3.2-3.4z', p.o) +
+        pa('M32 39.6v2.2M29.5 42.4c1.2 1 2.5 1 2.5 0 0 1 1.3 1 2.5 0') + oc(p, 25.5, 30.5, 2.1) + oc(p, 38.5, 30.5, 2.1) +
+        pa('M18 47c8 4 20 4 28 0l-14 14z', p.rosso) + ci(32, 50.5, 2.3, p.giallo);
+    },
+    rana: function (p) {   // su una foglia di ninfea
+      return pa('M6 56c0-5 12-8 26-8s26 3 26 8-12 6-26 6S6 61 6 56z', p.verde2) + pa('M32 54l8-6', null, sw(1.8)) +
+        pa('M11 40c0-9 9-14 21-14s21 5 21 14c0 8-9 12-21 12s-21-4-21-12z', p.verde) +
+        ci(22, 26, 6.5, p.verde) + ci(42, 26, 6.5, p.verde) + ci(22, 26, 3.6, p.bianco) + ci(42, 26, 3.6, p.bianco) +
+        ci(22.5, 26.4, 1.9, p.occhio, NS) + ci(42.5, 26.4, 1.9, p.occhio, NS) +
+        pa('M19 39c6 5.5 20 5.5 26 0') + ci(16.5, 40.5, 2.3, p.guance, NS) + ci(47.5, 40.5, 2.3, p.guance, NS) + ci(29, 34, .9, p.o, NS) + ci(35, 34, .9, p.o, NS);
+    },
+    lucciole: function (p) {   // una grande e due piccole, con la coda accesa
+      var luce = p.fiamma || p.giallo;
+      return el(23, 27, 9, 5, p.acqua, ' transform="rotate(-28 23 27)"') + el(41, 27, 9, 5, p.acqua, ' transform="rotate(28 41 27)"') +
+        el(32, 36, 6.5, 8.5, p.nero) + el(32, 46, 6, 5.6, luce) + ci(32, 23, 5.2, p.nero) +
+        ci(30, 22.4, 1.3, p.bianco, NS) + ci(34, 22.4, 1.3, p.bianco, NS) + pa('M30 18.5c-1.5-4-4.5-5-7-4M34 18.5c1.5-4 4.5-5 7-4', null, sw(1.6)) +
+        ci(9.5, 38, 2.4, luce) + pa('M11.5 41.5c2.5 3 5.5 4 8.5 3', null, st(luce, 1.3) + ' stroke-dasharray="1.2 2.6"') +
+        ci(54.5, 33, 2.1, luce) + pa('M52.5 36c-1.5 3-1 6 1 8', null, st(luce, 1.3) + ' stroke-dasharray="1.2 2.6"') + pa(stella(53, 21, 3.6, 1.3, 4), luce, NS);
+    },
+    zanzare: function (p) {   // di profilo, col pungiglione, e una piccola dietro
+      var zanzara = el(31, 18, 3.6, 10, p.acqua, ' transform="rotate(28 31 18)"') + el(24.5, 19.5, 3.2, 9, p.acqua, ' transform="rotate(-12 24.5 19.5)"') +
+        el(40, 36, 11, 4.4, p.grigio2, ' transform="rotate(22 40 36)"') + pa('M36.2 32.6l-1.6 5M40.6 34.4l-1.6 5M45 36.2l-1.6 5', null, sw(1.3)) +
+        pa('M25 35l-6 13M28 36.5l-2.5 15M31 35.5l4 14.5', null, sw(1.5)) + ci(28, 31, 6, p.grigio2) +
+        ci(19.5, 29, 4.2, p.grigio2) + ci(18.6, 28.4, 2.1, p.rosso, NS) + pa('M16.5 31.5l-9 9.5', null, sw(1.8));
+      return zanzara + gruppo(38.5, 9, .38, zanzara);
+    },
+    cerbiatto: function (p) {   // il cucciolo di cervo, con le macchie bianche
+      return pa('M21 27c-8-1-13-7-13-12 6 0 11 3 14.5 7z', p.marrone) + pa('M43 27c8-1 13-7 13-12-6 0-11 3-14.5 7z', p.marrone) +
+        pa('M19.5 24.5c-4.5-1-7.5-4-8.5-6.5 3.5 0 6.5 1.8 8.5 4.2zM44.5 24.5c4.5-1 7.5-4 8.5-6.5-3.5 0-6.5 1.8-8.5 4.2z', p.rosa, NS) +
+        pa('M20 28c0-8 5-12 12-12s12 4 12 12c0 6-3 10-6 14-2 3-4 6.5-6 6.5s-4-3.5-6-6.5c-3-4-6-8-6-14z', p.marrone) +
+        el(32, 43, 5.4, 5, p.beige) + el(32, 44.6, 2.6, 1.8, p.o, NS) + pa('M30 47.5c1.2.8 2.8.8 4 0', null, sw(1.4)) +
+        oc(p, 26.5, 31, 2.7) + oc(p, 37.5, 31, 2.7) + pa('M23.2 28.6l-1.6-1.6M40.8 28.6l1.6-1.6', null, sw(1.4)) +
+        ci(28.5, 22, 1.4, p.bianco, NS) + ci(35.5, 22.6, 1.2, p.bianco, NS) + ci(32, 19.4, 1, p.bianco, NS);
     }
   };
 
@@ -374,6 +421,44 @@
         pa('M23.5 41c3-3 6-3 8.5 0 2.5-3 5.5-3 8.5 0-2.5 2-6 2-8.5 0-2.5 2-6 2-8.5 0z', p.o) + pa('M28 46c2.5 1.6 5.5 1.6 8 0') +
         '<rect x="20" y="5" width="24" height="16" rx="1.5" fill="' + p.nero + '"/>' + '<rect x="20" y="15" width="24" height="3.5" fill="' + p.rosso + '"/>' + el(32, 21, 16, 3.2, p.nero);
     },
+    // Campo estivo
+    lago: function (p) {   // il mostro che esce dall'acqua, col collo lungo e due cornetti
+      return pa('M34 54c0-9 4-14 9-14s9 5 9 14z', p.verde) + pa('M47 54c0-5 3-9 7-9s7 4 7 9z', p.verde) +
+        pa('M12 56c0-16 2-28 10-34 5-4 12-4 15 1 2 4 0 8-4 9-5 1-7 5-8 10-1 5-1 9-1 14z', p.verde) +
+        pa('M22 19l-1.5-6 5 3.5zM27.5 17l1-6 3.5 4.5z', p.osso) + oc(p, 30, 23, 1.9) + pa('M33 28.5c1.6.6 3 .2 3.8-1') +
+        ci(18, 42, 1.5, p.verde2, NS) + ci(20.5, 35.5, 1.3, p.verde2, NS) + ci(44, 46, 1.3, p.verde2, NS) +
+        pa('M2 54c4-3.5 8-3.5 12 0s8 3.5 12 0 8-3.5 12 0 8 3.5 12 0 8-3.5 12 0v10H2z', p.blu) + pa('M10 60c3-2 6-2 9 0M38 60c3-2 6-2 9 0', null, st(p.acqua, 1.8));
+    },
+    fatuo: function (p) {   // una fiammella fredda che galleggia nella nebbia
+      var fuoco = p.fiamma2 || p.acqua, cuore = p.fiamma || p.bianco;
+      return pa('M6 58c6-3.5 12-3.5 18 0s12 3.5 18 0 10-2.5 16 0', null, st(p.grigio, 2.2)) + pa('M12 52c5-2.5 9-2.5 14 0', null, st(p.grigio, 1.8)) +
+        pa('M24 46c-4 4-10 5-15 3 4-1 6-3.5 7-7', fuoco) +
+        pa('M32 7c6 8 16 14 16 27 0 10-7 16-16 16s-16-6-16-16c0-6 3-10 6-13 0 4 2 6 4 7-1-8 2-15 6-21z', fuoco) +
+        pa('M32 24c3.5 4.5 7 7.5 7 12.5a7 7 0 0 1-14 0c0-3.5 2-6 4-7.5 0 2.6 1 3.6 2 3.6 0-3.4.4-6 1-8.6z', cuore, NS) +
+        el(27.5, 36, 2.1, 2.9, p.o, NS) + el(36.5, 36, 2.1, 2.9, p.o, NS) + pa('M28.5 42c2.2 1.8 4.8 1.8 7 0');
+    },
+    piedone: function (p) {   // il gigante peloso del bosco, coi cornetti tra il pelo
+      return pa('M19 18l-4-8 8 3.5zM45 18l4-8-8 3.5z', p.osso) +
+        pa('M11 42c-2-11 2-21 10-26 3-4 7-5 11-4 4-1 8 0 11 4 8 5 12 15 10 26l-4-3-2 5-4-3-3 5-3-4-3 4-3-5-4 3-2-5z', p.marrone3) +
+        pa('M22 30c0-5 4-8 10-8s10 3 10 8v7c0 6-4 10-10 10s-10-4-10-10z', p.beige) + pa('M21.5 28.5c3-2 7-2 10.5 0 3.5-2 7.5-2 10.5 0', null, sw(3)) +
+        oc(p, 27, 31.5, 1.9) + oc(p, 37, 31.5, 1.9) + pa('M29.2 36.2c1.2-1.2 4.4-1.2 5.6 0-.6 1.8-5 1.8-5.6 0z', p.marrone2) + pa('M27 41.5c3 1.6 7 1.6 10 0') +
+        pa('M46 58c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5z', p.marrone2, NS) + ci(46.5, 51, 1.3, p.marrone2, NS) + ci(50, 49.6, 1.3, p.marrone2, NS) + ci(53.6, 50.4, 1.3, p.marrone2, NS) + ci(56.2, 52.6, 1.2, p.marrone2, NS);
+    },
+    bosco: function (p) {   // l'albero con gli occhi accesi e i rami a corna
+      return pa('M20 14l-6-8 9 4zM44 14l6-8-9 4z', p.marrone3) +
+        pa('M12 36c-7-2-7-13 1-15 0-8 9-11 14-6 3-6 13-6 15 0 6-4 14 0 13 8 7 2 7 12 0 13-1 6-9 8-13 5-4 4-12 4-16 0-6 3-13 1-14-5z', p.verde) +
+        pa('M24 64l2-12c-4-2-8-2-11 0 3-4 8-5 12-4l1-6h8l1 6c4-1 9 0 12 4-3-2-7-2-11 0l2 12z', p.marrone3) +
+        el(25.5, 30, 3.6, 4.2, p.giallo) + el(38.5, 30, 3.6, 4.2, p.giallo) + ci(25.5, 30.6, 1.7, p.occhio, NS) + ci(38.5, 30.6, 1.7, p.occhio, NS) +
+        pa('M21 24.5l7 2.5M43 24.5l-7 2.5', null, sw(2.4)) + el(32, 56, 2.4, 3.4, p.marrone2, NS) + pa('M20 40c3 1 5 1 7 0M37 40c2 1 4 1 7 0', null, st(p.verde2, 1.8));
+    },
+    caposcout: function (p) {   // il cappello galleggia sopra il collo vuoto, da cui esce una fiammella
+      var fuoco = p.fiamma || p.arancio;
+      return pa('M12 66c1-12 8-19 20-19s19 7 20 19z', p.beige) + el(32, 47.5, 6.5, 2.6, p.nero) +
+        pa('M24.5 48l7.5 12 7.5-12c-5 2-10 2-15 0z', p.rosso) + ci(32, 53, 2.1, p.giallo) + pa(stella(44, 58, 3.4, 1.4, 5), p.giallo) +
+        pa('M32 46c-5-3-6-8.5-2-13 0 3 1.6 4.4 2 4.4 0-3.4 2-6.6 4.4-7.6-1.2 4.4 3 6.6 1 11.6-.9 2.4-3 4.2-5.4 4.6z', fuoco) +
+        pa('M21 21c0-6 4.5-11 11-11s11 5 11 11z', p.marrone) + pa('M27.5 12.5l4.5 4 4.5-4', null, sw(1.6)) + pa('M21.5 19h21', null, st(p.rosso, 2.4)) +
+        el(32, 22, 19, 4, p.marrone) + pa('M14 31c-1.5-1-2-2.5-1-4M50 31c1.5-1 2-2.5 1-4', null, st(p.grigio, 1.6));
+    },
     burlone: function (p) {   // il giullare
       return pa('M18 28c-6-2-10-8-12-14 5 0 10 3 14 7z', p.rosso) + pa('M46 28c6-2 10-8 12-14-5 0-10 3-14 7z', p.viola) + pa('M22 23c2-8 6-14 10-17 4 3 8 9 10 17z', p.giallo) +
         ci(6, 13, 2.4, p.giallo) + ci(58, 13, 2.4, p.giallo) + ci(32, 5, 2.4, p.rosso) + ci(32, 39, 13, p.bianco) +
@@ -385,7 +470,16 @@
 
   /* ---------- candele ---------- */
   var CERA = { principiante: 'crema', malvagia: 'nero', buona: 'blu', gentile: 'rosa', marcia: 'verde2' };
+  // Campo estivo: la lanterna da tenda, col manico e la fiammella dietro il vetro
+  function lanterna(p) {
+    var fiamma = p.fiamma || p.giallo;
+    return pa('M23.5 17c0-9 17-9 17 0', null, sw(2.4)) + pa('M21 17h22l-3 6H24z', p.rosso) +
+      '<rect x="24" y="23" width="16" height="21" rx="3" fill="' + p.acqua + '"/>' +
+      pa('M32 27c3 4 4.6 6.6 4.6 9.2a4.6 4.6 0 0 1-9.2 0c0-2.6 1.6-5.2 4.6-9.2z', fiamma) + pa('M32 32.4c1.3 1.8 1.9 3 1.9 3.9a1.9 1.9 0 0 1-3.8 0c0-.9.6-2.1 1.9-3.9z', p.fiamma ? fiamma : p.arancio, NS) +
+      pa('M21 44h22l2 6H19z', p.rosso) + pa('M17 50h30v4H17z', p.grigio2) + pa('M13 30l-4-1.5M14 37H9.5M51 30l4-1.5M50 37h4.5', null, st(fiamma, 1.8));
+  }
   function candela(I, p) {
+    if (I.id === 'lanterna') return lanterna(p);
     var cera = p[CERA[I.id] || 'crema'], fiamma = I.id === 'malvagia' ? (p.fiamma2 || p.verde) : (p.fiamma || p.giallo);
     return pa('M32 7c3 4 5 7 5 10a5 5 0 0 1-10 0c0-3 2-6 5-10z', fiamma) + pa('M32 13c1.4 2 2 3.4 2 4.4a2 2 0 0 1-4 0c0-1 .6-2.4 2-4.4z', p.fiamma ? fiamma : p.arancio, NS) +
       pa('M32 22v4') + pa('M23 26h18v24H23z', cera) + pa('M23 26h18v4c-2 0-2 5-4 5s-2-3-4-3-2 6-4 6-2-5-4-5-2 3-2 3z', cera, ' fill-opacity=".7"') +

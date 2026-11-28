@@ -21,6 +21,7 @@
     var sweet = cnt(s, p, K.asSweet) + add(K.asSweet), rotten = cnt(s, p, K.asRotten) + add(K.asRotten);
     var opp = s.seats.length - 1, v = I.v || 0;
     var reqOk = !I.req || (I.req === 'kid' ? kids >= 1 : I.req === 'noKid' ? kids === 0 : I.req === 'animals3' ? animals >= 3 : I.req === 'rotten3' ? rotten >= 3 :
+      I.req === 'demon' ? s.demons[p].length >= 1 :
       (cnt(s, p, K.asBoy) + add(K.asBoy) >= 2 || cnt(s, p, K.asGirl) + add(K.asGirl) >= 2));
     var r = reqOk ? 1 : 0.25;
     switch (I.fx) {
@@ -67,6 +68,18 @@
       case 'skunk': return 0;
       case 'serpent': return 30;
       case 'clock': return 4;
+      // Campo estivo
+      case 'perGirl': return v * (cnt(s, p, K.asGirl) + add(K.asGirl));
+      case 'perBoy': return v * (cnt(s, p, K.asBoy) + add(K.asBoy));
+      case 'poorest': return K.order(s, p).slice(1).every(function (q) { return s.souls[q] >= s.souls[p]; }) ? v : 1.6;
+      case 'campfire': return s.seats.length;
+      case 'stealRich': return v * 1.3;
+      case 'richTax': return 1.1 * Math.max(0.5, K.order(s, p).slice(1).filter(function (q) { return s.souls[q] > s.souls[p]; }).length);
+      case 'bite': return 0.55 * opp;
+      case 'tribute': return 1.2 * opp;
+      case 'fireflies': return K.BY[s.candle[p]] ? K.BY[s.candle[p]].nums.length : 2;
+      case 'perDemon': return v * Math.max(0.5, s.demons[p].length);
+      case 'discardAnimal': return 1.2;
     }
     return 0;
   }
@@ -92,6 +105,8 @@
       case 'candle2': return 2.5;
       case 'cheap': return 2.5;
       case 'jester': return 2 * (s.seats.length - 1);
+      case 'wisp': return 0.5 + 0.4 * s.seats.length;  // un doppio ogni sei tiri, di chiunque
+      case 'sweetGain': return 1.5;
     }
     return 1;
   }
@@ -144,7 +159,7 @@
         }
         if (pr.fx === 'damian' || pr.fx === 'egg') { by(function (u) { return demonValue(s, p, u); }, true); return { type: 'answer', pick: [opts[0]] }; }
         if (pr.fx === 'destiny') { by(function (u) { return cardValue(s, p, u); }, true); return { type: 'answer', pick: [opts[0]] }; }
-        if (pr.fx === 'discardKid') { by(hurtScore, true); return { type: 'answer', pick: [opts[0]] }; }
+        if (pr.fx === 'discardKid' || pr.fx === 'discardAnimal') { by(hurtScore, true); return { type: 'answer', pick: [opts[0]] }; }
         by(gainScore, true);
         if (pr.fx === 'annie' && gainScore(opts[0]) < cardValue(s, p, pr.c) * 0.8) return { type: 'answer', pick: [] };
         return { type: 'answer', pick: [opts[0]] };
